@@ -11,6 +11,7 @@ lasttime <-  as.POSIXct('2022-01-07 23:00', tz = 'UTC')
 
 indir <-  "C:/Users/egrout/Dropbox/coatithon/rawdata/2022/galaxy/gps/"
 outdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/"
+metadatadir <-  "C:/Users/egrout/Dropbox/coatithon/rawdata/2022/galaxy/metadata/"
 
 #setting the working directory to the raw data file in dropbox
 setwd(indir)
@@ -83,6 +84,11 @@ for(i in 1:length(all_files)){
   ys[i,] <- eastsNorths[,2]
   
 }
+
+setwd(metadatadir)
+coati_ids <- read.csv("coati_id.csv", header = F)
+colnames(coati_ids) <- c("name", "tag_id", "age", "sex")
+save(coati_ids, file = paste0(outdir, 'coati_ids.RData'))
 
 save(list=c('xs','ys','ts'), file = paste0(outdir,'galaxy_xy_10min_level0.RData'))
 save(list=c('lats','lons','ts'), file = paste0(outdir,'galaxy_latlon_10min_level0.RData'))  
