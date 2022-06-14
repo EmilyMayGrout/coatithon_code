@@ -41,8 +41,10 @@ n_tracked <- colSums(!is.na(xs))
 #indexes to time points where all individuals were tracked
 all_tracked_idxs <- which(n_tracked==n_inds)
 
+
+#------plot 1: number of sub groups when the radius is changed -----------
 png(height = 1080, width = 480, units = 'px', filename = paste0(plot_dir,'n_subgroups_hists.png'))
-par(mfrow=c(6,1), mar = c(4,5,1,1))
+par(mfrow=c(6,1), mar = c(6,5,1,1))
 for (i in 1:length(Rs)){
 
   R <- Rs[i]
@@ -51,8 +53,35 @@ for (i in 1:length(Rs)){
   if(i == length(Rs)){
     xlab <- 'Number of subgroups'
   }
-  hist(subgroup_data$n_subgroups[all_tracked_idxs],main = paste(R, "m"), xlab = xlab, col = "darkolivegreen3", breaks = seq(1,11), cex.lab = 2, cex.main = 2, cex.axis=2, freq = FALSE, ylim=c(0,.7))
+  hist(subgroup_data$n_subgroups[all_tracked_idxs],main = paste(R, "m"), xlab = xlab, col = "darkolivegreen3", breaks = seq(.5,11,1), cex.lab = 2, cex.main = 2, cex.axis=2, freq = FALSE, ylim=c(0,.7))
 
 }
 dev.off()
  
+#------plot 2: number of individuals in each sub group when radius is 50m -----------
+
+png(height = 540, width = 270, units = 'px', filename = paste0(plot_dir,'subgroup_size_hists.png'))
+subgroup_data <- get_subgroup_data(xs, ys, R=50)
+subgroup_counts <- subgroup_data$subgroup_counts[,all_tracked_idxs]
+n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
+
+s2 <- which(n_subgroups == 2)
+s3 <- which(n_subgroups == 3)
+s4 <- which(n_subgroups == 4)
+
+
+par(mfrow=c(2,1), mar = c(6,5,1,1))
+hist(subgroup_counts[,s2], breaks=seq(0.5,11,1), xlab = '', main = '2 subgroups', col = "darkolivegreen4", cex.lab = 1.5, cex.main = 1.5, cex.axis=1.5, freq = FALSE, ylim=c(0,.6))
+hist(subgroup_counts[,s3], breaks=seq(0.5,11,1), xlab = 'Subgroup size', main = '3 subgroups', col = "darkolivegreen4", cex.lab = 1.5, cex.main = 1.5, cex.axis=1.5, freq = FALSE, ylim=c(0,.6))
+
+dev.off()
+#making tables to look at numbers of individuals in each split
+subgroup_df <- as.data.frame(t(subgroup_counts))
+table(paste(subgroup_df[s4,1], subgroup_df[s4,2], subgroup_df[s4,3],subgroup_df[s4,4], sep= '_'))
+table(paste(subgroup_df[s3,1], subgroup_df[s3,2], subgroup_df[s3,3], sep= '_'))
+table(paste(subgroup_df[s2,1], subgroup_df[s2,2], sep= '_'))
+
+
+#------------which individuals tend to be on their own--------------
+
+
