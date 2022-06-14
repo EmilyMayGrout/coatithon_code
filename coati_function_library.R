@@ -109,8 +109,7 @@ get_subgroup_data <- function(xs, ys, R){
   ngroups <- suppressWarnings(apply(sub_groups, 2, max, na.rm = T)) #suppress warnings because if all NAs it gives a warning, this is fine because we deal with it in the next step by removing the infinite maxes
   #remove infinite values
   ngroups[is.infinite(ngroups)] <- NA
-  hist(ngroups)
-  plot(ngroups, type = "l")
+
   
   
   #now want to look at size of the sub-groups as the histogram shows 2 subgroups being most frequent 
