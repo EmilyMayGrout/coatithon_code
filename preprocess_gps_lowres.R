@@ -88,6 +88,11 @@ for(i in 1:length(all_files)){
 setwd(metadatadir)
 coati_ids <- read.csv("coati_id.csv", header = F)
 colnames(coati_ids) <- c("name", "tag_id", "age", "sex")
+coati_ids$color <- '#0000FF'
+coati_ids$color[which(coati_ids$age == 'Adult' & coati_ids$sex == 'Female')] <- '#FF0000'
+coati_ids$color[which(coati_ids$age == 'Sub-adult' & coati_ids$sex == 'Female')] <- '#FFAA66'
+coati_ids$color[which(coati_ids$age == 'Sub-adult' & coati_ids$sex == 'Male')] <- '#66AAFF'
+coati_ids$color[which(coati_ids$age == 'Juvenile')] <- '#666666'
 save(coati_ids, file = paste0(outdir, 'coati_ids.RData'))
 
 save(list=c('xs','ys','ts'), file = paste0(outdir,'galaxy_xy_10min_level0.RData'))

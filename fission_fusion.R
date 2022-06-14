@@ -15,12 +15,16 @@
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/'
-in_file <- "galaxy_xy_10min_level0.RData"
+gps_file <- "galaxy_xy_10min_level0.RData"
+id_file <- 'coati_ids.RData'
 
 #list of Rs
 Rs <- c(10, 20,30,40, 50, 100)
 
 #-------SETUP-------
+
+library(fields)
+library(viridis)
 
 #read in library of functions
 setwd(code_dir)
@@ -28,7 +32,8 @@ source('coati_function_library.R')
 
 #load data
 setwd(data_dir)
-load(in_file)
+load(gps_file)
+load(id_file)
 
 #-----MAIN------
 
@@ -82,6 +87,45 @@ table(paste(subgroup_df[s3,1], subgroup_df[s3,2], subgroup_df[s3,3], sep= '_'))
 table(paste(subgroup_df[s2,1], subgroup_df[s2,2], sep= '_'))
 
 
-#------------which individuals tend to be on their own--------------
+#------------which individuals tend to be in the same subgroup--------------
+
+subgroup_data <- get_subgroup_data(xs, ys, R=50)
+
+
+ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
+
+#going through each dyad and calculating fraction of time they are in the same subgroup (out of all time both are tracked)
+for(i in 1:n_inds){
+  for(j in 1:n_inds){
+
+    #getting subgroup id for individual i and j
+    sub_ids_i <- subgroup_data$ind_subgroup_membership[i,]
+    sub_ids_j <- subgroup_data$ind_subgroup_membership[j,]
+    
+    #computing edge weight (fraction of time in same subgroup)
+    ff_net[i,j] <- mean(sub_ids_i == sub_ids_j, na.rm=T)
+  }
+}
+
+png(height = 400, width = 400, units = 'px', filename = paste0(plot_dir,'subgroup_network.png'))
+diag(ff_net) <- NA
+image.plot(ff_net, col = viridis(256), zlim=c(0.3,1), xaxt= 'n', yaxt = 'n')
+
+axis(1, at = seq(0,1,length.out= n_inds), labels = coati_ids$name, las = 2)
+axis(2, at = seq(0,1,length.out= n_inds), labels = coati_ids$name, las = 2)
+
+points(rep(-.08,n_inds),seq(0,1,length.out=n_inds),col=coati_ids$color, xpd = T, pch = 19)
+points(seq(0,1,length.out=n_inds),rep(-.08,n_inds),col=coati_ids$color, xpd = T, pch = 19)
+dev.off()
+
+
+
+
+
+
+
+
+
+
 
 
