@@ -81,6 +81,9 @@ utm.to.latlon <- function(EastNorths,LonsCol1=TRUE,utm.zone = '34',southern_hemi
 get_subgroup_data <- function(xs, ys, R){
   
   
+  n_inds <- nrow(xs)
+  n_times <- ncol(xs)
+  
   sub_groups <- matrix(NA, nrow = n_inds, ncol = n_times)
   
   for (t_idx in 1:n_times){

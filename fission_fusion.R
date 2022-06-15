@@ -9,7 +9,7 @@
 #network of within group spatial associations and is that consistent over time
 #network of fraction of time each pair is in the same sub group and is it consistent over time
 #are these two things related? does the within group network correlate with the fission-fusion subgroup network
-
+#who displaces who - how do the groups split - who moves more
 
 #--------PARAMS-------
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/"
@@ -50,6 +50,7 @@ all_tracked_idxs <- which(n_tracked==n_inds)
 #------plot 1: number of sub groups when the radius is changed -----------
 png(height = 1080, width = 480, units = 'px', filename = paste0(plot_dir,'n_subgroups_hists.png'))
 par(mfrow=c(6,1), mar = c(6,5,1,1))
+
 for (i in 1:length(Rs)){
 
   R <- Rs[i]
@@ -91,7 +92,6 @@ table(paste(subgroup_df[s2,1], subgroup_df[s2,2], sep= '_'))
 
 subgroup_data <- get_subgroup_data(xs, ys, R=50)
 
-
 ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
 
 #going through each dyad and calculating fraction of time they are in the same subgroup (out of all time both are tracked)
@@ -107,16 +107,77 @@ for(i in 1:n_inds){
   }
 }
 
-png(height = 400, width = 400, units = 'px', filename = paste0(plot_dir,'subgroup_network.png'))
 diag(ff_net) <- NA
-image.plot(ff_net, col = viridis(256), zlim=c(0.3,1), xaxt= 'n', yaxt = 'n')
+new_order <- c(1,11,4,10,2, 3,6,7,8,9,5)
+ffnet_reorder <- ff_net[new_order, new_order]
 
-axis(1, at = seq(0,1,length.out= n_inds), labels = coati_ids$name, las = 2)
-axis(2, at = seq(0,1,length.out= n_inds), labels = coati_ids$name, las = 2)
 
-points(rep(-.08,n_inds),seq(0,1,length.out=n_inds),col=coati_ids$color, xpd = T, pch = 19)
-points(seq(0,1,length.out=n_inds),rep(-.08,n_inds),col=coati_ids$color, xpd = T, pch = 19)
+png(height = 400, width = 400, units = 'px', filename = paste0(plot_dir,'subgroup_network.png'))
+
+image.plot(ffnet_reorder, col = viridis(256), zlim=c(0.3,1), xaxt= 'n', yaxt = 'n')
+
+axis(1, at = seq(0,1,length.out= n_inds), labels = coati_ids$name[new_order], las = 2)
+axis(2, at = seq(0,1,length.out= n_inds), labels = coati_ids$name[new_order], las = 2)
+
+points(rep(-.08,n_inds),seq(0,1,length.out=n_inds),col=coati_ids$color[new_order], xpd = T, pch = 19)
+points(seq(0,1,length.out=n_inds),rep(-.08,n_inds),col=coati_ids$color[new_order], xpd = T, pch = 19)
 dev.off()
+
+
+#--------------within full group individual associations----------------
+#---------------to compare with the sub group memberships---------------
+
+R = 50
+subgroup_data <- get_subgroup_data(xs, ys, R)
+
+n_inds <- nrow(xs)
+n_times <- ncol(xs)
+
+#number of individuals tracked at each time point
+n_tracked <- colSums(!is.na(xs))
+
+#indexes to time points where all individuals were tracked
+all_tracked_idxs <- which(n_tracked==n_inds)
+#find index for when there is only 1 subgroup
+s1 <- which(subgroup_data$n_subgroups == 1)
+
+full_group_index <- intersect(all_tracked_idxs, s1)
+#subset the x's and y's for the moments the full group has a gps and is together
+subset_x <- xs[,full_group_index]
+subset_y <- ys[, full_group_index]
+
+i=1
+j=2
+t=1
+r_within = 5
+#get distance between individuals at these subset times
+
+#make array to store data into
+net_over_time <- array(NA, dim = c(n_inds,n_inds,ncol(subset_x)))
+
+#for loop through each individual with each individual for each time point (where all individuals are together and have gps point)
+for(t in 1:ncol(subset_x)){
+  for(i in 1:n_inds){
+    for(j in 1:n_inds){
+      
+      #get x and y coordinates to calculate distance using pythagorus
+      xcoord_i <- subset_x[i,t]
+      xcoord_j <- subset_x[j,t]
+      dx <- (xcoord_i - xcoord_j)
+      ycoord_i <- subset_y[i,t]
+      ycoord_j <- subset_y[j,t]
+      dy <- (ycoord_i - ycoord_j)
+      dist <- sqrt((dx)^2 + (dy)^2)
+      
+      #get true/false statements for when the 2 individuals are within a certain radium of one another (e.g 5m)
+      together <- dist < r_within
+      #put the statements into the array at the correct position in the correct dimension
+      net_over_time[i, j, t] <- together
+      
+      
+    }
+  }
+}
 
 
 
