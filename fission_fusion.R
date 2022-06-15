@@ -11,6 +11,13 @@
 #are these two things related? does the within group network correlate with the fission-fusion subgroup network
 #who displaces who - how do the groups split - who moves more
 
+###to do next
+#write up lab note book - for the coatithon - with plots and interpretations - go through code again
+#make animations of fission fusion with ffmpeg
+#once written up, send to Meg and Ben
+#start doing some writing to frame the paper
+#run the stuff that makes sense on Trago
+
 #--------PARAMS-------
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
