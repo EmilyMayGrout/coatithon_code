@@ -168,10 +168,65 @@ visualize_network_matrix <- function(net, coati_ids){
 }
 
 
+#Function for getting distance between individuals over time
+#INPUT:
+#xs, ys, radius
+#OUTPUT
+#object that contains:
+  #   $distance over time: distance between each individual at each time point
+  #   $proximity_network: probability that i and j are withina distance of R
+  #   $r_within [numeric]: radius used used for proximity network
 
+get_proximity_data <- function(xs, ys, r_within){
 
+  #get n_inds and n_times
+  n_inds <- nrow(xs)
+  n_times <- ncol(xs)
+  
+  #get distance between individuals at these subset times
+  
+  #make array to store data into
+  dist_over_time <- array(NA, dim = c(n_inds, n_inds, n_times))
+  
+  #for loop through each individual with each individual for each time point (where all individuals are together and have gps point)
+  for(t in 1:ncol(xs)){
+    for(i in 1:n_inds){
+      for(j in 1:n_inds){
+        
+        #get x and y coordinates to calculate distance using pythagorus
+        xcoord_i <- xs[i,t]
+        xcoord_j <- xs[j,t]
+        dx <- (xcoord_i - xcoord_j)
+        ycoord_i <- ys[i,t]
+        ycoord_j <- ys[j,t]
+        dy <- (ycoord_i - ycoord_j)
+        dist <- sqrt((dx)^2 + (dy)^2)
+        
+        #put the statements into the array at the correct position in the correct dimension
+        dist_over_time[i, j, t] <- dist
+        
+        
+      }
+    }
+  }
+  
+  #threshold the distances to determine if individuals are in proximity at each time
+  net_over_time <- dist_over_time < r_within
+  
+  #construct proximity network
+  proximity_net <- apply(net_over_time, MARGIN = c(1,2), FUN = mean, na.rm=T)
+  diag(proximity_net) <- NA
+  
+  #store output
+  proximity_data <- list()
+  proximity_data$proximity_net <- proximity_net
+  proximity_data$dist_over_time <- dist_over_time
+  proximity_data$r_within <- r_within
+  
+  #return output
+  return(proximity_data)
 
-
+}
 
 
 

@@ -141,46 +141,57 @@ full_group_index <- intersect(all_tracked_idxs, s1)
 subset_x <- xs[,full_group_index]
 subset_y <- ys[, full_group_index]
 
-
-r_within = 10
-#get distance between individuals at these subset times
-
-#make array to store data into
-net_over_time <- array(NA, dim = c(n_inds,n_inds,ncol(subset_x)))
-
-#for loop through each individual with each individual for each time point (where all individuals are together and have gps point)
-for(t in 1:ncol(subset_x)){
-  for(i in 1:n_inds){
-    for(j in 1:n_inds){
-      
-      #get x and y coordinates to calculate distance using pythagorus
-      xcoord_i <- subset_x[i,t]
-      xcoord_j <- subset_x[j,t]
-      dx <- (xcoord_i - xcoord_j)
-      ycoord_i <- subset_y[i,t]
-      ycoord_j <- subset_y[j,t]
-      dy <- (ycoord_i - ycoord_j)
-      dist <- sqrt((dx)^2 + (dy)^2)
-      
-      #get true/false statements for when the 2 individuals are within a certain radium of one another (e.g 5m)
-      together <- dist < r_within
-      #put the statements into the array at the correct position in the correct dimension
-      net_over_time[i, j, t] <- together
-      
-      
-    }
-  }
-}
+#get proximity network
+within_group_data <- get_proximity_data(subset_x, subset_y, 10)
 
 
-proximity_net <- apply(net_over_time, MARGIN = c(1,2), FUN = mean, na.rm=T)
-
-diag(proximity_net) <- NA
 new_order <- c(1,11,4,10,2,3,6,7,8,9,5)
 
 png(height = 400, width = 400, units = 'px', filename = paste0(plot_dir,'withingroup_network_withgus.png'))
-visualize_network_matrix(proximity_net, coati_ids[new_order,])
+visualize_network_matrix(within_group_data$proximity_net, coati_ids[new_order,])
 dev.off()
+
+
+#removing gus from the full group to get proximity data within group
+
+
+
+xs_nogus <- xs[-c(5), ]
+ys_nogus <- ys[-c(5), ]
+coati_ids_nogus <- coati_ids[-c(5),]
+
+R = 50
+subgroup_data <- get_subgroup_data(xs_nogus, ys_nogus, R)
+
+n_inds <- nrow(xs_nogus)
+n_times <- ncol(xs_nogus)
+
+#number of individuals tracked at each time point
+n_tracked <- colSums(!is.na(xs_nogus))
+
+#indexes to time points where all individuals were tracked
+all_tracked_idxs <- which(n_tracked==n_inds)
+#find index for when there is only 1 subgroup
+s1 <- which(subgroup_data$n_subgroups == 1)
+
+full_group_index <- intersect(all_tracked_idxs, s1)
+#subset the x's and y's for the moments the full group has a gps and is together
+subset_x <- xs_nogus[,full_group_index]
+subset_y <- ys_nogus[, full_group_index]
+
+#get proximity network
+within_group_data <- get_proximity_data(subset_x, subset_y, 10)
+
+
+new_order <- c(1,10,4,9,2,3,5,6,7,8)
+
+png(height = 400, width = 400, units = 'px', filename = paste0(plot_dir,'withingroup_network_withoutgus.png'))
+visualize_network_matrix(within_group_data$proximity_net, coati_ids_nogus[new_order,])
+dev.off()
+
+#there's an additional 42 data points but the proximity values don't change much
+#but gives more data points by not including him which is good
+#other option to get more data is looking at all data (not removing points when not all individuals are tracked)
 
 
 
