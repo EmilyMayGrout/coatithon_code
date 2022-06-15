@@ -40,6 +40,7 @@ load(id_file)
 n_inds <- nrow(xs)
 n_times <- ncol(xs)
 
+
 #number of individuals tracked at each time point
 n_tracked <- colSums(!is.na(xs))
 
@@ -114,13 +115,7 @@ ffnet_reorder <- ff_net[new_order, new_order]
 
 png(height = 400, width = 400, units = 'px', filename = paste0(plot_dir,'subgroup_network.png'))
 
-image.plot(ffnet_reorder, col = viridis(256), zlim=c(0.3,1), xaxt= 'n', yaxt = 'n')
-
-axis(1, at = seq(0,1,length.out= n_inds), labels = coati_ids$name[new_order], las = 2)
-axis(2, at = seq(0,1,length.out= n_inds), labels = coati_ids$name[new_order], las = 2)
-
-points(rep(-.08,n_inds),seq(0,1,length.out=n_inds),col=coati_ids$color[new_order], xpd = T, pch = 19)
-points(seq(0,1,length.out=n_inds),rep(-.08,n_inds),col=coati_ids$color[new_order], xpd = T, pch = 19)
+visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
 dev.off()
 
 
@@ -146,10 +141,8 @@ full_group_index <- intersect(all_tracked_idxs, s1)
 subset_x <- xs[,full_group_index]
 subset_y <- ys[, full_group_index]
 
-i=1
-j=2
-t=1
-r_within = 5
+
+r_within = 10
 #get distance between individuals at these subset times
 
 #make array to store data into
@@ -180,9 +173,14 @@ for(t in 1:ncol(subset_x)){
 }
 
 
+proximity_net <- apply(net_over_time, MARGIN = c(1,2), FUN = mean, na.rm=T)
 
+diag(proximity_net) <- NA
+new_order <- c(1,11,4,10,2,3,6,7,8,9,5)
 
-
+png(height = 400, width = 400, units = 'px', filename = paste0(plot_dir,'withingroup_network_withgus.png'))
+visualize_network_matrix(proximity_net, coati_ids[new_order,])
+dev.off()
 
 
 

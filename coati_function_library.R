@@ -147,3 +147,39 @@ get_subgroup_data <- function(xs, ys, R){
   return(subgroup_data)
   
 }
+
+#Make a network visualization with colors
+#INPUT:
+#net[adjacency matrix of the network]
+#coati_ids[dataframe of the coati ids]
+#OUTPUT:
+#plot
+visualize_network_matrix <- function(net, coati_ids){
+  
+  zmin <- min(net, na.rm=T)
+  zmax <- max(net, na.rm=T)
+  image.plot(net, col = viridis(256), zlim=c(zmin,zmax), xaxt= 'n', yaxt = 'n')
+  
+  axis(1, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2)
+  axis(2, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2)
+  
+  points(rep(-.08, nrow(net)),seq(0,1,length.out=n_inds),col=coati_ids$color, xpd = T, pch = 19)
+  points(seq(0,1,length.out=nrow(net)),rep(-.08,n_inds),col=coati_ids$color, xpd = T, pch = 19)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
