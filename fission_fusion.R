@@ -18,6 +18,14 @@
 #start doing some writing to frame the paper
 #run the stuff that makes sense on Trago
 
+#further ideas:
+#is one of the sub-groups displaced or do they naturally drift apart from loss of cohesion?
+#in the grouping matrix, it could hide individuals who are closely associated because of their association with a different individual,
+#how can we see whether this is occuring?
+#is there multi-level sub grouping patterns? - groups in groups?
+#can we predict a fission by looking at the stability of the group?
+
+
 #--------PARAMS-------
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
@@ -55,7 +63,7 @@ n_tracked <- colSums(!is.na(xs))
 all_tracked_idxs <- which(n_tracked==n_inds)
 
 
-#------plot 1: number of sub groups when the radius is changed -----------
+#------plot 1: number of sub groups when the radius is changed (graph put in dropbox results folder) -----------
 png(height = 1080, width = 480, units = 'px', filename = paste0(plot_dir,'n_subgroups_hists.png'))
 par(mfrow=c(6,1), mar = c(6,5,1,1))
 
@@ -74,7 +82,7 @@ dev.off()
  
 #------plot 2: number of individuals in each sub group when radius is 50m -----------
 
-png(height = 540, width = 270, units = 'px', filename = paste0(plot_dir,'subgroup_size_hists.png'))
+png(height = 540, width = 270, units = 'px', filename = paste0(plot_dir,'subgroup_size_hists_50m.png'))
 subgroup_data <- get_subgroup_data(xs, ys, R=50)
 subgroup_counts <- subgroup_data$subgroup_counts[,all_tracked_idxs]
 n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
@@ -89,6 +97,27 @@ hist(subgroup_counts[,s2], breaks=seq(0.5,11,1), xlab = '', main = '2 subgroups'
 hist(subgroup_counts[,s3], breaks=seq(0.5,11,1), xlab = 'Subgroup size', main = '3 subgroups', col = "darkolivegreen4", cex.lab = 1.5, cex.main = 1.5, cex.axis=1.5, freq = FALSE, ylim=c(0,.6))
 
 dev.off()
+
+#------plot 2.1: subgroup size at 100m----------------------
+
+png(height = 540, width = 270, units = 'px', filename = paste0(plot_dir,'subgroup_size_hists_100m.png'))
+subgroup_data <- get_subgroup_data(xs, ys, R=100)
+subgroup_counts <- subgroup_data$subgroup_counts[,all_tracked_idxs]
+n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
+
+s2 <- which(n_subgroups == 2)
+s3 <- which(n_subgroups == 3)
+s4 <- which(n_subgroups == 4)
+
+
+par(mfrow=c(2,1), mar = c(6,5,1,1))
+hist(subgroup_counts[,s2], breaks=seq(0.5,11,1), xlab = '', main = '2 subgroups', col = "darkolivegreen4", cex.lab = 1.5, cex.main = 1.5, cex.axis=1.5, freq = FALSE, ylim=c(0,.6))
+hist(subgroup_counts[,s3], breaks=seq(0.5,11,1), xlab = 'Subgroup size', main = '3 subgroups', col = "darkolivegreen4", cex.lab = 1.5, cex.main = 1.5, cex.axis=1.5, freq = FALSE, ylim=c(0,.6))
+
+dev.off()
+
+#not much difference between the 50m and 100m radius cut of for sub group structure 
+
 #making tables to look at numbers of individuals in each split
 subgroup_df <- as.data.frame(t(subgroup_counts))
 table(paste(subgroup_df[s4,1], subgroup_df[s4,2], subgroup_df[s4,3],subgroup_df[s4,4], sep= '_'))
@@ -96,7 +125,7 @@ table(paste(subgroup_df[s3,1], subgroup_df[s3,2], subgroup_df[s3,3], sep= '_'))
 table(paste(subgroup_df[s2,1], subgroup_df[s2,2], sep= '_'))
 
 
-#------------which individuals tend to be in the same subgroup--------------
+#----------plot 3: which individuals tend to be in the same subgroup--------------
 
 subgroup_data <- get_subgroup_data(xs, ys, R=50)
 
@@ -126,7 +155,7 @@ visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
 dev.off()
 
 
-#--------------within full group individual associations----------------
+#--------------plot 4: within full group individual associations----------------
 #---------------to compare with the sub group memberships---------------
 
 R = 50
@@ -158,10 +187,8 @@ png(height = 400, width = 400, units = 'px', filename = paste0(plot_dir,'withing
 visualize_network_matrix(within_group_data$proximity_net, coati_ids[new_order,])
 dev.off()
 
-
+#---------------plot 5: full group associations without Gus 
 #removing gus from the full group to get proximity data within group
-
-
 
 xs_nogus <- xs[-c(5), ]
 ys_nogus <- ys[-c(5), ]
@@ -199,10 +226,6 @@ dev.off()
 #there's an additional 42 data points but the proximity values don't change much
 #but gives more data points by not including him which is good
 #other option to get more data is looking at all data (not removing points when not all individuals are tracked)
-
-
-
-
 
 
 
