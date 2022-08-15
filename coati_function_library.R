@@ -174,8 +174,8 @@ visualize_network_matrix <- function(net, coati_ids){
 #OUTPUT
 #object that contains:
   #   $distance over time: distance between each individual at each time point
-  #   $proximity_network: probability that i and j are withina distance of R
-  #   $r_within [numeric]: radius used used for proximity network
+  #   $proximity_network: probability that i and j are within a distance of R
+  #   $r_within [numeric]: radius used for proximity network
 
 get_proximity_data <- function(xs, ys, r_within){
 
