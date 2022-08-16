@@ -34,7 +34,7 @@ gps_file <- "galaxy_xy_10min_level0.RData"
 id_file <- 'coati_ids.RData'
 
 #list of Rs
-Rs <- c(10, 20,30,40, 50, 100)
+Rs <- c(10,20,30,40,50,100)
 
 #-------SETUP-------
 
@@ -79,6 +79,8 @@ for (i in 1:length(Rs)){
 
 }
 dev.off()
+
+
  
 #------plot 2: number of individuals in each sub group when radius is 50m -----------
 

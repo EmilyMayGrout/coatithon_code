@@ -1,0 +1,83 @@
+---
+title: "Galaxy fission-fusion report"
+author: "Emily Grout"
+date: "August 2022"
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Contents:
+
+* 1: Defining a sub-group
+* 2: Proportion of individuals in each sub-group
+* 3: Sub-group compositions
+* 4: Within-group associations
+
+
+
+
+### 1: How to define sub-groups
+
+Data used for this analysis were from the GPS points every 10 minutes from 6am to 6pm from the 25th December 2021 to 7th of January 2022. 
+**All** group members must have had a fix for each timestamp used in the analysis.
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 8, fig.width = 8, out.width = "8.5in"}
+
+data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/"
+code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/'
+gps_file <- "galaxy_xy_10min_level0.RData"
+id_file <- 'coati_ids.RData'
+
+#list of Rs
+Rs <- c(10,20,30,40,50,100)
+
+library(fields)
+library(viridis)
+setwd(code_dir)
+source('coati_function_library.R')
+setwd(data_dir)
+load(gps_file)
+load(id_file)
+n_inds <- nrow(xs)
+n_times <- ncol(xs)
+#number of individuals tracked at each time point
+n_tracked <- colSums(!is.na(xs))
+#indexes to time points where all individuals were tracked
+all_tracked_idxs <- which(n_tracked==n_inds)
+
+```
+
+
+### Plot 1: Number of sub groups when the radius is changed
+We used dbscan: Density-based Spatial Clustering with varying epsilon neighbourhood values (10m to 100m)
+
+
+```{r , echo = FALSE, fig.align = "center", fig.height = 15, fig.width = 8, out.width = "55%"}
+
+par(mfrow=c(6,1), mar = c(6,5,1,1))
+
+for (i in 1:length(Rs)){
+
+  R <- Rs[i]
+  subgroup_data <- get_subgroup_data(xs, ys, R)
+  xlab <- ''
+  if(i == length(Rs)){
+    xlab <- 'Number of subgroups'
+  }
+  hist(subgroup_data$n_subgroups[all_tracked_idxs],main = paste(R, "m"), xlab = xlab, 
+       col = "darkolivegreen3", breaks = seq(.5,11,1), cex.lab = 2, cex.main = 2, 
+       cex.axis=2, freq = FALSE, ylim=c(0,.7))
+
+}
+
+```
+
+As you can see from the plots, once the threshold reached 50m between individuals, the number of subgroups were between 2 and 3 groups. 
+
+
+
