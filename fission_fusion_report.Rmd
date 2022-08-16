@@ -4,28 +4,33 @@ author: "Emily Grout"
 date: "August 2022"
 
 ---
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Contents:
+From the Gamboa field season in 2021-2022, we collared 2 full groups; Galaxy and Trago, with GPS and audio collars. In Galaxy group, we discovered that they exhibited fission fusion behaviour. In this report, we will look further into these fission events to explore the properties of these sub-grouping patterns.
+
+![](https://github.com/EmilyMayGrout/gif/raw/main/moveVis_satellite_coati060122.gif)
+
+
+### Contents:
 
 * 1: Defining a sub-group
 * 2: Proportion of individuals in each sub-group
 * 3: Sub-group compositions
-* 4: Within-group associations
-
-
+* 4: Within-group compositions
 
 
 ### 1: How to define sub-groups
 
+To investigate the fission-fusion events in Galaxy group, we need to define when the group has **fissioned**.
 Data used for this analysis were from the GPS points every 10 minutes from 6am to 6pm from the 25th December 2021 to 7th of January 2022. 
-**All** group members must have had a fix for each timestamp used in the analysis.
+For each timestamp used in the analysis, **all** group members must have had a fix.
 
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 8, fig.width = 8, out.width = "8.5in"}
+
+
 
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
@@ -52,9 +57,9 @@ all_tracked_idxs <- which(n_tracked==n_inds)
 
 ```
 
-
-### Plot 1: Number of sub groups when the radius is changed
-We used dbscan: Density-based Spatial Clustering with varying epsilon neighbourhood values (10m to 100m)
+### Plot 1: Sub-group count with varing radii
+We used **dbscan**: Density-based Spatial Clustering with varying epsilon neighbourhood values
+For each individual, we made a radius of a set distance (10m to 100m), if another individual was in that radius, they were clustered together.
 
 
 ```{r , echo = FALSE, fig.align = "center", fig.height = 15, fig.width = 8, out.width = "55%"}
@@ -77,7 +82,247 @@ for (i in 1:length(Rs)){
 
 ```
 
-As you can see from the plots, once the threshold reached 50m between individuals, the number of subgroups were between 2 and 3 groups. 
+
+As you can see from the plots, once the epsilon neighbourhood value reached 50m between individuals, the majority of sub-groups were between 1 to 3 groups. This gives us a good approximation of where the distance threshold should be placed to capture when the group was split. We wanted to investigate this further by looking at how the number of individuals were divided into these groups.
+
+
+### Visualisation of the fission-fusion dynamics every 10 minutes over 12 hours:
+
+<p align="center">
+  <img src="https://github.com/EmilyMayGrout/gif/raw/main/galaxy_2021-01-06_ffnet_10min.gif" width="500" height="500"/>
+</p>
+
+### 2: Proportion of individuals in each sub-group
+We used the 50m radius as the cut-off distance to define the sub-groups. The data was split to when the group was divided into 2 and 3 sub-groups accordingly. This allowed us to look at the number of individuals in each sub-group, to understand how the sub-groups arrange themselves when the group has fissioned. 
+
+
+### Plot 2: Group split with 2 sub-groups
+
+```{r , echo = FALSE, out.width = "55%",  fig.align = "center"}
+subgroup_data <- get_subgroup_data(xs, ys, R=50)
+subgroup_counts <- subgroup_data$subgroup_counts[,all_tracked_idxs]
+n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
+
+s2 <- which(n_subgroups == 2)
+s3 <- which(n_subgroups == 3)
+s4 <- which(n_subgroups == 4)
+
+hist(subgroup_counts[,s2], breaks=seq(0.5,11,1), xlab = '', main = '2 subgroups', col = "darkolivegreen4", cex.lab = 1.5, cex.main = 1.5, cex.axis=1.5, freq = FALSE, ylim=c(0,.6))
+
+```
+When the group was split in 2 sub-groups, the majority of splits were either even with 5 individuals in one group and 6 in the other, or the split was from one individual outside of the group, whilst the rest of the group were together.
+
+
+
+### Plot 3: Group split with 3 sub-groups
+```{r , echo = FALSE, out.width = "55%",  fig.align = "center"}
+
+hist(subgroup_counts[,s3], breaks=seq(0.5,11,1), xlab = 'Subgroup size', main = '3 subgroups', col = "darkolivegreen4", cex.lab = 1.5, cex.main = 1.5, cex.axis=1.5, freq = FALSE, ylim=c(0,.6))
+```
+
+Again, when the group was split into 3 sub-groups, the group sizes were either 5, 5, 1, or 9, 1, 1. Therefore, we can show that when groups split, they either split evenly or the majority of the group is together with 1 or 2 individuals away from the group. The tables below give the counts of individuals in the different split compositions.
+
+### Counts for the number of individuals in each sub-group:
+
+**4 sub-groups**
+```{r , echo = FALSE}
+library(DT)
+par(mfrow=c(1,1))
+subgroup_df <- as.data.frame(t(subgroup_counts))
+
+table(paste(subgroup_df[s4,1], subgroup_df[s4,2], subgroup_df[s4,3],subgroup_df[s4,4], sep= '_'))
+```
+**3 sub-groups**
+```{r , echo = FALSE}
+table(paste(subgroup_df[s3,1], subgroup_df[s3,2], subgroup_df[s3,3], sep= '_'))
+```
+**2 sub-groups**
+```{r , echo = FALSE}
+table(paste(subgroup_df[s2,1], subgroup_df[s2,2], sep= '_'))
+```
+
+### 3: Sub-group compositions
+For data where all individuals had a GPS fix, we calculated the fraction of time every dyad were in the **same sub-group**. The aim for this was to determine whether individuals have distinct sub-group memberships. 
+
+### Plot 4: Sub-group compositions
+```{r , echo = FALSE, fig.align = "center", fig.height = 5, fig.width = 5}
+subgroup_data <- get_subgroup_data(xs, ys, R=50)
+
+ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
+for(i in 1:n_inds){
+  for(j in 1:n_inds){
+
+    #getting subgroup id for individual i and j
+    sub_ids_i <- subgroup_data$ind_subgroup_membership[i,]
+    sub_ids_j <- subgroup_data$ind_subgroup_membership[j,]
+    #computing edge weight (fraction of time in same subgroup)
+    ff_net[i,j] <- mean(sub_ids_i == sub_ids_j, na.rm=T)
+  }
+}
+
+diag(ff_net) <- NA
+new_order <- c(1,11,4,10,2,3,6,7,8,9,5)
+ffnet_reorder <- ff_net[new_order, new_order]
+
+visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
+
+```
+It is clear that coatis in Galaxy group spend more time with certain individuals, so it could be speculated that they have preferences for who they remain with when the group splits. We can also see that one of the sub-groups contains all adult females and the only juvenile of the group, whereas the other sub-group contains 2 adult females and 3 sub-adults. Gus, the adult male spends slightly more time with the mostly adult group, but very little time with Estrella. 
+
+
+### 4: Within-group compositions
+
+**Is there multi-level sub-grouping patterns?**
+
+We did the same analysis for when all group members were together to determine whether there is within-group spatial clustering. To do this, we changed the epsilon neighbourhood value (radius) to 10m and 1m. So if the group is spread 30m, we would be able to identify which individuals are closer together. 
+
+### Plot 5: Gus in the group with 10m radius
+```{r , echo = FALSE, fig.align = "center", fig.height = 5, fig.width = 5}
+R = 50
+subgroup_data <- get_subgroup_data(xs, ys, R)
+
+n_inds <- nrow(xs)
+n_times <- ncol(xs)
+
+#number of individuals tracked at each time point
+n_tracked <- colSums(!is.na(xs))
+
+#indexes to time points where all individuals were tracked
+all_tracked_idxs <- which(n_tracked==n_inds)
+#find index for when there is only 1 subgroup
+s1 <- which(subgroup_data$n_subgroups == 1)
+
+full_group_index <- intersect(all_tracked_idxs, s1)
+#subset the x's and y's for the moments the full group has a gps and is together
+subset_x <- xs[,full_group_index]
+subset_y <- ys[, full_group_index]
+
+#get proximity network
+
+within_group_data <- get_proximity_data(subset_x, subset_y, 10)
+new_order <- c(1,11,4,10,2,3,6,7,8,9,5)
+visualize_network_matrix(within_group_data$proximity_net, coati_ids[new_order,])
+
+```
+
+### Plot 6: Gus in the group with 3m radius
+```{r , echo = FALSE, fig.align = "center", fig.height = 5, fig.width = 5}
+
+R = 50
+subgroup_data <- get_subgroup_data(xs, ys, R)
+
+n_inds <- nrow(xs)
+n_times <- ncol(xs)
+
+#number of individuals tracked at each time point
+n_tracked <- colSums(!is.na(xs))
+
+#indexes to time points where all individuals were tracked
+all_tracked_idxs <- which(n_tracked==n_inds)
+#find index for when there is only 1 subgroup
+s1 <- which(subgroup_data$n_subgroups == 3)
+
+full_group_index <- intersect(all_tracked_idxs, s1)
+#subset the x's and y's for the moments the full group has a gps and is together
+subset_x <- xs[,full_group_index]
+subset_y <- ys[, full_group_index]
+
+#get proximity network
+
+within_group_data <- get_proximity_data(subset_x, subset_y, 1)
+new_order <- c(1,11,4,10,2,3,6,7,8,9,5)
+visualize_network_matrix(within_group_data$proximity_net, coati_ids[new_order,])
+
+```
+These matrices show that there may be some preferences within the full group. Quasar tends to be closer to Pluto, Luna, and Gus. Planeta tends to be closer to Orbita.
+
+As Gus was not always present in the group, we removed him from the analysis which gave us an additional 42 data points. However, the proximity values don't change much.
+
+### Plot 7: Without Gus in the group with 10m radius
+
+```{r , echo = FALSE, fig.align = "center", fig.height = 5, fig.width = 5}
+xs_nogus <- xs[-c(5), ]
+ys_nogus <- ys[-c(5), ]
+coati_ids_nogus <- coati_ids[-c(5),]
+
+R = 50
+subgroup_data <- get_subgroup_data(xs_nogus, ys_nogus, R)
+
+n_inds <- nrow(xs_nogus)
+n_times <- ncol(xs_nogus)
+
+#number of individuals tracked at each time point
+n_tracked <- colSums(!is.na(xs_nogus))
+
+#indexes to time points where all individuals were tracked
+all_tracked_idxs <- which(n_tracked==n_inds)
+#find index for when there is only 1 subgroup
+s1 <- which(subgroup_data$n_subgroups == 1)
+
+full_group_index <- intersect(all_tracked_idxs, s1)
+#subset the x's and y's for the moments the full group has a gps and is together
+subset_x <- xs_nogus[,full_group_index]
+subset_y <- ys_nogus[, full_group_index]
+
+#get proximity network
+within_group_data <- get_proximity_data(subset_x, subset_y, 10)
+
+new_order <- c(1,10,4,9,2,3,5,6,7,8)
+visualize_network_matrix(within_group_data$proximity_net, coati_ids_nogus[new_order,])
+
+
+```
+
+
+### Plot 8: Without Gus in the group with 3m radius
+
+```{r , echo = FALSE, fig.align = "center", fig.height = 5, fig.width = 5}
+xs_nogus <- xs[-c(5), ]
+ys_nogus <- ys[-c(5), ]
+coati_ids_nogus <- coati_ids[-c(5),]
+
+R = 50
+subgroup_data <- get_subgroup_data(xs_nogus, ys_nogus, R)
+
+n_inds <- nrow(xs_nogus)
+n_times <- ncol(xs_nogus)
+
+#number of individuals tracked at each time point
+n_tracked <- colSums(!is.na(xs_nogus))
+
+#indexes to time points where all individuals were tracked
+all_tracked_idxs <- which(n_tracked==n_inds)
+#find index for when there is only 1 subgroup
+s1 <- which(subgroup_data$n_subgroups == 1)
+
+full_group_index <- intersect(all_tracked_idxs, s1)
+#subset the x's and y's for the moments the full group has a gps and is together
+subset_x <- xs_nogus[,full_group_index]
+subset_y <- ys_nogus[, full_group_index]
+
+#get proximity network
+within_group_data <- get_proximity_data(subset_x, subset_y, 3)
+
+new_order <- c(1,10,4,9,2,3,5,6,7,8)
+visualize_network_matrix(within_group_data$proximity_net, coati_ids_nogus[new_order,])
+
+```
+
+Without Gus in the group, we see Quasar closer to Luna and Pluto as well as Saturno. However, with short radii values, the proportion of time individuals are in the same within group sub-group is largely reduced. So these results may be inaccurate interpretations. These plots show that the value we set as the radii is important for how we interpret the social relationships within the group.
+
+### Further questions:
+
+* Is one of the sub-groups displaced or do they naturally drift apart from loss of cohesion?
+* In the grouping matrix, it could give false interpretations of close associations between individuals that have a common stronger association, which may consequently increase their strength of association. How can we see whether this is occurring?
+* Can we predict a fission by looking at the stability of the group?
+
+
+
+
+
+
+
+
 
 
 
