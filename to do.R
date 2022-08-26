@@ -1,5 +1,4 @@
-# compare high res to low res from 9am-6pm
-# make matrix for each day to compare over days
+
 # mantel test to correlate the networks
 # across day and within day consistency and day night 
 

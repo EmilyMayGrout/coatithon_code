@@ -12,9 +12,7 @@
 #who displaces who - how do the groups split - who moves more
 
 ###to do next
-#write up lab note book - for the coatithon - with plots and interpretations - go through code again
 #make animations of fission fusion with ffmpeg
-#once written up, send to Meg and Ben
 #start doing some writing to frame the paper
 #run the stuff that makes sense on Trago
 
@@ -31,8 +29,6 @@ data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/'
 gps_file <- "galaxy_xy_10min_level0.RData"
-#looking at data from
-#gps_file <- "galaxy_xy_10min_9am_level0.RData"
 id_file <- 'coati_ids.RData'
 
 #list of Rs

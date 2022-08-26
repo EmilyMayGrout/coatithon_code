@@ -1,5 +1,6 @@
 #this script is to build a social network with the high res data only
 #needs to be checked as the results are very similar to the 1 gps/10 min data
+#checked by Ari and it looks good
 
 
 

@@ -2,7 +2,8 @@
 title: "Galaxy fission-fusion report"
 author: "Emily Grout"
 date: "August 2022"
-
+editor_options: 
+  chunk_output_type: console
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -179,7 +180,7 @@ Here we can clearly see that the majority of split events, the group splits even
 ### **3: Sub-group compositions**
 For data where all individuals had a GPS fix, we calculated the fraction of time every dyad were in the **same sub-group**. The aim for this was to determine whether individuals have distinct sub-group memberships. 
 
-### Plot 6: Sub-group compositions
+### Plot 6: Sub-group compositions across entire collar period
 ```{r , echo = FALSE, fig.align = "center", fig.height = 5, fig.width = 5}
 subgroup_data <- get_subgroup_data(xs, ys, R=50)
 
@@ -205,9 +206,314 @@ visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
 
 *  *Grey is juvenile female, red is adult female, orange is sub-adult female, pale blue is sub-adult male and dark blue is adult male*
 
+### Plot 7: Sub-group compositions by day
+```{r , echo = FALSE, fig.align = "center", fig.height = 20, fig.width = 20}
+
+par(mfrow=c(4,4), mar = c(5,5,5,5))
+
+#day1:
+subgroup_data <- get_subgroup_data(xs[,1:78], ys[,1:78], R=50)
+ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
+for(i in 1:n_inds){
+  for(j in 1:n_inds){
+    sub_ids_i <- subgroup_data$ind_subgroup_membership[i,]
+    sub_ids_j <- subgroup_data$ind_subgroup_membership[j,]
+    ff_net[i,j] <- mean(sub_ids_i == sub_ids_j, na.rm=T)
+  }
+}
+diag(ff_net) <- NA
+new_order <- c(1,11,4,10,2, 3,6,7,8,9,5)
+ffnet_reorder <- ff_net[new_order, new_order]
+visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
+mtext("Day 1")
+#-----------------------------------------------------------------
+#day2:
+subgroup_data <- get_subgroup_data(xs[,79:156], ys[,79:156], R=50)
+ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
+for(i in 1:n_inds){
+  for(j in 1:n_inds){
+    sub_ids_i <- subgroup_data$ind_subgroup_membership[i,]
+    sub_ids_j <- subgroup_data$ind_subgroup_membership[j,]
+    ff_net[i,j] <- mean(sub_ids_i == sub_ids_j, na.rm=T)
+  }
+}
+diag(ff_net) <- NA
+new_order <- c(1,11,4,10,2, 3,6,7,8,9,5)
+ffnet_reorder <- ff_net[new_order, new_order]
+visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
+mtext("Day 2")
+#-----------------------------------------------------------------
+#day3:
+subgroup_data <- get_subgroup_data(xs[,157:234], ys[,157:234], R=50)
+ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
+for(i in 1:n_inds){
+  for(j in 1:n_inds){
+    sub_ids_i <- subgroup_data$ind_subgroup_membership[i,]
+    sub_ids_j <- subgroup_data$ind_subgroup_membership[j,]
+    ff_net[i,j] <- mean(sub_ids_i == sub_ids_j, na.rm=T)
+  }
+}
+diag(ff_net) <- NA
+new_order <- c(1,11,4,10,2, 3,6,7,8,9,5)
+ffnet_reorder <- ff_net[new_order, new_order]
+visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
+mtext("Day 3")
+#-----------------------------------------------------------------
+#day4:
+subgroup_data <- get_subgroup_data(xs[,235:312], ys[,235:312], R=50)
+ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
+for(i in 1:n_inds){
+  for(j in 1:n_inds){
+    sub_ids_i <- subgroup_data$ind_subgroup_membership[i,]
+    sub_ids_j <- subgroup_data$ind_subgroup_membership[j,]
+    ff_net[i,j] <- mean(sub_ids_i == sub_ids_j, na.rm=T)
+  }
+}
+diag(ff_net) <- NA
+new_order <- c(1,11,4,10,2, 3,6,7,8,9,5)
+ffnet_reorder <- ff_net[new_order, new_order]
+visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
+mtext("Day 4")
+#-----------------------------------------------------------------
+#day5:
+subgroup_data <- get_subgroup_data(xs[,313:390], ys[,313:390], R=50)
+ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
+for(i in 1:n_inds){
+  for(j in 1:n_inds){
+    sub_ids_i <- subgroup_data$ind_subgroup_membership[i,]
+    sub_ids_j <- subgroup_data$ind_subgroup_membership[j,]
+    ff_net[i,j] <- mean(sub_ids_i == sub_ids_j, na.rm=T)
+  }
+}
+diag(ff_net) <- NA
+new_order <- c(1,11,4,10,2, 3,6,7,8,9,5)
+ffnet_reorder <- ff_net[new_order, new_order]
+visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
+mtext("Day 5")
+#-----------------------------------------------------------------
+#day6:
+subgroup_data <- get_subgroup_data(xs[,391:468], ys[,391:468], R=50)
+ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
+for(i in 1:n_inds){
+  for(j in 1:n_inds){
+    sub_ids_i <- subgroup_data$ind_subgroup_membership[i,]
+    sub_ids_j <- subgroup_data$ind_subgroup_membership[j,]
+    ff_net[i,j] <- mean(sub_ids_i == sub_ids_j, na.rm=T)
+  }
+}
+diag(ff_net) <- NA
+new_order <- c(1,11,4,10,2, 3,6,7,8,9,5)
+ffnet_reorder <- ff_net[new_order, new_order]
+visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
+mtext("Day 6")
+#-----------------------------------------------------------------
+#day7:
+subgroup_data <- get_subgroup_data(xs[,469:546], ys[,469:546], R=50)
+ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
+for(i in 1:n_inds){
+  for(j in 1:n_inds){
+    sub_ids_i <- subgroup_data$ind_subgroup_membership[i,]
+    sub_ids_j <- subgroup_data$ind_subgroup_membership[j,]
+    ff_net[i,j] <- mean(sub_ids_i == sub_ids_j, na.rm=T)
+  }
+}
+diag(ff_net) <- NA
+new_order <- c(1,11,4,10,2, 3,6,7,8,9,5)
+ffnet_reorder <- ff_net[new_order, new_order]
+visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
+mtext("Day 7")
+#-----------------------------------------------------------------
+#day8:
+subgroup_data <- get_subgroup_data(xs[,547:624], ys[,547:624], R=50)
+ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
+for(i in 1:n_inds){
+  for(j in 1:n_inds){
+    sub_ids_i <- subgroup_data$ind_subgroup_membership[i,]
+    sub_ids_j <- subgroup_data$ind_subgroup_membership[j,]
+    ff_net[i,j] <- mean(sub_ids_i == sub_ids_j, na.rm=T)
+  }
+}
+diag(ff_net) <- NA
+new_order <- c(1,11,4,10,2, 3,6,7,8,9,5)
+ffnet_reorder <- ff_net[new_order, new_order]
+visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
+mtext("Day 8")
+#-----------------------------------------------------------------
+#day9:
+subgroup_data <- get_subgroup_data(xs[,625:702], ys[,625:702], R=50)
+ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
+for(i in 1:n_inds){
+  for(j in 1:n_inds){
+    sub_ids_i <- subgroup_data$ind_subgroup_membership[i,]
+    sub_ids_j <- subgroup_data$ind_subgroup_membership[j,]
+    ff_net[i,j] <- mean(sub_ids_i == sub_ids_j, na.rm=T)
+  }
+}
+diag(ff_net) <- NA
+new_order <- c(1,11,4,10,2, 3,6,7,8,9,5)
+ffnet_reorder <- ff_net[new_order, new_order]
+visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
+mtext("Day 9")
+#-----------------------------------------------------------------
+#day10:
+subgroup_data <- get_subgroup_data(xs[,703:780], ys[,703:780], R=50)
+ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
+for(i in 1:n_inds){
+  for(j in 1:n_inds){
+    sub_ids_i <- subgroup_data$ind_subgroup_membership[i,]
+    sub_ids_j <- subgroup_data$ind_subgroup_membership[j,]
+    ff_net[i,j] <- mean(sub_ids_i == sub_ids_j, na.rm=T)
+  }
+}
+diag(ff_net) <- NA
+new_order <- c(1,11,4,10,2, 3,6,7,8,9,5)
+ffnet_reorder <- ff_net[new_order, new_order]
+visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
+mtext("Day 10")
+#-----------------------------------------------------------------
+#day11:
+subgroup_data <- get_subgroup_data(xs[,781:858], ys[,781:858], R=50)
+ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
+for(i in 1:n_inds){
+  for(j in 1:n_inds){
+    sub_ids_i <- subgroup_data$ind_subgroup_membership[i,]
+    sub_ids_j <- subgroup_data$ind_subgroup_membership[j,]
+    ff_net[i,j] <- mean(sub_ids_i == sub_ids_j, na.rm=T)
+  }
+}
+diag(ff_net) <- NA
+new_order <- c(1,11,4,10,2, 3,6,7,8,9,5)
+ffnet_reorder <- ff_net[new_order, new_order]
+visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
+mtext("Day 11")
+#-----------------------------------------------------------------
+#day12:
+subgroup_data <- get_subgroup_data(xs[,859:936], ys[,859:936], R=50)
+ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
+for(i in 1:n_inds){
+  for(j in 1:n_inds){
+    sub_ids_i <- subgroup_data$ind_subgroup_membership[i,]
+    sub_ids_j <- subgroup_data$ind_subgroup_membership[j,]
+    ff_net[i,j] <- mean(sub_ids_i == sub_ids_j, na.rm=T)
+  }
+}
+diag(ff_net) <- NA
+new_order <- c(1,11,4,10,2, 3,6,7,8,9,5)
+ffnet_reorder <- ff_net[new_order, new_order]
+visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
+mtext("Day 12")
+#-----------------------------------------------------------------
+#day13:
+subgroup_data <- get_subgroup_data(xs[,937:1014], ys[,937:1014], R=50)
+ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
+for(i in 1:n_inds){
+  for(j in 1:n_inds){
+    sub_ids_i <- subgroup_data$ind_subgroup_membership[i,]
+    sub_ids_j <- subgroup_data$ind_subgroup_membership[j,]
+    ff_net[i,j] <- mean(sub_ids_i == sub_ids_j, na.rm=T)
+  }
+}
+diag(ff_net) <- NA
+new_order <- c(1,11,4,10,2, 3,6,7,8,9,5)
+ffnet_reorder <- ff_net[new_order, new_order]
+visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
+mtext("Day 13")
+#-----------------------------------------------------------------
+#day14:
+subgroup_data <- get_subgroup_data(xs[,1015:1092], ys[,1015:1092], R=50)
+ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
+for(i in 1:n_inds){
+  for(j in 1:n_inds){
+    sub_ids_i <- subgroup_data$ind_subgroup_membership[i,]
+    sub_ids_j <- subgroup_data$ind_subgroup_membership[j,]
+    ff_net[i,j] <- mean(sub_ids_i == sub_ids_j, na.rm=T)
+  }
+}
+diag(ff_net) <- NA
+new_order <- c(1,11,4,10,2, 3,6,7,8,9,5)
+ffnet_reorder <- ff_net[new_order, new_order]
+visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
+mtext("Day 14")
+#-----------------------------------------------------------------
+#day15:
+subgroup_data <- get_subgroup_data(xs[,1093:1170], ys[,1093:1170], R=50)
+ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
+for(i in 1:n_inds){
+  for(j in 1:n_inds){
+    sub_ids_i <- subgroup_data$ind_subgroup_membership[i,]
+    sub_ids_j <- subgroup_data$ind_subgroup_membership[j,]
+    ff_net[i,j] <- mean(sub_ids_i == sub_ids_j, na.rm=T)
+  }
+}
+diag(ff_net) <- NA
+new_order <- c(1,11,4,10,2, 3,6,7,8,9,5)
+ffnet_reorder <- ff_net[new_order, new_order]
+visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
+mtext("Day 15")
+#-----------------------------------------------------------------
+#day16:
+subgroup_data <- get_subgroup_data(xs[,1171:1248], ys[,1171:1248], R=50)
+ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
+for(i in 1:n_inds){
+  for(j in 1:n_inds){
+    sub_ids_i <- subgroup_data$ind_subgroup_membership[i,]
+    sub_ids_j <- subgroup_data$ind_subgroup_membership[j,]
+    ff_net[i,j] <- mean(sub_ids_i == sub_ids_j, na.rm=T)
+  }
+}
+diag(ff_net) <- NA
+new_order <- c(1,11,4,10,2, 3,6,7,8,9,5)
+ffnet_reorder <- ff_net[new_order, new_order]
+visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
+mtext("Day 16")
+
+
+```
+
 
 It is clear that coatis in Galaxy group spend more time with certain individuals, so it could be speculated that they have preferences for who they remain with when the group splits. We can also see that one of the sub-groups contains all adult females and the only juvenile of the group, whereas the other sub-group contains 2 adult females and 3 sub-adults. Gus, the adult male spends slightly more time with the adult group, but very little time with Estrella. 
 
+
+### Plot 8: Are there differences in sub-group compositions between mornings and afternoons?
+
+```{r , echo = FALSE, fig.align = "center", fig.height = 5, fig.width = 10}
+par(mfrow=c(1,2), mar = c(5,5,5,5))
+
+#mornings
+subgroup_data <- get_subgroup_data(xs[,c(1:37,79:115, 157:193,236:271,313:349,391:427,469:505,547:583,625:661, 703:739,781:817,859:895, 937:973,1015:1051,1093:1129, 1171:1207)], ys[,c(1:37,79:115, 157:193, 236:271, 313:349, 391:427,469:505,547:583,625:661, 703:739, 781:817, 859:895, 937:973,1015:1051,1093:1129, 1171:1207)], R=50)
+ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
+for(i in 1:n_inds){
+  for(j in 1:n_inds){
+    sub_ids_i <- subgroup_data$ind_subgroup_membership[i,]
+    sub_ids_j <- subgroup_data$ind_subgroup_membership[j,]
+    ff_net[i,j] <- mean(sub_ids_i == sub_ids_j, na.rm=T)
+  }
+}
+diag(ff_net) <- NA
+new_order <- c(1,11,4,10,2, 3,6,7,8,9,5)
+ffnet_reorder <- ff_net[new_order, new_order]
+visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
+mtext("Mornings")
+#-----------------------------------------------------------
+#afternoons
+subgroup_data <- get_subgroup_data(xs[,c(38:78,116:156,194:235, 272:312, 350:390, 428:468, 506:546, 584:624, 662:702, 740:780, 818:858, 896:936, 974:1014, 1052:1092, 1130:1170, 1208:1248)], ys[,c(38:78,116:156,194:235, 272:312, 350:390, 428:468, 506:546, 584:624, 662:702, 740:780, 818:858, 896:936, 974:1014, 1052:1092, 1130:1170, 1208:1248)], R=50)
+ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
+for(i in 1:n_inds){
+  for(j in 1:n_inds){
+    sub_ids_i <- subgroup_data$ind_subgroup_membership[i,]
+    sub_ids_j <- subgroup_data$ind_subgroup_membership[j,]
+    ff_net[i,j] <- mean(sub_ids_i == sub_ids_j, na.rm=T)
+  }
+}
+diag(ff_net) <- NA
+new_order <- c(1,11,4,10,2, 3,6,7,8,9,5)
+ffnet_reorder <- ff_net[new_order, new_order]
+visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
+mtext("Afternoons")
+
+
+```
+When the total data is split by morning (6am-12pm) and evening (12:10pm-6:50pm), there is little difference in sub-group compositions.
 
 ### **4: Within-group compositions**
 
@@ -215,7 +521,7 @@ It is clear that coatis in Galaxy group spend more time with certain individuals
 
 We did the same analysis for when all group members were together to determine whether there is within-group spatial clustering. To do this, we changed the epsilon neighbourhood value (radius) to 10m. So if the group is spread 30m, we would be able to identify which individuals are closer together. 
 
-### Plot 7: Gus in the group with 10m radius
+### Plot 9: Gus in the group with 10m radius
 ```{r , echo = FALSE, fig.align = "center", fig.height = 5, fig.width = 5}
 R = 50
 subgroup_data <- get_subgroup_data(xs, ys, R)
@@ -248,7 +554,7 @@ This matrix shows that there may be some preferences within the full group. Quas
 
 As Gus was not always present in the group, we removed him from the analysis which gave us an additional 42 data points. However, the proximity values don't change much.
 
-### Plot 8: Without Gus in the group with 10m radius
+### Plot 10: Without Gus in the group with 10m radius
 
 ```{r , echo = FALSE, fig.align = "center", fig.height = 5, fig.width = 5}
 xs_nogus <- xs[-c(5), ]
@@ -284,7 +590,7 @@ visualize_network_matrix(within_group_data$proximity_net, coati_ids_nogus[new_or
 ```
 
 
-### Plot 9: Without Gus in the group with 3m radius
+### Plot 11: Without Gus in the group with 3m radius
 
 Here, I changed the radius to 3m to look at whether the distance threshold set may affect the results:
 
@@ -326,13 +632,28 @@ Without Gus in the group, we see Quasar closer to Luna and Pluto as well as Satu
 
 * In the grouping matrix, it could give false interpretations of close associations between individuals that have a common stronger association, which may consequently increase their strength of association. How can we see whether this is occurring?
 
-### With the 1Hz data:
-* Can we predict a fission by looking at the stability of the group before the split?
-* Is one of the sub-groups displaced or do they naturally drift apart from loss of cohesion?
-* Is there a leader who initiates the splits? > *we could potentially use Ari's push/pull analyses*
-* What calls are emitted during fission events? 
+### Chapter ideas:
+
+* fission fusion descriptive paper
+  + only with low res data
+  
+* fission fusion mechanisms paper
+  + with high res data and audio
+  + Is one of the sub-groups displaced or do they naturally drift apart from loss of cohesion?
+  + Is there a leader who initiates the splits?
+  + What calls are emitted during fission events? 
   + What can their calling behaviour tell us about their state at the time of the fission? 
   + Are fissions caused by an aggressive interaction or is it from lack of cohesion/differences in preferences?  
+  
+  
+* chirp grunt individual variability
+
+* turning influence for whole group vs sub groups - is it consistent across difference group compositions
+
+
+### Other ideas:
+* Can we predict a fission by looking at the stability of the group before the split?
+
   
   
 
