@@ -31,6 +31,8 @@ data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/'
 gps_file <- "galaxy_xy_10min_level0.RData"
+#looking at data from
+#gps_file <- "galaxy_xy_10min_9am_level0.RData"
 id_file <- 'coati_ids.RData'
 
 #list of Rs
@@ -100,6 +102,7 @@ hist(subgroup_counts[,s3], breaks=seq(0.5,11,1), xlab = 'Subgroup size', main = 
 
 dev.off()
 
+
 #------plot 2.1: subgroup size at 100m----------------------
 
 png(height = 540, width = 270, units = 'px', filename = paste0(plot_dir,'subgroup_size_hists_100m.png'))
@@ -125,6 +128,53 @@ subgroup_df <- as.data.frame(t(subgroup_counts))
 table(paste(subgroup_df[s4,1], subgroup_df[s4,2], subgroup_df[s4,3],subgroup_df[s4,4], sep= '_'))
 table(paste(subgroup_df[s3,1], subgroup_df[s3,2], subgroup_df[s3,3], sep= '_'))
 table(paste(subgroup_df[s2,1], subgroup_df[s2,2], sep= '_'))
+
+
+#-------plot 2.2 subgroups at 50m omitting times when there are solitary individuals in their own group
+
+# remove instances when the sub-group is 1 individual as this is not really a sub-group
+
+#first make values equal to 1 and 10 equal to NA for the 2 sub groups and change 9 to NA in 3 subgroups
+subgroup_data <- get_subgroup_data(xs, ys, R=50)
+subgroup_counts <- subgroup_data$subgroup_counts[,all_tracked_idxs]
+n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
+
+s2 <- which(n_subgroups == 2)
+s3 <- which(n_subgroups == 3)
+s4 <- which(n_subgroups == 4)
+
+par(mfrow=c(2,1), mar = c(6,5,2,1))
+#for 2 subgroups
+subgroup_counts_NA <- subgroup_counts
+subgroup_counts_NA[subgroup_counts_NA == "1"] <- NA
+subgroup_counts_NA[subgroup_counts_NA == "10"] <- NA
+hist(subgroup_counts_NA[,s2], breaks=seq(0.5,11,1), xlab = '', main = '2 subgroups', col = "darkolivegreen4", cex.lab = 1.5, cex.main = 1.5, cex.axis=1.5, freq = FALSE, ylim=c(0,.6))
+#for 3 subgroups
+subgroup_counts_NA[subgroup_counts_NA == "9"] <- NA
+hist(subgroup_counts_NA[,s3], breaks=seq(0.5,11,1), xlab = 'Subgroup size', main = '3 subgroups', col = "darkolivegreen4", cex.lab = 1.5, cex.main = 1.5, cex.axis=1.5, freq = FALSE, ylim=c(0,.6))
+
+
+#--------plot 2.3 subgroups at 100m omitting times when there are solitary individuals in their own group
+
+subgroup_data <- get_subgroup_data(xs, ys, R=100)
+subgroup_counts <- subgroup_data$subgroup_counts[,all_tracked_idxs]
+n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
+
+s2 <- which(n_subgroups == 2)
+s3 <- which(n_subgroups == 3)
+s4 <- which(n_subgroups == 4)
+
+par(mfrow=c(2,1), mar = c(6,5,2,1))
+#for 2 subgroups
+subgroup_counts_NA <- subgroup_counts
+subgroup_counts_NA[subgroup_counts_NA == "1"] <- NA
+subgroup_counts_NA[subgroup_counts_NA == "10"] <- NA
+hist(subgroup_counts_NA[,s2], breaks=seq(0.5,11,1), xlab = '', main = '2 subgroups', col = "darkolivegreen4", cex.lab = 1.5, cex.main = 1.5, cex.axis=1.5, freq = FALSE, ylim=c(0,.6))
+#for 3 subgroups
+subgroup_counts_NA[subgroup_counts_NA == "9"] <- NA
+hist(subgroup_counts_NA[,s3], breaks=seq(0.5,11,1), xlab = 'Subgroup size', main = '3 subgroups', col = "darkolivegreen4", cex.lab = 1.5, cex.main = 1.5, cex.axis=1.5, freq = FALSE, ylim=c(0,.6))
+
+
 
 
 #----------plot 3: which individuals tend to be in the same subgroup--------------

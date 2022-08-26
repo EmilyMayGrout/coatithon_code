@@ -6,15 +6,109 @@ library(lubridate)
 source('C:/Users/egrout/Dropbox/coatithon/coatithon_code/coati_function_library.R')
 
 firsttime <- as.POSIXct('2021-12-24 11:00', tz = 'UTC')
-lasttime <-  as.POSIXct('2022-01-07 23:00', tz = 'UTC')
+lasttime <-  as.POSIXct('2022-01-13 23:00', tz = 'UTC')
 #to do: get the last day of data and rbind it to the same file - then change the last date
 
-indir <-  "C:/Users/egrout/Dropbox/coatithon/rawdata/2022/galaxy/gps/"
+indir <-  "C:/Users/egrout/Dropbox/coatithon/rawdata/2022/galaxy/gps/binded_files/"
 outdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/"
 metadatadir <-  "C:/Users/egrout/Dropbox/coatithon/rawdata/2022/galaxy/metadata/"
 
 #setting the working directory to the raw data file in dropbox
 setwd(indir)
+
+#the file structure for the rbind code below has been changed so this no longer works, but the binded data is in the binded_files folder
+#rbind the last day to each gps txt file
+#9460
+#all_files[2]
+#all_files[3]
+#tag_9460 <- read.table(all_files[2])
+#tag_9460_2 <- read.table(all_files[3])
+#tag_9460_all <- rbind(tag_9460, tag_9460_2)
+#write.table(tag_9460_all,"binded_files/tag9460_gps.txt", row.names = F, col.names = F,  quote = FALSE)
+
+#9463
+#all_files[4]
+#all_files[5]
+#tag_9463 <- read.table(all_files[4])
+#tag_9463_2 <- read.table(all_files[5])
+#tag_9463_all <- rbind(tag_9463, tag_9463_2)
+#write.table(tag_9463_all,"binded_files/tag9463_gps.txt", row.names = F, col.names = F,  quote = FALSE)
+
+#9464
+#all_files[6]
+#all_files[7]
+#tag_9464 <- read.table(all_files[6])
+#tag_9464_2 <- read.table(all_files[7])
+#tag_9464_all <- rbind(tag_9464, tag_9464_2)
+#write.table(tag_9464_all,"binded_files/tag9464_gps.txt", row.names = F, col.names = F,  quote = FALSE)
+
+#9466
+#all_files[8]
+#all_files[9]
+#tag_9466 <- read.table(all_files[8])
+#tag_9466_2 <- read.table(all_files[9])
+#tag_9466_all <- rbind(tag_9466, tag_9466_2)
+#write.table(tag_9466_all,"binded_files/tag9466_gps.txt", row.names = F, col.names = F,  quote = FALSE)
+
+#9467
+#all_files[10]
+#all_files[11]
+#tag_9467 <- read.table(all_files[10])
+#tag_9467_2 <- read.table(all_files[11])
+#tag_9467_all <- rbind(tag_9467, tag_9467_2)
+#write.table(tag_9467_all,"binded_files/tag9467_gps.txt", row.names = F, col.names = F,  quote = FALSE)
+
+#9470
+#all_files[12]
+#all_files[13]
+#tag_9470 <- read.table(all_files[12])
+#tag_9470_2 <- read.table(all_files[13])
+#tag_9470_all <- rbind(tag_9470, tag_9470_2)
+#write.table(tag_9470_all,"binded_files/tag9470_gps.txt", row.names = F, col.names = F,  quote = FALSE)
+
+#9471
+#all_files[14]
+#all_files[15]
+#tag_9471 <- read.table(all_files[14])
+#tag_9471_2 <- read.table(all_files[15])
+#tag_9471_all <- rbind(tag_9471, tag_9471_2)
+#write.table(tag_9471_all,"binded_files/tag9471_gps.txt", row.names = F, col.names = F,  quote = FALSE)
+
+#9474
+#all_files[16]
+#all_files[17]
+#tag_9474 <- read.table(all_files[16])
+#tag_9474_2 <- read.table(all_files[17])
+#tag_9474_all <- rbind(tag_9474, tag_9474_2)
+#write.table(tag_9474_all,"binded_files/tag9474_gps.txt", row.names = F, col.names = F,  quote = FALSE)
+
+#9475
+#all_files[18]
+#all_files[19]
+#tag_9475 <- read.table(all_files[18])
+#tag_9475_2 <- read.table(all_files[19])
+#tag_9475_all <- rbind(tag_9475, tag_9475_2)
+#write.table(tag_9475_all,"binded_files/tag9475_gps.txt", row.names = F, col.names = F,  quote = FALSE)
+
+#9476
+#all_files[20]
+#all_files[21]
+#tag_9476 <- read.table(all_files[20])
+#tag_9476_2 <- read.table(all_files[21])
+#tag_9476_all <- rbind(tag_9476, tag_9476_2)
+#write.table(tag_9476_all,"binded_files/tag9476_gps.txt", row.names = F, col.names = F,  quote = FALSE)
+
+#9480
+#all_files[22]
+#all_files[23]
+#tag_9480 <- read.table(all_files[22])
+#tag_9480_2 <- read.table(all_files[23])
+#tag_9480_all <- rbind(tag_9480, tag_9480_2)
+#write.table(tag_9480_all,"binded_files/tag9480_gps.txt", row.names = F, col.names = F,  quote = FALSE)
+
+
+
+
 
 #create times vector - only for the times that are in the DAY 11:00 (6am) - 23:00 (6pm)
 #first make list of 10 min intervals then remove the times overnight
@@ -97,7 +191,5 @@ save(coati_ids, file = paste0(outdir, 'coati_ids.RData'))
 
 save(list=c('xs','ys','ts'), file = paste0(outdir,'galaxy_xy_10min_level0.RData'))
 save(list=c('lats','lons','ts'), file = paste0(outdir,'galaxy_latlon_10min_level0.RData'))  
-  
-  
-  
+
 
