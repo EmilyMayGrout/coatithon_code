@@ -174,7 +174,7 @@ hist(subgroup_counts_NA[,s3], breaks=seq(0.5,11,1), xlab = 'Subgroup size', main
 
 ```
 
-Here we can clearly see that the majority of split events, the group splits evenly.
+Here we can clearly see that for the majority of split events, the group splits evenly.
 
 
 ### **3: Sub-group compositions**
@@ -205,6 +205,9 @@ visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
 ```
 
 *  *Grey is juvenile female, red is adult female, orange is sub-adult female, pale blue is sub-adult male and dark blue is adult male*
+
+It is clear that coatis in Galaxy group spend more time with certain individuals, so it could be speculated that they have preferences for who they remain with when the group splits. We can also see that one of the sub-groups contains all adult females and the only juvenile of the group, whereas the other sub-group contains 2 adult females and 3 sub-adults. Gus, the adult male spends slightly more time with the adult group, but very little time with Estrella. 
+
 
 ### Plot 7: Sub-group compositions by day
 ```{r , echo = FALSE, fig.align = "center", fig.height = 20, fig.width = 20}
@@ -470,9 +473,7 @@ mtext("Day 16")
 
 ```
 
-
-It is clear that coatis in Galaxy group spend more time with certain individuals, so it could be speculated that they have preferences for who they remain with when the group splits. We can also see that one of the sub-groups contains all adult females and the only juvenile of the group, whereas the other sub-group contains 2 adult females and 3 sub-adults. Gus, the adult male spends slightly more time with the adult group, but very little time with Estrella. 
-
+From these plots we can speculate that the sub-groups remain apart across multiple days. Our next steps in this analysis is to identify the split events in the low res data so we can record how many times they re-split into the same sub-groups. This would also allow us to calculate the duration of time they are in their sub-groups.
 
 ### Plot 8: Are there differences in sub-group compositions between mornings and afternoons?
 
