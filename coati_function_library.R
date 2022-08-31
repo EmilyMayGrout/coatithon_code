@@ -159,7 +159,6 @@ visualize_network_matrix <- function(net, coati_ids){
   zmin <- min(net, na.rm=T)
   zmax <- max(net, na.rm=T)
   image.plot(net, col = viridis(256), zlim=c(zmin,zmax), xaxt= 'n', yaxt = 'n')
-  
   axis(1, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2)
   axis(2, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2)
   
@@ -204,8 +203,6 @@ get_proximity_data <- function(xs, ys, r_within){
         
         #put the statements into the array at the correct position in the correct dimension
         dist_over_time[i, j, t] <- dist
-        
-        
       }
     }
   }
@@ -227,12 +224,6 @@ get_proximity_data <- function(xs, ys, r_within){
   return(proximity_data)
 
 }
-
-
-
-
-
-
 
 
 

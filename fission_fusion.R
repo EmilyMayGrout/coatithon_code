@@ -205,6 +205,7 @@ dev.off()
 
 #--------------plot 4: within full group individual associations----------------
 #---------------to compare with the sub group memberships---------------
+#this is the probability of individuals being in the same sub-group using absolute dyadic distances 
 
 R = 50
 subgroup_data <- get_subgroup_data(xs, ys, R)
@@ -234,6 +235,18 @@ new_order <- c(1,11,4,10,2,3,6,7,8,9,5)
 png(height = 400, width = 400, units = 'px', filename = paste0(plot_dir,'withingroup_network_withgus.png'))
 visualize_network_matrix(within_group_data$proximity_net, coati_ids[new_order,])
 dev.off()
+
+
+#to visualise the absolute dyadic distances for any time 
+#png(height = 800, width = 800, units = 'px', filename = paste0(plot_dir,'withingroup_network_withgus_distovertime_2.png'))
+#par(mfrow=c(10,11), mar = c(1,1,1,1))
+#for (i in 145:253){
+#  visualize_network_matrix(within_group_data$dist_over_time[,,i], coati_ids[new_order,])
+#the darker the colour, the closer the distance (opposite)
+#  }
+#dev.off()
+
+
 
 #---------------plot 5: full group associations without Gus 
 #removing gus from the full group to get proximity data within group
@@ -274,6 +287,25 @@ dev.off()
 #there's an additional 42 data points but the proximity values don't change much
 #but gives more data points by not including him which is good
 #other option to get more data is looking at all data (not removing points when not all individuals are tracked)
+
+
+
+
+
+#plotting number of subgroups over time when the radius is 50m
+plot(subgroup_data$n_subgroups, xlim = c(0, 1633))
+
+
+
+#making the subgroup data into a dataframe so I can make social networks 
+R = 50
+subgroup_data <- get_subgroup_data(xs, ys, R)
+t <- as.data.frame(rbind(subgroup_data$ind_subgroup_membership[,1:1633]))
+t <- cbind(coati_ids$name, t)
+
+
+
+
 
 
 

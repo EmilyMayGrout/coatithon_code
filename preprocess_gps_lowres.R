@@ -7,7 +7,6 @@ source('C:/Users/egrout/Dropbox/coatithon/coatithon_code/coati_function_library.
 
 firsttime <- as.POSIXct('2021-12-24 11:00', tz = 'UTC')
 lasttime <-  as.POSIXct('2022-01-13 23:00', tz = 'UTC')
-#to do: get the last day of data and rbind it to the same file - then change the last date
 
 indir <-  "C:/Users/egrout/Dropbox/coatithon/rawdata/2022/galaxy/gps/binded_files/"
 outdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/"
