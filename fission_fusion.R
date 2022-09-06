@@ -301,11 +301,44 @@ plot(subgroup_data$n_subgroups, xlim = c(0, 1633))
 R = 50
 subgroup_data <- get_subgroup_data(xs, ys, R)
 t <- as.data.frame(rbind(subgroup_data$ind_subgroup_membership[,1:1633]))
+#put id into dataframe
 t <- cbind(coati_ids$name, t)
+#changing column names into a list from 1 to 1633 - one day would be good to have as time
+column_names <- c(1:1633)
+colnames(t)[-1] <- column_names
+#change ID's into numbers
+t[t == 'Quasar'] <- '1'
+t[t == 'Estrella'] <- '2'
+t[t == 'Venus'] <- '3'
+t[t == 'Lucero'] <- '4'
+t[t == 'Gus'] <- '5'
+t[t == 'Orbita'] <- '6'
+t[t == 'Planeta'] <- '7'
+t[t == 'Saturno'] <- '8'
+t[t == 'Pluto'] <- '9'
+t[t == 'Luna'] <- '10'
+t[t == 'Cometa'] <- '11'
+
+library(tidyr)
+#pivot the data frame into a long format
+test <- t %>% pivot_longer(-c(`coati_ids$name`), names_to='time', values_to='sub-group')
+
+library(dplyr)
+test$subgroup_mod <- case_when(
+        test$`coati_ids$name` == 1  ~ test$`sub-group`+ 0.08,
+        test$`coati_ids$name` == 2  ~ test$`sub-group`+ 0.16,
+        test$`coati_ids$name` == 3  ~ test$`sub-group`+ 0.24,
+        test$`coati_ids$name` == 4  ~ test$`sub-group`+ 0.32,
+        test$`coati_ids$name` == 5  ~ test$`sub-group`+ 0.40,
+        test$`coati_ids$name` == 6  ~ test$`sub-group`+ 0.48,
+        test$`coati_ids$name` == 7  ~ test$`sub-group`+ 0.56,
+        test$`coati_ids$name` == 8  ~ test$`sub-group`+ 0.64,
+        test$`coati_ids$name` == 9  ~ test$`sub-group`+ 0.72,
+        test$`coati_ids$name` == 10  ~ test$`sub-group`+ 0.80,
+        test$`coati_ids$name` == 11  ~ test$`sub-group`+ 0.88
+
+)
 
 
-
-
-
-
+plot(test$time, test$subgroup_mod)
 
