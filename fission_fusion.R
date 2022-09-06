@@ -38,6 +38,7 @@ Rs <- c(10,20,30,40,50,100)
 
 library(fields)
 library(viridis)
+library(tidyverse)
 
 #read in library of functions
 setwd(code_dir)
@@ -341,4 +342,16 @@ test$subgroup_mod <- case_when(
 
 
 plot(test$time, test$subgroup_mod)
+
+# change time to numeric
+test <- test %>% mutate(time = as.numeric(time))
+
+# plot subgroup changes
+test %>% 
+  filter(time < 100) %>% 
+  ggplot(aes(x = time, y = subgroup_mod, color = `coati_ids$name`)) +
+  geom_point() +
+  geom_line(aes(group = 1)) +
+  theme_classic()
+#need to sort out geom_line in the plot to connect by id
 
