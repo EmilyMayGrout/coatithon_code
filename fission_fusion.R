@@ -323,35 +323,131 @@ t[t == 'Cometa'] <- '11'
 library(tidyr)
 #pivot the data frame into a long format
 test <- t %>% pivot_longer(-c(`coati_ids$name`), names_to='time', values_to='sub-group')
+test$time <- as.numeric(test$time)
+
+#time df
+time_df <- data.frame(ts, 1:length(ts))
+names(time_df)[2] <- "time"
+test <- left_join(test, time_df)
+
 
 library(dplyr)
 test$subgroup_mod <- case_when(
-        test$`coati_ids$name` == 1  ~ test$`sub-group`+ 0.08,
-        test$`coati_ids$name` == 2  ~ test$`sub-group`+ 0.16,
-        test$`coati_ids$name` == 3  ~ test$`sub-group`+ 0.24,
-        test$`coati_ids$name` == 4  ~ test$`sub-group`+ 0.32,
-        test$`coati_ids$name` == 5  ~ test$`sub-group`+ 0.40,
-        test$`coati_ids$name` == 6  ~ test$`sub-group`+ 0.48,
-        test$`coati_ids$name` == 7  ~ test$`sub-group`+ 0.56,
-        test$`coati_ids$name` == 8  ~ test$`sub-group`+ 0.64,
-        test$`coati_ids$name` == 9  ~ test$`sub-group`+ 0.72,
-        test$`coati_ids$name` == 10  ~ test$`sub-group`+ 0.80,
-        test$`coati_ids$name` == 11  ~ test$`sub-group`+ 0.88
+        test$`coati_ids$name` == 1  ~ test$`sub-group` -0.25,
+        test$`coati_ids$name` == 2  ~ test$`sub-group` -0.20,
+        test$`coati_ids$name` == 3  ~ test$`sub-group` -0.15,
+        test$`coati_ids$name` == 4  ~ test$`sub-group` -0.10,
+        test$`coati_ids$name` == 5  ~ test$`sub-group` -0.05,
+        test$`coati_ids$name` == 6  ~ test$`sub-group`+ 0.0,
+        test$`coati_ids$name` == 7  ~ test$`sub-group`+ 0.05,
+        test$`coati_ids$name` == 8  ~ test$`sub-group`+ 0.10,
+        test$`coati_ids$name` == 9  ~ test$`sub-group`+ 0.15,
+        test$`coati_ids$name` == 10  ~ test$`sub-group`+ 0.20,
+        test$`coati_ids$name` == 11  ~ test$`sub-group`+ 0.25
 
 )
 
 
 plot(test$time, test$subgroup_mod)
 
-# change time to numeric
-test <- test %>% mutate(time = as.numeric(time))
+
+#remove rows with NA's
+test <- test[complete.cases(test), ]
+
+library(lubridate)
+library(hms)
+test$hours <- as_hms(test$ts)
+
+
+
 
 # plot subgroup changes
-test %>% 
-  filter(time < 100) %>% 
-  ggplot(aes(x = time, y = subgroup_mod, color = `coati_ids$name`)) +
+#test %>% 
+  #filter(time < 100) %>% 
+  ggplot(data = test, aes(x = ts, 
+             y = subgroup_mod, 
+             color = `coati_ids$name`, 
+             group = `coati_ids$name`)) +
   geom_point() +
-  geom_line(aes(group = 1)) +
+  geom_line(aes(group = `coati_ids$name`)) +
   theme_classic()
-#need to sort out geom_line in the plot to connect by id
 
+  
+  
+  
+#now adding grey areas for night time
+
+#need to make separate dataframe for day and night times then add it in to geom_rect, calling the different dataframe for each geom
+firstday <- as.POSIXct('2021-12-24 11:00', tz = 'UTC')
+lastday <-  as.POSIXct('2022-01-13 23:00', tz = 'UTC')
+xmax <- seq.POSIXt(from = firstday, to = lastday,  by = 'day')
+firstnight <- as.POSIXct('2021-12-24 23:00', tz = 'UTC')
+lastnight <-  as.POSIXct('2022-01-13 23:00', tz = 'UTC')
+xmin <- seq.POSIXt(from = firstnight, to = lastnight,  by = 'day')
+ymin = 0
+ymax = 6
+daynight <- data.frame(1:21,xmax, xmin, ymax, ymin)
+colnames(daynight)[colnames(daynight) == 'X1.17'] <- 'rect_id'
+
+#rename coati_id column
+colnames(test)[colnames(test) == 'coati_ids$name'] <- 'id'
+colnames(test)[colnames(test) == 'ts'] <- 'Time'
+
+
+ #aes(xmin = test$ts[which(test$hours == as_hms("23:00:00"))], 
+  #              xmax = test$ts[which(test$hours == as_hms("11:00:00"))],
+   #             ymin = 0, 
+    #            ymax = 5)
+
+
+t[t == 'Quasar'] <- '1'
+t[t == 'Estrella'] <- '2'
+t[t == 'Venus'] <- '3'
+t[t == 'Lucero'] <- '4'
+t[t == 'Gus'] <- '5'
+t[t == 'Orbita'] <- '6'
+t[t == 'Planeta'] <- '7'
+t[t == 'Saturno'] <- '8'
+t[t == 'Pluto'] <- '9'
+t[t == 'Luna'] <- '10'
+t[t == 'Cometa'] <- '11'
+
+
+library(ggthemes)
+#final plot:
+
+#png(height = 800, width = 1600, units = 'px', filename = paste0(plot_dir,'sub_groupings_over_time_50m.png'))
+
+
+ggplot(data = test, aes(x = Time, 
+             y = subgroup_mod, 
+             color = id, 
+             group = id)) +
+  scale_color_discrete(name="Coati ID", labels=c("Quasar", "Luna", "Cometa", 
+                                             "Estrella", "Venus", "Lucero", 
+                                             "Gus", "Orbita", "Planeta",
+                                             "Saturno", "Pluto")) +
+  geom_rect(data = daynight, 
+            aes(xmin = xmax, xmax = xmin, ymin = ymin, ymax = ymax), 
+            inherit.aes = FALSE, fill = "white") +
+  
+  geom_point(data = test, aes(x = Time, 
+                              y = subgroup_mod, 
+                              color = id, 
+                              group = id), size = 1.8) +
+  geom_line(data = test, aes(x = Time, 
+                             y = subgroup_mod, 
+                             color = id, 
+                             group = id)) +
+  scale_y_continuous("Sub-group number", limits = c( 0, 6 ), breaks = 0:5) +
+  theme(panel.background = element_rect(fill = 'snow2'), 
+        panel.grid.major = element_line(color = 'snow2'),  
+        panel.grid.minor = element_line(color = 'snow2', size = 2)) 
+  
+
+#dev.off()
+
+
+#next make plot for specific days - zoomed in
+
+#first plot for 6th Jan
