@@ -16,7 +16,7 @@ metadatadir <-  "C:/Users/egrout/Dropbox/coatithon/rawdata/2022/galaxy/metadata/
 #setting the working directory to the raw data file in dropbox
 setwd(indir)
 
-#create times vector - only for the times that are in the DAY 11:00 (6am) - 23:00 (6pm)
+#create times vector - only for the times that are in the DAY 11:00 (6am) - 14:00 (9amm)
 #first make list of 10 min intervals then remove the times overnight
 ts <- seq.POSIXt(from = firsttime, to = lasttime,  by = '1 sec')
 minhr <- 11
@@ -84,6 +84,7 @@ for(i in 1:length(all_files)){
   #store eastings and northings in xs and ys matrices
   xs[i,] <- eastsNorths[,1]
   ys[i,] <- eastsNorths[,2]
+  
   
 }
 
