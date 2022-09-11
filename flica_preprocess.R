@@ -59,9 +59,17 @@ Quasar$is_na[ is.na (Quasar$x) ] <- 0
 Quasar$is_na[ Quasar$x > 1] <- 1
 Quasar$time <- ts
 
-#choose times to plot
-plot(Quasar$time[27401:49201], Quasar$is_na[27401:49201])
+Estrella <- as.data.frame(xs[2,])
+colnames(Estrella)[colnames(Estrella) == "xs[2, ]"] <- "x"
+Estrella$is_na[ is.na (Estrella$x) ] <- 0 
+Estrella$is_na[ Estrella$x > 1] <- 2
+Estrella$time <- ts
 
+#perhaps this graph can be done as a forloop through the ID's
+
+#choose times to plot
+plot(Quasar$time[27401:49201], Quasar$is_na[27401:49201], ylim = c(0,3))
+points(Estrella$time[27401:49201], Estrella$is_na[27401:49201])
 
 #need to add other group members to this, have their is_na value from 1 to 11 then put them onto same plot 
 
