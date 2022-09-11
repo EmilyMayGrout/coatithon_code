@@ -16,11 +16,11 @@ metadatadir <-  "C:/Users/egrout/Dropbox/coatithon/rawdata/2022/galaxy/metadata/
 #setting the working directory to the raw data file in dropbox
 setwd(indir)
 
-#create times vector - only for the times that are in the DAY 11:00 (6am) - 14:00 (9amm)
+#create times vector - only for the times that are in the DAY 11:00 (6am) - 14:00 (9am) - changed to 13 because it goes to 14:50 which are mostly NAs
 #first make list of 10 min intervals then remove the times overnight
 ts <- seq.POSIXt(from = firsttime, to = lasttime,  by = '1 sec')
 minhr <- 11
-maxhr <- 14
+maxhr <- 13
 ts <- ts[which((hour(ts) <= maxhr) & (hour(ts) >= minhr))]
 
 #making a list of all individuals in galaxy
