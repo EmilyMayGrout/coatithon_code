@@ -129,7 +129,8 @@ test<-list(day1,day2,day3, day4, day5, day6, day7, day8,day9, day10, day11,
           day12, day13, day14, day15, day16)
 i=1
 
-png(height = 1080, width = 1080, units = 'px', filename = paste0(plot_dir,'na_highres.png'))
+#png(height = 1080, width = 1080, units = 'px', filename = paste0(plot_dir,'na_highres.png'))
+
 par(mfrow=c(4,4), mar = c(2,1,1,1))
 j<-0
 for(i in test){
@@ -138,9 +139,9 @@ for(i in test){
 
 cex = 0.5
 
-#xlim = c(as.POSIXct("2022-01-08 11:00:00 UTC"),as.POSIXct("2022-01-08 13:59:59 UTC") 
+#xlim = c(as.POSIXct("2022-01-08 11:00:00 UTC"),as.POSIXct("2022-01-08 13:59:59 UTC"))
 #choose times to plot
-plot(ID_1[rownames(ID_1)%in%i,]$time, ID_1[rownames(ID_1)%in%i,]$is_na, col= "#9e0142", ylim = c(0,11),  pch = 20, cex = cex, xlab = "Time", ylab = "ID", main = paste0("Day ",j))
+plot(ID_1[rownames(ID_1)%in%i,]$time, ID_1[rownames(ID_1)%in%i,]$is_na, col= "#9e0142", ylim = c(0,11), pch = 20, cex = cex, xlab = "Time", ylab = "ID", main = paste0("Day ",j))
 points(ID_2[rownames(ID_2)%in%i,]$time, ID_2[rownames(ID_2)%in%i,]$is_na, col= "#d53e4f", pch = 20, cex = cex)
 points(ID_3[rownames(ID_3)%in%i,]$time, ID_3[rownames(ID_3)%in%i,]$is_na, col= "#f46d43", pch = 20, cex = cex)
 points(ID_4[rownames(ID_4)%in%i,]$time, ID_4[rownames(ID_4)%in%i,]$is_na, col= "#fdae61", pch = 20, cex = cex)
@@ -155,7 +156,7 @@ points(ID_11[rownames(ID_11)%in%i,]$time, ID_11[rownames(ID_11)%in%i,]$is_na, co
 
 }
 
-dev.off()
+#dev.off()
 
 #need to add other group members to this, have their is_na value from 1 to 11 then put them onto same plot 
 
