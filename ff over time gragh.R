@@ -102,7 +102,7 @@ test$hours <- as_hms(test$Time)
 
 
 # plot subgroup changes
-#this is for the 6th, need to find a better way of subsetting
+#this is for the 6th of Jan, need to find a better way of subsetting
 
 ggplot(data = test, aes(x = Time, 
                         y = subgroup_mod, 
@@ -129,30 +129,6 @@ ymin = 0
 ymax = 6
 daynight <- data.frame(1:21,xmax, xmin, ymax, ymin)
 colnames(daynight)[colnames(daynight) == 'X1.17'] <- 'rect_id'
-
-#rename coati_id column
-#colnames(test)[colnames(test) == 'coati_ids$name'] <- 'id'
-#colnames(test)[colnames(test) == 'ts'] <- 'Time'
-
-
-#aes(xmin = test$ts[which(test$hours == as_hms("23:00:00"))], 
-#              xmax = test$ts[which(test$hours == as_hms("11:00:00"))],
-#             ymin = 0, 
-#            ymax = 5)
-
-
-t[t == 'Quasar'] <- '1'
-t[t == 'Estrella'] <- '2'
-t[t == 'Venus'] <- '3'
-t[t == 'Lucero'] <- '4'
-t[t == 'Gus'] <- '5'
-t[t == 'Orbita'] <- '6'
-t[t == 'Planeta'] <- '7'
-t[t == 'Saturno'] <- '8'
-t[t == 'Pluto'] <- '9'
-t[t == 'Luna'] <- '10'
-t[t == 'Cometa'] <- '11'
-
 
 library(ggthemes)
 #final plot:
