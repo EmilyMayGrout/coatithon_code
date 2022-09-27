@@ -1,5 +1,4 @@
 #this script is to build a social network with the high res data only
-#needs to be checked as the results are very similar to the 1 gps/10 min data
 #checked by Ari and it looks good
 
 
@@ -62,10 +61,10 @@ new_order <- c(1,11,4,10,2, 3,6,7,8,9,5)
 ffnet_reorder <- ff_net[new_order, new_order]
 
 
-png(height = 400, width = 400, units = 'px', filename = paste0(plot_dir,'subgroup_network_highres.png'))
+#png(height = 400, width = 400, units = 'px', filename = paste0(plot_dir,'subgroup_network_highres.png'))
 
 visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
-dev.off()
+#dev.off()
 
 
 #-----------plot 2: social network for high res data when group is together --------------

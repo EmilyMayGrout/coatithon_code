@@ -104,16 +104,19 @@ test$hours <- as_hms(test$Time)
 # plot subgroup changes
 #this is for the 6th of Jan, need to find a better way of subsetting
 
+png(height = 400, width = 800, units = 'px', filename = paste0(plot_dir,'sub_groupings_over_time_50m_Jan6th.png'))
 ggplot(data = test, aes(x = Time, 
                         y = subgroup_mod, 
                         color = id, 
                         group = id)) +
   scale_x_datetime(limits=c(as.POSIXct("2022-01-06 11:00:00"), as.POSIXct("2022-01-06 23:00:00"))) +
-  scale_color_discrete(name="Coati ID", 
-                       labels=c("Quasar", "Luna", "Cometa", "Estrella", "Venus", "Lucero", "Gus", "Orbita", "Planeta", "Saturno", "Pluto")) +
+  scale_color_manual(name="Coati ID", 
+                       labels=c("Quasar", "Luna", "Cometa", "Estrella", "Venus", "Lucero", "Gus", "Orbita", "Planeta", "Saturno", "Pluto"), values = c("#fcfdbf", "#fecf92", "#fe9f6d", "#f7705c", "#de4968", "#b73779", "#8c2981", "#641a80", "#3b0f70", "#140e36", "#000004")) +
   geom_point() +
   geom_line(aes(group = id)) +
   theme_classic()
+
+dev.off()
 
 #---------------------------------------------------------------------
 #now adding grey areas for night time
