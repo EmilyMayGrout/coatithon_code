@@ -19,6 +19,11 @@ setwd(data_dir)
 load(gps_file)
 load(id_file)
 
+#-----FUNCTIONS----
+mode <- function(x) {
+  return(as.numeric(names(which.max(table(x)))))
+}
+
 #-----MAIN------
 
 n_inds <- nrow(xs)
@@ -104,4 +109,59 @@ for(t in 1:(n_times-1)){
   
   
 }
+
+#make a data frame of splits, with original group and subgroups
+splits_df <- data.frame(t = splits, orig_group=NULL, sub1=NULL, sub2=NULL, sub3=NULL, sub4=NULL, sub5=NULL)
+for(i in 1:nrow(splits_df)){
+  t <- splits_df$t[i]
+  subgroups_now <- subgroup_data$ind_subgroup_membership[,t]
+  subgroups_later <- subgroup_data$ind_subgroup_membership[,t+1]
+  
+  #transfer NAs from now to later and later to now
+  subgroups_now[which(is.na(subgroups_later))] <- NA
+  subgroups_later[which(is.na(subgroups_now))] <- NA
+  
+  #original group = largest subgroup (no singletons)
+  orig_subgroup_number <- mode(subgroups_now)
+  orig_subgroup_members <- which(subgroups_now == orig_subgroup_number)
+  
+  #store original group membership in data frame
+  splits_df$orig_group[i] <- list(orig_subgroup_members)
+  
+  #find the groups where the original members went
+  group_ids_later <- unique(subgroups_later[orig_subgroup_members])
+  
+  for(j in 1:length(group_ids_later)){
+    group_id <- group_ids_later[j]
+    inds_in_group <- which(subgroups_later==group_id)
+    orig_inds_in_group <- intersect(inds_in_group, orig_subgroup_members) #only count the original group members 
+    
+    #really hacky shit to get R to put lists into a data frame :(
+    if(j==1){
+      splits_df$sub1[i] <- list(orig_inds_in_group)
+    }
+    if(j==2){
+      splits_df$sub2[i] <- list(orig_inds_in_group)
+    }
+    if(j==3){
+      splits_df$sub3[i] <- list(orig_inds_in_group)
+    }
+    if(j==4){
+      splits_df$sub4[i] <- list(orig_inds_in_group)
+    }
+    if(j==5){
+      splits_df$sub5[i] <- list(orig_inds_in_group)
+    }
+  }
+}
+
+#number in each subgroup
+splits_df$n_orig <- sapply(splits_df$orig_group, function(x){return(sum(!is.na(x)))})
+splits_df$n_sub1 <- sapply(splits_df$sub1, function(x){return(sum(!is.na(x)))})
+splits_df$n_sub2 <- sapply(splits_df$sub2, function(x){return(sum(!is.na(x)))})
+splits_df$n_sub3 <- sapply(splits_df$sub3, function(x){return(sum(!is.na(x)))})
+
+
+
+
 
