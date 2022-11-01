@@ -83,3 +83,20 @@ nest_df_all <- full_join(pivot_nesting, all_inds)
 
 save(nest_df_all, file = paste0(data_dir,'galaxy_nest_subgroups_lowres_level0.RData'))
 
+#---------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

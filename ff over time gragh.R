@@ -105,6 +105,7 @@ test$hours <- as_hms(test$Time)
 #this is for the 6th of Jan, need to find a better way of subsetting
 
 png(height = 400, width = 800, units = 'px', filename = paste0(plot_dir,'sub_groupings_over_time_50m_Jan6th.png'))
+#g2 <- 
 ggplot(data = test, aes(x = Time, 
                         y = subgroup_mod, 
                         color = id, 
@@ -116,7 +117,33 @@ ggplot(data = test, aes(x = Time,
   geom_line(aes(group = id)) +
   theme_classic()
 
+#saveRDS(g2, file = paste0(plot_dir,"sub_groupings_over_time_50m_Jan6th.rds"))
+#readRDS(file = "C:/Users/egrout/Dropbox/coatithon/results/sub_groupings_over_time_50m_Jan6th.rds")
 dev.off()
+
+#-----------------------------------------------------------------------------
+#day 29.12.21 to 01.01.22 were when the 2 subgroups were not together
+
+g3 <- ggplot(data = test, aes(x = Time, 
+                        y = subgroup_mod, 
+                        color = id, 
+                        group = id)) +
+  scale_x_datetime(limits=c(as.POSIXct("2021-12-29 11:00:00"), as.POSIXct("2022-01-01 23:00:00"))) +
+  scale_color_manual(name="Coati ID", 
+                     labels=c("Quasar", "Luna", "Cometa", "Estrella", "Venus", "Lucero", "Gus", "Orbita", "Planeta", "Saturno", "Pluto"), values = c("#fcfdbf", "#fecf92", "#fe9f6d", "#f7705c", "#de4968", "#b73779", "#8c2981", "#641a80", "#3b0f70", "#140e36", "#000004")) +
+  geom_point() +
+  geom_line(aes(group = id)) +
+  theme_classic()
+
+saveRDS(g3, file = paste0(plot_dir,"sub_groupings_over_time_50m_Dec29th_Jan1st.rds"))
+readRDS(file = "C:/Users/egrout/Dropbox/coatithon/results/sub_groupings_over_time_50m_Dec29th_Jan1st.rds")
+
+png(height = 500, width = 800, units = 'px', filename = paste0(plot_dir,'subgroup_4days.png'))
+g3
+dev.off()
+
+
+
 
 #---------------------------------------------------------------------
 #now adding grey areas for night time
@@ -136,9 +163,10 @@ colnames(daynight)[colnames(daynight) == 'X1.17'] <- 'rect_id'
 library(ggthemes)
 #final plot:
 
-#png(height = 800, width = 1600, units = 'px', filename = paste0(plot_dir,'sub_groupings_over_time_50m.png'))
+#png(height = 800, width = 1600, units = 'px', filename = paste0(plot_dir,'sub_groupings_over_time_50m_2.png'))
 
 
+#g1 <- 
 ggplot(data = test, aes(x = Time, 
                         y = subgroup_mod, 
                         color = id, 
@@ -158,10 +186,13 @@ ggplot(data = test, aes(x = Time,
                              color = id, 
                              group = id)) +
   scale_y_continuous("Sub-group number", limits = c( 0, 6 ), breaks = 0:5) +
-  theme(panel.background = element_rect(fill = 'snow2'), 
-        panel.grid.major = element_line(color = 'snow2'),  
-        panel.grid.minor = element_line(color = 'snow2', size = 2)) 
+  theme(panel.background = element_rect(fill = 'snow3'), #changed colour to snow2 for the recursion markdown
+        panel.grid.major = element_line(color = 'snow3'),  
+        panel.grid.minor = element_line(color = 'snow3', size = 2)) 
 
+#saveRDS(g1, file = paste0(plot_dir,"sub_groupings_over_time_50m_2.rds"))
+
+#readRDS(file = "C:/Users/egrout/Dropbox/coatithon/results/sub_groupings_over_time_50m_2.rds")
 
 #dev.off()
 
