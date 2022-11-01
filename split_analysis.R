@@ -161,7 +161,35 @@ splits_df$n_sub1 <- sapply(splits_df$sub1, function(x){return(sum(!is.na(x)))})
 splits_df$n_sub2 <- sapply(splits_df$sub2, function(x){return(sum(!is.na(x)))})
 splits_df$n_sub3 <- sapply(splits_df$sub3, function(x){return(sum(!is.na(x)))})
 
+#DONE WITH DATAFRAME!
 
-
+#COMPUTE METRIC OF P(STAY TOGETHER | originally together) for each dyad
+p_dyad_together <- array(NA, dim = c(n_inds,n_inds))
+#loop over dyads
+for(i in 1:(n_inds-1)){
+  for(j in (i+1):n_inds){
+    
+    #find rows where they were both in the original group
+    originally_together_rows <- which(unlist(lapply(splits_df$orig_group, FUN = function(x){return(i %in% x & j %in% x)})))
+    
+    #how many times do they end up in the same group
+    still_together <- 0
+    for(r in originally_together_rows){
+      if(i %in% splits_df$sub1[r][[1]] & j%in% splits_df$sub1[r][[1]]){
+        still_together <- still_together + 1
+      }
+      if(i %in% splits_df$sub2[r][[1]] & j %in% splits_df$sub2[r][[1]]){
+        still_together <- still_together + 1
+      }
+      if(i %in% splits_df$sub3[r][[1]] & j %in% splits_df$sub3[r][[1]]){
+        still_together <- still_together + 1
+      }
+      
+    }
+    
+    p_dyad_together[i,j] <- still_together / length(originally_together_rows)
+    
+  }
+}
 
 
