@@ -63,32 +63,26 @@ subgroup_data <- get_subgroup_data(xs, ys, 50)
 splits <- c()
 for(t in 1:(n_times-1)){
   
-  #get number of subgroups now and in next time step (later)
-  n_subgroups_now <- subgroup_data$n_subgroups[t]
-  n_subgroups_later <- subgroup_data$n_subgroups[t+1]
+  #get subgroup membership now and later
+  subgroups_now <- subgroup_data$ind_subgroup_membership[,t]
+  subgroups_later <- subgroup_data$ind_subgroup_membership[,t+1]
   
-  #number of individuals in each subgroup now
-  subgroup_counts_now <- subgroup_data$subgroup_counts[,t]
-  subgroup_counts_later <- subgroup_data$subgroup_counts[,t+1]
+  #if we have a time of completely nas, pass
+  if(sum(!is.na(subgroups_now))==0 | sum(!is.na(subgroups_later))==0){
+    next
+  }
+  
+  #transfer NAs from now to later and later to now
+  subgroups_now[which(is.na(subgroups_later))] <- NA
+  subgroups_later[which(is.na(subgroups_now))] <- NA
+  
+  #get number of subgroups now and in next time step (later)
+  n_subgroups_now <- length(unique(subgroups_now[!is.na(subgroups_now)]))
+  n_subgroups_later <- length(unique(subgroups_later[!is.na(subgroups_later)]))
   
   #get number of singleton groups now and later
-  singletons_now <- sum(subgroup_counts_now==1, na.rm=T)
-  singletons_later <- sum(subgroup_counts_later==1, na.rm=T)
-  
-  #individuals tracked now and later
-  tracked_now <- !is.na(xs[,t])
-  tracked_later <- !is.na(xs[,t+1])
-  
-  #if any individuals were tracked now and not later or vice versa, pass
-  if(sum(tracked_now != tracked_later)>0){
-    next
-  }
-  
-  
-  #if anything is an NA, pass
-  if(is.na(n_subgroups_now) | is.na(n_subgroups_later)){
-    next
-  }
+  singletons_now <- sum(table(subgroups_now)==1)
+  singletons_later <- sum(table(subgroups_later)==1)
   
   #determine if this time step is a split
   #if we have one group that goes to more than one, and there are no singletons subsequently, then it's a split
