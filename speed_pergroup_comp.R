@@ -16,6 +16,8 @@ id_file <- 'coati_ids.RData'
 
 library(fields)
 library(viridis)
+library(dplyr)
+library(hms) 
 
 #read in library of functions
 setwd(code_dir)
@@ -47,7 +49,10 @@ subgroup_data <- get_subgroup_data(xs, ys, R)
 
 #make a dataframe with time and individual
 
-speed_df <- data.frame(t = rep(1:(n_times-1), n_inds), UTC_time = rep(ts[1:(n_times-1)], n_inds) ,ind = rep(1:n_inds, each = (n_times-1)), n_tracked = rep(n_tracked[1:(n_times-1)], n_inds), subgroup_size = NA, split = NA, speed = NA)
+speed_df <- data.frame(t = rep(1:(n_times-1), n_inds), UTC_time = rep(ts[1:(n_times-1)], n_inds) ,ind = rep(1:n_inds, each = (n_times-1)), n_tracked = rep(n_tracked[1:(n_times-1)], n_inds), subgroup_size = NA, split = NA, speed = NA, context = NA)
+
+
+
 
 #loop through to calculate subgroup size, whether there is a split, and ind speed
 i=1
@@ -93,12 +98,38 @@ for (i in 1:nrow(speed_df)){
   dx <- ind_xs_next - ind_xs_current
   dy <- ind_ys_next - ind_ys_current
   
-  #getting 
+  #getting speed
   speed <- (sqrt((dx)^2 + (dy)^2))/dt
   
   speed_df$speed[i] <- speed
   
+  #adding context: alone, split or group together
+  if(subgroup_size == 1){
+   speed_df$context[i] <-  "alone"
+  }
+  
+  if(split == TRUE & subgroup_size > 1){
+    speed_df$context[i] <- "split"
+  }
+  
+  if(split == FALSE & subgroup_size > 1){
+    speed_df$context[i] <- "together"
+  }
+  
+  
 }
+
+
+#filter to just day (remove weird speed values for overnight)
+speed_days <- speed_df
+speed_days$time_only <- format(speed_days$UTC_time, format = "%H:%M:%S")
+speed_days$time_only<- as_hms(speed_days$time_only)
+speed_days <- speed_days %>%  filter(time_only > as_hms("11:30:00") & time_only < as_hms("22:30:00")) 
+
+#histogram of speeds
+hist(speed_days$speed)
+
+
 
 
 
