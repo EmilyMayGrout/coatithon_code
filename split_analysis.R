@@ -188,7 +188,19 @@ abline(v=consistency_data, col = 'red')
 
 #should look into repeatability of binary data - to see if there is a better metric for getting consistency values from binary data
 
+#symmetrize matrix - copy entries from p_dyad_together[i,j] to p_dyad_together[j,i]
+for(i in 1:(n_inds-1)){
+  for(j in (i+1):n_inds){
+    p_dyad_together[j,i] <- p_dyad_together[i,j]
+  }
+}
 
 
+diag(p_dyad_together) <- NA
+new_order <- c(1,11,4,10,2,3,6,7,8,9,5)
+p_dyad_together_reorder <- p_dyad_together[new_order, new_order]
 
+visualize_network_matrix(p_dyad_together_reorder, coati_ids[new_order,])
+
+image.plot(p_dyad_together)
 

@@ -353,3 +353,14 @@ g2 + stat_summary(fun = median,
                  geom = "line",
                  aes(group = 1),
                  col = "red")
+
+
+#plot number of subgroups over time
+
+plot(ts, subgroup_data$n_subgroups, type = 'l')
+
+
+
+
+
+
