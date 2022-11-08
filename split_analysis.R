@@ -1,5 +1,7 @@
 #analyse split events
 
+#NOTE: this code only works for up to 3 subgroups per split
+#TODO: if more than 3 subgroups present, need to generalize
 
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
@@ -111,7 +113,7 @@ for(t in 1:(n_times-1)){
 }
 
 #make a data frame of splits, with original group and subgroups
-splits_df <- data.frame(t = splits, orig_group=NULL, sub1=NULL, sub2=NULL, sub3=NULL, sub4=NULL, sub5=NULL)
+splits_df <- data.frame(t = splits, orig_group=NA, sub1=NA, sub2=NA, sub3=NA, sub4=NA, sub5=NA)
 for(i in 1:nrow(splits_df)){
   t <- splits_df$t[i]
   subgroups_now <- subgroup_data$ind_subgroup_membership[,t]
@@ -163,33 +165,30 @@ splits_df$n_sub3 <- sapply(splits_df$sub3, function(x){return(sum(!is.na(x)))})
 
 #DONE WITH DATAFRAME!
 
-#COMPUTE METRIC OF P(STAY TOGETHER | originally together) for each dyad
-p_dyad_together <- array(NA, dim = c(n_inds,n_inds))
-#loop over dyads
-for(i in 1:(n_inds-1)){
-  for(j in (i+1):n_inds){
-    
-    #find rows where they were both in the original group
-    originally_together_rows <- which(unlist(lapply(splits_df$orig_group, FUN = function(x){return(i %in% x & j %in% x)})))
-    
-    #how many times do they end up in the same group
-    still_together <- 0
-    for(r in originally_together_rows){
-      if(i %in% splits_df$sub1[r][[1]] & j%in% splits_df$sub1[r][[1]]){
-        still_together <- still_together + 1
-      }
-      if(i %in% splits_df$sub2[r][[1]] & j %in% splits_df$sub2[r][[1]]){
-        still_together <- still_together + 1
-      }
-      if(i %in% splits_df$sub3[r][[1]] & j %in% splits_df$sub3[r][[1]]){
-        still_together <- still_together + 1
-      }
-      
-    }
-    
-    p_dyad_together[i,j] <- still_together / length(originally_together_rows)
-    
-  }
+p_dyad_together <- get_p_dyad_together(splits_df_local = splits_df, n_inds_local = n_inds)
+
+#Compute consistency based on consistency metric (see coati_function_library)
+consistency_data <- get_consistency(p_dyad_together)
+
+#randomize splits and recompute consistency metric
+n_rands <- 1000
+rando_consistencies <- rep(NA, n_rands)
+for (i in 1:n_rands){
+
+  rando <- randomise_splits(splits_df)
+  rando_dyad <- get_p_dyad_together(splits_df_local = rando, n_inds_local = n_inds)
+  consist <- get_consistency(rando_dyad)
+  rando_consistencies[i] <- consist
+
 }
+
+hist(rando_consistencies, breaks=seq(0,0.5,0.005))
+abline(v=consistency_data, col = 'red')
+#this graph shows that the mean consistency of individuals splitting with others is more likely than randomly assigning individuals into sub-groups
+
+#should look into repeatability of binary data - to see if there is a better metric for getting consistency values from binary data
+
+
+
 
 

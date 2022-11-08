@@ -294,3 +294,62 @@ dev.off()
 plot(subgroup_data$n_subgroups, xlim = c(0, 1633))
 
 
+
+#-------------------------------------------------------------------
+#Plotting the mean sub-group size for each hour for all individuals
+
+#get mean group size for each timepoint - so need to get the total number of individuals divided by the number of groups
+
+sub_counts <- as.data.frame(t(subgroup_data$subgroup_counts))
+colnames(sub_counts) <- c("sub1", "sub2", "sub3", "sub4", "sub5")
+n_groups <- as.data.frame(subgroup_data$n_subgroups)
+#combine to make dataframe with the number of individuals in each sub group and the number of subgroups
+n_subs <- cbind(sub_counts, n_groups)
+colnames(n_subs)[colnames(n_subs) == 'subgroup_data$n_subgroups'] <- 'n_groups'
+#adding time to n_subs
+n_subs <- cbind(n_subs, ts)
+
+#get the hour
+n_subs$hour <- hour(n_subs$ts)
+
+#get total number of individuals
+n_subs$n_inds <- n_tracked
+
+#calculate the mean group size
+n_subs$mean_group_size <- NA
+
+n_subs$mean_group_size <- (n_subs$n_inds/n_subs$n_groups)
+
+#change hour to Panama time
+n_subs$panama_time <- n_subs$hour-5
+n_subs$date <- as.Date(n_subs$ts)
+
+#save n_subs as an RData object
+#save(n_subs, file = "C:/Users/egrout/Dropbox/stats_Franzi/data/n_subs.Rdata")
+
+library("vioplot")
+#now plotting mean group size for each hour of the day
+png(height = 500, width = 800, units = 'px', filename = paste0(plot_dir, "mean_group_size_violin.png"))
+vioplot(n_subs$mean_group_size ~ n_subs$panama_time,  xlab = "panama time", ylab = "mean subgroup size", col = "cyan3")
+dev.off()
+
+
+
+#subsetting to smaller date range
+n_subs_subset <- n_subs %>%  filter(date > as.Date("2021-12-25") & date < as.Date("2022-01-10"))
+#looking at mean group size per day 
+g1 <- ggplot(data=n_subs_subset, aes(x=`hour`, y=mean_group_size, group = `hour`))+geom_boxplot()+ theme_classic() + facet_wrap(~date, ncol = 4)
+#png(height = 800, width = 800, units = 'px', filename = paste0(plot_dir, "mean_group_size.png"))
+g1 + stat_summary(fun = median,
+                  geom = "line",
+                  aes(group = 1),
+                  col = "red")
+#dev.off()
+
+#look at the number of groups
+g2 <- ggplot(data=n_subs_subset, aes(x=`hour`, y=n_groups, group = `hour`))+geom_boxplot()+ theme_classic() + facet_wrap(~date, ncol = 4)
+
+g2 + stat_summary(fun = median,
+                 geom = "line",
+                 aes(group = 1),
+                 col = "red")

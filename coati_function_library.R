@@ -226,6 +226,119 @@ get_proximity_data <- function(xs, ys, r_within){
 }
 
 
+#Randomise the splits and construct new randomized data frame
+#Keep original group the same, keep subgroup sizes the same, but randomize who goes to which subgroup
+#INPUTS:
+# splits_df: data frame with information about splits from real data
+#OUTPUTS:
+# splits_df_random: randomised version of splits data frame
+randomise_splits <- function(splits_df){
+  
+  #start with the splits_df data frame from the data
+  splits_df_rand <- splits_df
+  
+  #loop over each row and randomize who goes where
+  for (i in 1:nrow(splits_df_rand)){
+    
+    #get the original group and sizes of subgroups for one row
+    row <- splits_df[i,]
+    orig_group <- row$orig_group[[1]]
+    n_sub1 <- row$n_sub1
+    n_sub2 <- row$n_sub2
+    n_sub3 <- row$n_sub3
+    
+    #shuffle the original group to a random order
+    orig_group_shuffled <- sample(orig_group)
+    
+    #allocate them to groups
+    sub1 <- orig_group_shuffled[1:n_sub1]
+    sub2 <- orig_group_shuffled[(length(sub1)+1):(length(sub1)+n_sub2)]
+    
+    splits_df_rand$sub1[i] <- list(sub1)
+    splits_df_rand$sub2[i] <- list(sub2)
+    
+    if(n_sub3 > 0){
+      sub3 <- orig_group_shuffled[(length(sub1)+length(sub2)+1):(n_sub1+n_sub2+n_sub3)]
+      splits_df_rand$sub3[i] <- list(sub3)
+    }
+    
+  }
+  
+  return(splits_df_rand)
+  
+}
+
+#Helper function for get_consistency
+#Returns q if q <= 0.5 and 1-q if q > 0.5
+dist_to_0_or_1 <- function(q){
+  
+  if(is.na(q)){
+    return(NA)
+  }
+  if(q > 0.5) {return(1-q)
+   }else{return(q)}
+  
+}
+
+#Compute our metric of consistency, C
+#Let q_dyad = p_dyad_together
+#m_dyad = 1-q_dyad if q_dyad > 0.5 or = q_dyad if q_dyad < 0.5 (so it's the distance to 0 or 1, whichever is closer)
+#C = 1 - 2*mean(m_dyad)
+#At the end, C is a measure of consistency where C = 0 if all q_dyad are at 0.5 and C = 1 if all q_dyad are either 0 or 1
+#Why do we multiply by 2 and subtract from 1? The multiplying by 2 puts the number between 0 and 1 instead of between 0 and 0.5. The 1 minus makes it be consistency instead of inconsistency
+#INPUTS:
+# p_dyad_together: [matrix] of probabilities of splitting together given you were both in the original group
+#OUTPUTS:
+# C: [numeric] metric of consistency
+get_consistency <- function(p_dyad_together){
+  
+  m_dyad <- sapply(p_dyad_together, FUN = dist_to_0_or_1)
+  C <- 1 - 2*mean(m_dyad, na.rm=T)
+  return(C)
+}
+
+#function that takes in a splits dataframe and outputs a p_dyad_together matrix (probability of splitting together for each dyad)
+#INPUTS:
+# splits_df_local: [data frame] containing information on group splits
+# n_inds_local: [numeric] number of individuals in the full group
+#OUTPUTS:
+# p_dyad_together_local: [matrix n_inds_local x n_inds_local]: probability of being together in a split, given you were both in the original group 
+get_p_dyad_together <- function(splits_df_local, n_inds_local){
+  
+  #COMPUTE METRIC OF P(STAY TOGETHER | originally together) for each dyad
+  p_dyad_together_local <- array(NA, dim = c(n_inds_local,n_inds_local))
+  #loop over dyads
+  for(i in 1:(n_inds_local-1)){
+    for(j in (i+1):n_inds_local){
+      
+      #find rows where they were both in the original group
+      originally_together_rows <- which(unlist(lapply(splits_df_local$orig_group, FUN = function(x){return(i %in% x & j %in% x)})))
+      
+      #how many times do they end up in the same group
+      still_together <- 0
+      for(r in originally_together_rows){
+        if(i %in% splits_df_local$sub1[r][[1]] & j%in% splits_df_local$sub1[r][[1]]){
+          still_together <- still_together + 1
+        }
+        if(i %in% splits_df_local$sub2[r][[1]] & j %in% splits_df_local$sub2[r][[1]]){
+          still_together <- still_together + 1
+        }
+        if(i %in% splits_df_local$sub3[r][[1]] & j %in% splits_df_local$sub3[r][[1]]){
+          still_together <- still_together + 1
+        }
+        
+      }
+      
+      p_dyad_together_local[i,j] <- still_together / length(originally_together_rows)
+      
+    }
+  }
+  return(p_dyad_together_local)
+  
+}
 
 
 
+
+
+ 
