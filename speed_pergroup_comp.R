@@ -3,6 +3,7 @@
 #---PARAMS----
 R <- 50
 dt <- 10 #time interval between points (=10 for coati low res). 10 is metres per minute.
+min_tracked <- 7 #minimum number of individuals tracked to include in analysis (=7)
 
 #---DIRECTORIES----
 
@@ -18,6 +19,8 @@ library(fields)
 library(viridis)
 library(dplyr)
 library(hms) 
+library(ggplot2)
+library(vioplot)
 
 #read in library of functions
 setwd(code_dir)
@@ -49,7 +52,7 @@ subgroup_data <- get_subgroup_data(xs, ys, R)
 
 #make a dataframe with time and individual
 
-speed_df <- data.frame(t = rep(1:(n_times-1), n_inds), UTC_time = rep(ts[1:(n_times-1)], n_inds) ,ind = rep(1:n_inds, each = (n_times-1)), n_tracked = rep(n_tracked[1:(n_times-1)], n_inds), subgroup_size = NA, split = NA, speed = NA, context = NA)
+speed_df <- data.frame(t = rep(1:(n_times-1), n_inds), UTC_time = rep(ts[1:(n_times-1)], n_inds) ,ind = rep(1:n_inds, each = (n_times-1)), n_tracked = rep(n_tracked[1:(n_times-1)], n_inds), subgroup_size = NA, split = NA, speed = NA, context = NA, name = rep(coati_ids$name, each = n_times-1))
 
 
 
@@ -126,13 +129,23 @@ speed_days$time_only <- format(speed_days$UTC_time, format = "%H:%M:%S")
 speed_days$time_only<- as_hms(speed_days$time_only)
 speed_days <- speed_days %>%  filter(time_only > as_hms("11:30:00") & time_only < as_hms("22:30:00")) 
 
+#remove NA's (when individual was not tracked) or when too few individuals were tracked
+speed_days <- speed_days %>%  filter(n_tracked > min_tracked)
+speed_days <- speed_days %>% filter(!is.na(speed))
+
+
 #histogram of speeds
 hist(speed_days$speed)
 
+#plot speeds for each context
+
+vioplot(log(speed_days$speed) ~ speed_days$context)
 
 
-
-
+ggplot(speed_days, aes(x = context, y = speed)) + 
+  geom_violin() +facet_wrap(~name)
+#TODO: add number of data points for each of the contexts for each individual
+#TODO: look at this depending on the subgroup size
 
 
 
