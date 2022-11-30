@@ -194,7 +194,7 @@ for(i in 1:n_inds){
 }
 
 diag(ff_net) <- NA
-new_order <- c(1,11,4,10,2, 3,6,7,8,9,5)
+new_order <- c(5,1,11,4,10,2, 3,6,7,8,9)
 ffnet_reorder <- ff_net[new_order, new_order]
 
 
@@ -231,7 +231,7 @@ subset_y <- ys[, full_group_index]
 within_group_data <- get_proximity_data(subset_x, subset_y, 10)
 
 
-new_order <- c(1,11,4,10,2,3,6,7,8,9,5)
+new_order <- c(5,1,11,4,10,2,3,6,7,8,9)
 
 png(height = 400, width = 400, units = 'px', filename = paste0(plot_dir,'withingroup_network_withgus.png'))
 visualize_network_matrix(within_group_data$proximity_net, coati_ids[new_order,])

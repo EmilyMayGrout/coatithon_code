@@ -1,4 +1,4 @@
-# this script is to make a plot with subgroup size and seed of travel
+# this script is to make a plot with subgroup size and speed of travel
 
 library(move)
 library(data.table)

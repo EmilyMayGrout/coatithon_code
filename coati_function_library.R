@@ -38,7 +38,7 @@ latlon.to.utm <- function(LonsLats,EastingsCol1 = TRUE,utm.zone='34',southern_he
   }
 }
 
-#Converts a matrix of eastings and northings (eastings first column, northings second column) to UTM
+#Converts a matrix of eastings and northings (eastings first column, northings second column) to latlong
 #Inputs:
 #	EastNorths: [N x 2 matrix] of eastings (col 1) and northings (col2)
 #	utm.zone: [numeric or string], by default 34 (this is where the KRR is)
@@ -158,13 +158,16 @@ visualize_network_matrix <- function(net, coati_ids){
   
   zmin <- min(net, na.rm=T)
   zmax <- max(net, na.rm=T)
-  image.plot(net, col = viridis(256), zlim=c(zmin,zmax), xaxt= 'n', yaxt = 'n')
-  axis(1, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2)
-  axis(2, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2)
+  image.plot(net, col = viridis(256), zlim=c(zmin,zmax), xaxt= 'n', yaxt = 'n', legend.cex = 5, legend.width = 2, axis.args=list(cex.axis=1))
+  axis(1, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2, cex.axis=1)
+  axis(2, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2,  cex.axis=1)
   
   points(rep(-.08, nrow(net)),seq(0,1,length.out=n_inds),col=coati_ids$color, xpd = T, pch = 19)
   points(seq(0,1,length.out=nrow(net)),rep(-.08,n_inds),col=coati_ids$color, xpd = T, pch = 19)
 }
+
+#changed the size of the labels with cex.axis = 1.5, default is 1
+#also changed the size of the legend axis values with: axis.args=list(cex.axis=2), remove if want default
 
 
 #Function for getting distance between individuals over time

@@ -142,14 +142,42 @@ hist(speed_days$speed)
 vioplot(log(speed_days$speed) ~ speed_days$context)
 
 
-ggplot(speed_days, aes(x = context, y = speed)) + 
-  geom_violin() +facet_wrap(~name)
+png(height = 600, width = 900, units = 'px', filename = paste0(plot_dir,'speeds_in_subgroups_all.png'))
+
+ggplot(speed_days, aes(x = context, y = speed, fill = context)) + 
+  geom_violin() +theme_classic()+
+  scale_fill_manual(values=c("darkslategray2","darkslategray3", "darkslategray4"))+
+  theme(axis.text=element_text(size=20),
+        axis.title=element_text(size=24),
+        legend.title = element_text(size=24),
+        legend.text = element_text(size=20), 
+        strip.text = element_text(size = 20)) + 
+  stat_summary(fun.data = give.n, geom = "text", cex = 6, position = position_nudge(x=0.2, y = 5))+ 
+  ylim(0, 30)
+
+
+dev.off()
+#facet_wrap(~name)
+
+#+facet_wrap(~name)
 #TODO: add number of data points for each of the contexts for each individual
 #TODO: look at this depending on the subgroup size
 
 
+png(height = 1200, width = 1500, units = 'px', filename = paste0(plot_dir,'speeds_in_subgroups_perind.png'))
 
+ggplot(speed_days, aes(x = context, y = speed, fill = context)) + 
+  geom_violin() +theme_classic()+
+  scale_fill_manual(values=c("darkslategray2","darkslategray3", "darkslategray4"))+
+  theme(axis.text=element_text(size=20),
+        axis.title=element_text(size=24),
+        legend.title = element_text(size=24),
+        legend.text = element_text(size=20), 
+        strip.text = element_text(size = 20)) + 
+  stat_summary(fun.data = give.n, geom = "text", cex = 6, position = position_nudge(x=0.25, y = 5))+ 
+  ylim(0, 25)+ facet_wrap(~name)
 
+dev.off()
 
 
 

@@ -72,17 +72,17 @@ test <- left_join(test, time_df)
 
 library(dplyr)
 test$subgroup_mod <- case_when(
-  test$`coati_ids$name` == 1  ~ test$`sub-group` -0.25,
-  test$`coati_ids$name` == 2  ~ test$`sub-group` -0.20,
-  test$`coati_ids$name` == 3  ~ test$`sub-group` -0.15,
-  test$`coati_ids$name` == 4  ~ test$`sub-group` -0.10,
-  test$`coati_ids$name` == 5  ~ test$`sub-group` -0.05,
+  test$`coati_ids$name` == 1  ~ test$`sub-group` -0.32,
+  test$`coati_ids$name` == 2  ~ test$`sub-group` -0.24,
+  test$`coati_ids$name` == 3  ~ test$`sub-group` -0.18,
+  test$`coati_ids$name` == 4  ~ test$`sub-group` -0.12,
+  test$`coati_ids$name` == 5  ~ test$`sub-group` -0.06,
   test$`coati_ids$name` == 6  ~ test$`sub-group`+ 0.0,
-  test$`coati_ids$name` == 7  ~ test$`sub-group`+ 0.05,
-  test$`coati_ids$name` == 8  ~ test$`sub-group`+ 0.10,
-  test$`coati_ids$name` == 9  ~ test$`sub-group`+ 0.15,
-  test$`coati_ids$name` == 10  ~ test$`sub-group`+ 0.20,
-  test$`coati_ids$name` == 11  ~ test$`sub-group`+ 0.25
+  test$`coati_ids$name` == 7  ~ test$`sub-group`+ 0.06,
+  test$`coati_ids$name` == 8  ~ test$`sub-group`+ 0.12,
+  test$`coati_ids$name` == 9  ~ test$`sub-group`+ 0.18,
+  test$`coati_ids$name` == 10  ~ test$`sub-group`+ 0.24,
+  test$`coati_ids$name` == 11  ~ test$`sub-group`+ 0.33
   
 )
 
@@ -104,7 +104,7 @@ test$hours <- as_hms(test$Time)
 # plot subgroup changes
 #this is for the 6th of Jan, need to find a better way of subsetting
 
-png(height = 400, width = 800, units = 'px', filename = paste0(plot_dir,'sub_groupings_over_time_50m_Jan6th.png'))
+#png(height = 400, width = 800, units = 'px', filename = paste0(plot_dir,'sub_groupings_over_time_50m_Jan6th.png'))
 #g2 <- 
 ggplot(data = test, aes(x = Time, 
                         y = subgroup_mod, 
@@ -148,12 +148,15 @@ dev.off()
 #---------------------------------------------------------------------
 #now adding grey areas for night time
 
+#change time to Panama time
+test$Panama_time <- with_tz(test$Time, tzone = "America/Panama")
+
 #need to make separate dataframe for day and night times then add it in to geom_rect, calling the different dataframe for each geom
-firstday <- as.POSIXct('2021-12-24 11:00', tz = 'UTC')
-lastday <-  as.POSIXct('2022-01-13 23:00', tz = 'UTC')
+firstday <- as.POSIXct('2021-12-24 06:00', tz = 'America/Panama')
+lastday <-  as.POSIXct('2022-01-13 18:00', tz = 'America/Panama')
 xmax <- seq.POSIXt(from = firstday, to = lastday,  by = 'day')
-firstnight <- as.POSIXct('2021-12-24 23:00', tz = 'UTC')
-lastnight <-  as.POSIXct('2022-01-13 23:00', tz = 'UTC')
+firstnight <- as.POSIXct('2021-12-24 18:00', tz = 'America/Panama')
+lastnight <-  as.POSIXct('2022-01-13 18:00', tz = 'America/Panama')
 xmin <- seq.POSIXt(from = firstnight, to = lastnight,  by = 'day')
 ymin = 0
 ymax = 6
@@ -163,11 +166,12 @@ colnames(daynight)[colnames(daynight) == 'X1.17'] <- 'rect_id'
 library(ggthemes)
 #final plot:
 
-#png(height = 800, width = 1600, units = 'px', filename = paste0(plot_dir,'sub_groupings_over_time_50m_2.png'))
+
+png(height = 600, width = 2000, units = 'px', filename = paste0(plot_dir,'sub_groupings_over_time_50m_4.png'))
 
 
 #g1 <- 
-ggplot(data = test, aes(x = Time, 
+ggplot(data = test, aes(x = Panama_time, 
                         y = subgroup_mod, 
                         color = id, 
                         group = id)) +
@@ -177,22 +181,77 @@ ggplot(data = test, aes(x = Time,
             aes(xmin = xmax, xmax = xmin, ymin = ymin, ymax = ymax), 
             inherit.aes = FALSE, fill = "white") +
   
-  geom_point(data = test, aes(x = Time, 
+  geom_point(data = test, aes(x = Panama_time, 
                               y = subgroup_mod, 
                               color = id, 
-                              group = id), size = 1.8) +
-  geom_line(data = test, aes(x = Time, 
+                              group = id), size = 1.9) +
+  geom_line(data = test, aes(x = Panama_time, 
                              y = subgroup_mod, 
                              color = id, 
                              group = id)) +
-  scale_y_continuous("Sub-group number", limits = c( 0, 6 ), breaks = 0:5) +
-  theme(panel.background = element_rect(fill = 'snow3'), #changed colour to snow2 for the recursion markdown
-        panel.grid.major = element_line(color = 'snow3'),  
-        panel.grid.minor = element_line(color = 'snow3', size = 2)) 
-
+  scale_y_continuous("Sub-group number", limits = c(0, 6),expand=c(0,0), breaks = 0:5) +
+  theme(panel.background = element_rect(fill = 'azure3'), #changed colour to snow2 for the recursion markdown
+        panel.grid.major = element_line(color = 'azure3'),  
+        panel.grid.minor = element_line(color = 'azure3', size = 2)) +
+  scale_x_datetime(limits=c(as.POSIXct("2021-12-29 06:00:00"), as.POSIXct("2022-01-02 06:00:00"), tz = "America/Panama"), position = "top", date_breaks="1 day", expand=c(0,0)) +
+  xlab("Panama time") +
+  theme(axis.text=element_text(size=20),
+        axis.title=element_text(size=25),
+        legend.title = element_text(size=25),
+        legend.text = element_text(size=25), legend.key=element_rect(fill="white"))
 #saveRDS(g1, file = paste0(plot_dir,"sub_groupings_over_time_50m_2.rds"))
 
 #readRDS(file = "C:/Users/egrout/Dropbox/coatithon/results/sub_groupings_over_time_50m_2.rds")
 
-#dev.off()
+dev.off()
 
+
+#hist(test$`sub-group`, col = "azure3")
+
+
+
+
+
+
+
+#---------------------------------------------------------------
+#for 1 day with the same these as above graph
+
+
+test$hour <- as_hms(test$Panama_time)
+
+png(height = 600, width = 1200, units = 'px', filename = paste0(plot_dir,'sub_groupings_over_time_50m_2_1day.png'))
+
+ggplot(data = test, aes(x = Panama_time, 
+                        y = subgroup_mod, 
+                        color = id, 
+                        group = id)) +
+  scale_color_discrete(name="Coati ID", 
+                       labels=c("Quasar", "Luna", "Cometa", "Estrella", "Venus", "Lucero", "Gus", "Orbita", "Planeta", "Saturno", "Pluto")) +
+  geom_rect(data = daynight, 
+            aes(xmin = xmax, xmax = xmin, ymin = ymin, ymax = ymax), 
+            inherit.aes = FALSE, fill = "white") +
+  
+  geom_point(data = test, aes(x = Panama_time, 
+                              y = subgroup_mod, 
+                              color = id, 
+                              group = id), size = 1.9) +
+  geom_line(data = test, aes(x = Panama_time, 
+                             y = subgroup_mod, 
+                             color = id, 
+                             group = id)) +
+  scale_x_continuous(expand=c(0,0))+
+  scale_y_continuous("Sub-group number", limits = c(-0.1, 6),expand=c(0,-0.2), breaks = 0:5) +
+  theme(panel.background = element_rect(fill = 'azure3'), #changed colour to snow2 for the recursion markdown
+        panel.grid.major = element_line(color = 'azure3'),  
+        panel.grid.minor = element_line(color = 'azure3', size = 2))+
+  scale_x_datetime(limits=c(as.POSIXct("2022-01-05 11:00:00"), as.POSIXct("2022-01-06 01:00:00"), tz = "America/Panama"), position = "top", date_breaks="6 hour", expand=c(0,0)) +
+  xlab("Panama time") +
+  theme(axis.text=element_text(size=20),
+        axis.title=element_text(size=25),
+        legend.title = element_text(size=25),
+        legend.text = element_text(size=25), legend.key=element_rect(fill="white"))
+
+
+
+dev.off()

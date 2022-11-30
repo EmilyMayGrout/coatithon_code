@@ -7,7 +7,7 @@ data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/'
 gps_file <- "galaxy_xy_10min_level0.RData"
-id_file <- 'coati_ids.RData'
+id_file <- 'coati_ids.RData' 
 
 library(fields)
 library(viridis)
@@ -163,6 +163,8 @@ splits_df$n_sub1 <- sapply(splits_df$sub1, function(x){return(sum(!is.na(x)))})
 splits_df$n_sub2 <- sapply(splits_df$sub2, function(x){return(sum(!is.na(x)))})
 splits_df$n_sub3 <- sapply(splits_df$sub3, function(x){return(sum(!is.na(x)))})
 
+#save(splits_df, file = "C:/Users/egrout/Dropbox/coatithon/coatithon_code/splits_on_map/splits_df.Rdata")  
+
 #DONE WITH DATAFRAME!
 
 p_dyad_together <- get_p_dyad_together(splits_df_local = splits_df, n_inds_local = n_inds)
@@ -182,8 +184,13 @@ for (i in 1:n_rands){
 
 }
 
-hist(rando_consistencies, breaks=seq(0,0.5,0.005))
-abline(v=consistency_data, col = 'red')
+png(height = 600, width = 900, units = 'px', filename = paste0(plot_dir,'consistency_splits_hist.png'))
+par(mfrow=c(1,1), mar = c(6,6,3,3))#(bottom, left, top, right)
+hist(rando_consistencies, breaks=seq(0,0.5,0.005), main = "", xlab = "Consistency of random sub-group allocations", col = "slategray4",  cex.lab = 2.5, cex.axis=2.5)
+abline(v=consistency_data, col = 'orange2', lwd=4)
+dev.off()
+
+
 #this graph shows that the mean consistency of individuals splitting with others is more likely than randomly assigning individuals into sub-groups
 
 #should look into repeatability of binary data - to see if there is a better metric for getting consistency values from binary data
@@ -197,10 +204,12 @@ for(i in 1:(n_inds-1)){
 
 
 diag(p_dyad_together) <- NA
-new_order <- c(1,11,4,10,2,3,6,7,8,9,5)
+new_order <- c(5,1,11,4,10,2,3,6,7,8,9)
 p_dyad_together_reorder <- p_dyad_together[new_order, new_order]
 
+png(height = 400, width = 400, units = 'px', filename = paste0(plot_dir,'subgroup_network_splits.png'))
+par(mfrow=c(1,1), mar = c(1,2,1,1))#(bottom, left, top, right)
 visualize_network_matrix(p_dyad_together_reorder, coati_ids[new_order,])
-
-image.plot(p_dyad_together)
+dev.off()
+#image.plot(p_dyad_together)
 
