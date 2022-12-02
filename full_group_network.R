@@ -1,12 +1,27 @@
 #this script is to build a social network for the times when the group is together
 #need to find times when all individuals are together with and without singletons
 
-data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/"
-code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/'
+#------DIRECTORIES AND FILES------
+
+#EMILY DIRECTORIES
+#data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/"
+#code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
+#plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/'
+
+#ARI DIRECTORIES
+data_dir <- "/Users/Ari/Dropbox/coatithon/processed/2022/"
+code_dir <- '/Users/Ari/Dropbox/code_ari/coatithon_code/'
+plot_dir <- '/Users/Ari/Dropbox/coatithon/results/'
+
 gps_file <- "galaxy_xy_10min_level0.RData"
 id_file <- 'coati_ids.RData' 
 
+#-----PARAMETERS-----
+min_tracked <- 8 #the minimum number of individuals tracked at any point to consider a time point in this analysis
+R <- 50 # the radius used to define subgroups
+R_within <- 10 #the radius used to define subgroups within the larger group
+
+#-----LIBRARIES AND SOURCED FUNCTIONS-----
 library(fields)
 library(viridis)
 
@@ -30,14 +45,20 @@ n_inds <- nrow(xs)
 n_times <- ncol(xs)
 
 
+#get who is tracked at each time point
+tracked <- !is.na(xs)
+
 #number of individuals tracked at each time point
-n_tracked <- colSums(!is.na(xs))
+n_tracked <- colSums(tracked)
 
 #indexes to time points where all individuals were tracked
 all_tracked_idxs <- which(n_tracked==n_inds)
 
-#get the subgroup data when radius is 50m
-subgroup_data <- get_subgroup_data(xs, ys, 50)
+#get the subgroup data when radius is R (default 50m)
+subgroup_data <- get_subgroup_data(xs, ys, R)
+
+#also get the subgroup data for a smaller radius, R_within (default = 10)
+subgroup_data_within <- get_subgroup_data(xs, ys, R_within)
 
 #run through time by time and check if each time is when the group is together
 #want to ignore times when there are singletons
@@ -74,17 +95,18 @@ for(t in 1:(n_times-1)){
 #together is the indx of time points when the full group is together or when the full group is together and there's singletons
 
 
+#NOTE: I (Ari) removed this bit because you can just index in to the original matrices at the correct time indices (in other words it gets filtered in the loop below) 
 #filter the xs and ys to the indx of times when the group is together
-
-xs_fullgroup <- xs[1:11, together]
-ys_fullgroup <- ys[1:11, together]
-
-fullgroup_data <- get_subgroup_data(xs_fullgroup, ys_fullgroup, R=50)
-
-n_inds <- nrow(xs_fullgroup)
-n_times <- ncol(xs_fullgroup)
-
-ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
+# 
+# xs_fullgroup <- xs[1:11, together]
+# ys_fullgroup <- ys[1:11, together]
+# 
+# fullgroup_data <- get_subgroup_data(xs_fullgroup, ys_fullgroup, R=50)
+# 
+# n_inds <- nrow(xs_fullgroup)
+# n_times <- ncol(xs_fullgroup)
+# 
+# ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
 
 #going through each dyad and calculating fraction of time they are in the same subgroup (out of all time both are tracked)
 
@@ -93,14 +115,22 @@ j = 6
 for(i in 1:n_inds){
   for(j in 1:n_inds){
     
-    #need to omit times when i and j are not in the same group
-    if(fullgroup_data$ind_subgroup_membership[i,i]!= fullgroup_data$ind_subgroup_membership[j,j]){
-      next
-    }
+    #only time steps where:
+    #1) at least min_tracked individuals are tracked from the entire group
+    #2) i and j are both tracked 
+    #3) i and j are in the same subgroup (at a scale of R=50)
+    usable_times <- which(n_tracked >= min_tracked 
+                           & !is.na(subgroup_data$ind_subgroup_membership[i,]) 
+                           & !is.na(subgroup_data$ind_subgroup_membership[j,])
+                           & subgroup_data$ind_subgroup_membership[i,] == subgroup_data$ind_subgroup_membership[j,])
     
-    #getting subgroup id for individual i and j
-    sub_ids_i <- fullgroup_data$ind_subgroup_membership[i,]
-    sub_ids_j <- fullgroup_data$ind_subgroup_membership[j,]
+    #find the usable time steps where the group is also together
+    usable_times_together <- intersect(together, usable_times)
+    
+    #getting subgroup id for individual i and j, only at times when they were together and that are usable according to definition above
+    #Note that this uses the smaller radius, because we want to look at within-group structure
+    sub_ids_i <- subgroup_data_within$ind_subgroup_membership[i,usable_times_together]
+    sub_ids_j <- subgroup_data_within$ind_subgroup_membership[j,usable_times_together]
     
     #computing edge weight (fraction of time in same subgroup)
     ff_net[i,j] <- mean(sub_ids_i == sub_ids_j, na.rm=T)
