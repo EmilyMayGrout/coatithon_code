@@ -60,6 +60,8 @@ subgroup_data <- get_subgroup_data(xs, ys, R)
 
 #also get the subgroup data for a smaller radius, R_within (default = 10)
 subgroup_data_within <- get_subgroup_data(xs, ys, R_within)
+#subgroup_data_within <- get_subgroup_data(xs, ys, 30)
+
 
 #run through time by time and check if each time is when the group is together
 #want to ignore times when there are singletons
@@ -142,6 +144,7 @@ diag(ff_net) <- NA
 new_order <- c(5,1,11,4,10,2, 3,6,7,8,9)
 ffnet_reorder <- ff_net[new_order, new_order]
 
+par(mfrow=c(1,1), mar = c(4,4,1,1))
 visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
 
 
