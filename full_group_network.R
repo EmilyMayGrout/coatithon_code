@@ -102,6 +102,7 @@ for(i in 1:n_inds){
     sub_ids_i <- fullgroup_data$ind_subgroup_membership[i,]
     sub_ids_j <- fullgroup_data$ind_subgroup_membership[j,]
     
+    
     #computing edge weight (fraction of time in same subgroup)
     ff_net[i,j] <- mean(sub_ids_i == sub_ids_j, na.rm=T)
   }
