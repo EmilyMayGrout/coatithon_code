@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+#<<<<<<< HEAD
 #this script is to build a social network for the times when the group is together
 #need to find times when all individuals are together with and without singletons
 
@@ -128,7 +128,7 @@ visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
 
 
 
-=======
+#=======
 #this script is to build a social network for the times when the group is together
 #need to find times when all individuals are together with and without singletons
 
@@ -287,4 +287,4 @@ visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
 
 
 
->>>>>>> main
+#>>>>>>> main
