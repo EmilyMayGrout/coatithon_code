@@ -14,6 +14,7 @@ id_file <- 'coati_ids.RData'
 
 library(fields)
 library(viridis)
+library(hms)
 
 #read in library of functions
 setwd(code_dir)
@@ -192,3 +193,40 @@ visualize_network_matrix(p_dyad_together_reorder, coati_ids[new_order,])
 dev.off()
 #image.plot(p_dyad_together)
 
+
+
+#make plot for the number of individuals tracked over time
+n_tr <- as.data.frame(n_tracked) 
+n_tr <- cbind(n_tr, ts)
+hist(n_tracked)
+
+#get the hour
+n_tr$hour <- as_hms(n_tr$ts)
+
+#remove the times when no individuals are tracked
+no_zero <- n_tr[n_tr$n_tracked != 0,]
+
+plot(no_zero$hour, no_zero$n_tracked)
+
+
+png(height = 600, width = 800, units = 'px', filename = paste0(plot_dir,'hist_number_tracked.png'))
+par(mfrow=c(1,1), mar = c(6,8,6,6))#(bottom, left, top, right)
+hist(no_zero$n_tracked, breaks = 11, main = "", xlab = "Number of individuals tracked", ylab = "Frequency", col = "turquoise4", cex.lab = 2, cex.axis = 2)
+dev.off()
+
+
+#getting the number of NAs for each individual
+xs_df <- as.data.frame(xs)
+xs_df$nas <- sapply(1:nrow(xs_df), function(i) sum((xs_df[i,] %in% "NA")))
+
+nas <- xs_df$nas
+coati_ids$nas <- nas
+data <- 1633-nas
+
+png(height = 600, width = 800, units = 'px', filename = paste0(plot_dir,'number_tracked_perind.png'))
+par(mfrow=c(1,1), mar = c(10,10,10,10))
+barplot(data, col ='turquoise4', names.arg = coati_ids$name, las = 2, cex.axis = 2,cex.names = 2, cex.lab = 2)
+title(ylab = "Number of GPS points", line = 5, cex.lab=2)
+dev.off()
+  
+ 

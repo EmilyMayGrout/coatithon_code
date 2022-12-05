@@ -1,4 +1,5 @@
-#analyse split events
+#analyse split events'
+#get consistency metric
 
 #NOTE: this code only works for up to 3 subgroups per split
 #TODO: if more than 3 subgroups present, need to generalize

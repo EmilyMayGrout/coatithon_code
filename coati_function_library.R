@@ -158,7 +158,7 @@ visualize_network_matrix <- function(net, coati_ids){
   
   zmin <- min(net, na.rm=T)
   zmax <- max(net, na.rm=T)
-  image.plot(net, col = viridis(256), zlim=c(zmin,zmax), xaxt= 'n', yaxt = 'n', legend.cex = 5, legend.width = 2, axis.args=list(cex.axis=1))
+  image.plot(net, col = viridis(256), zlim=c(zmin,zmax), xaxt= 'n', yaxt = 'n', legend.cex = 5, legend.width = 1.3, axis.args=list(cex.axis=1))
   axis(1, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2, cex.axis=1)
   axis(2, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2,  cex.axis=1)
   

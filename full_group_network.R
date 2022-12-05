@@ -143,8 +143,9 @@ for(i in 1:n_inds){
 diag(ff_net) <- NA
 new_order <- c(5,1,11,4,10,2, 3,6,7,8,9)
 ffnet_reorder <- ff_net[new_order, new_order]
-
 par(mfrow=c(1,1), mar = c(4,4,1,1))
-visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
 
+png(height = 400, width = 400, units = 'px', filename = paste0(plot_dir,'subgroup_network_fullgroup.png'))
+visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
+dev.off()
 
