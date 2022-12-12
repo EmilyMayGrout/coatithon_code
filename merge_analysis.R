@@ -1,7 +1,4 @@
-#analyse split events
-#need to adapt this code to look at merge events
-#Ari said to swap (t and t+1) for (t and t-1)
-#I ran it with these changes but it doesn't seem to be correct, still need to play with it
+#analyse merge events (opposite to the code for getting split events)
 
 #NOTE: this code only works for up to 3 subgroups per split
 #TODO: if more than 3 subgroups present, need to generalize
@@ -46,69 +43,78 @@ all_tracked_idxs <- which(n_tracked==n_inds)
 subgroup_data <- get_subgroup_data(xs, ys, 50)
 
 
-#run through time by time and check if each time is a split
-splits <- c()
+#run through time by time and check if each time is a merge
+merge <- c()
+
 for(t in 1:(n_times-1)){
   
   #get subgroup membership now and previous
-  subgroups_now <- subgroup_data$ind_subgroup_membership[,t]
+  merge_group <- subgroup_data$ind_subgroup_membership[,t]
   subgroups_previously <- subgroup_data$ind_subgroup_membership[,t-1]
   
   #if we have a time of completely nas, pass
-  if(sum(!is.na(subgroups_now))==0 | sum(!is.na(subgroups_previously))==0){
+  if(sum(!is.na(merge_group))==0 | sum(!is.na(subgroups_previously))==0){
     next
   }
   
   #transfer NAs from now to later and later to now
-  subgroups_now[which(is.na(subgroups_previously))] <- NA
-  subgroups_previously[which(is.na(subgroups_now))] <- NA
+  merge_group[which(is.na(subgroups_previously))] <- NA
+  subgroups_previously[which(is.na(merge_group))] <- NA
   
   #get number of subgroups now and in next time step (later)
-  n_subgroups_now <- length(unique(subgroups_now[!is.na(subgroups_now)]))
+  n_merge_group <- length(unique(merge_group[!is.na(merge_group)]))
   n_subgroups_previously <- length(unique(subgroups_previously[!is.na(subgroups_previously)]))
   
   #get number of singleton groups now and later
-  singletons_now <- sum(table(subgroups_now)==1)
+  singletons_now <- sum(table(merge_group)==1)
   singletons_later <- sum(table(subgroups_previously)==1)
   
   #determine if this time step is a merge
   #if we have one group that goes to more than one, and there are no singletons subsequently, then it's a split
-  if(n_subgroups_now==1 
+  if(n_merge_group==1 
      & n_subgroups_previously >1
      & singletons_later==0
   ){
-    splits <- c(splits, t)
+    merge <- c(merge, t)
   }
   
   #if we have more than one group, but rest are singletons, and number of singletons doesn't change (so we don't have just one loner moving off), then it's a split
-  if(n_subgroups_now > 1 
-     & (singletons_now+1) == n_subgroups_now
-     & n_subgroups_previously > n_subgroups_now
+  if(n_merge_group > 1 
+     & (singletons_now + 1) == n_merge_group
+     & n_subgroups_previously > n_merge_group
      & singletons_now == singletons_later
   ){
-    splits <- c(splits, t)
+    merge <- c(merge, t)
   }
   
   
 }
 
-#make a data frame of splits, with original group and subgroups
-splits_df <- data.frame(t = splits, orig_group=NA, sub1=NA, sub2=NA, sub3=NA, sub4=NA, sub5=NA)
-for(i in 1:nrow(splits_df)){
-  t <- splits_df$t[i]
-  subgroups_now <- subgroup_data$ind_subgroup_membership[,t]
+#this seems to work
+
+
+
+
+#make a data frame of merges, with merged group and subgroups
+merge_df <- data.frame(t = merge, merge_group=NA, sub1=NA, sub2=NA, sub3=NA, sub4=NA, sub5=NA)
+
+
+i=5
+for(i in 1:nrow(merge_df)){
+  t <- merge_df$t[i]
+  merge_group <- subgroup_data$ind_subgroup_membership[,t]
   subgroups_previously <- subgroup_data$ind_subgroup_membership[,t-1]
   
   #transfer NAs from now to later and later to now
-  subgroups_now[which(is.na(subgroups_previously))] <- NA
-  subgroups_previously[which(is.na(subgroups_now))] <- NA
+  merge_group[which(is.na(subgroups_previously))] <- NA
+  subgroups_previously[which(is.na(merge_group))] <- NA
   
   #original group = largest subgroup (no singletons)
-  orig_subgroup_number <- mode(subgroups_now)
-  orig_subgroup_members <- which(subgroups_now == orig_subgroup_number)
+  orig_subgroup_number <- mode(merge_group)
+  orig_subgroup_members <- which(merge_group == orig_subgroup_number)
   
   #store original group membership in data frame
-  splits_df$orig_group[i] <- list(orig_subgroup_members)
+  merge_df$merge_group[i] <- list(orig_subgroup_members)
   
   #find the groups where the original members went
   group_ids_later <- unique(subgroups_previously[orig_subgroup_members])
@@ -120,113 +126,40 @@ for(i in 1:nrow(splits_df)){
     
     #really hacky shit to get R to put lists into a data frame :(
     if(j==1){
-      splits_df$sub1[i] <- list(orig_inds_in_group)
+      merge_df$sub1[i] <- list(orig_inds_in_group)
     }
     if(j==2){
-      splits_df$sub2[i] <- list(orig_inds_in_group)
+      merge_df$sub2[i] <- list(orig_inds_in_group)
     }
     if(j==3){
-      splits_df$sub3[i] <- list(orig_inds_in_group)
+      merge_df$sub3[i] <- list(orig_inds_in_group)
     }
     if(j==4){
-      splits_df$sub4[i] <- list(orig_inds_in_group)
+      merge_df$sub4[i] <- list(orig_inds_in_group)
     }
     if(j==5){
-      splits_df$sub5[i] <- list(orig_inds_in_group)
+      merge_df$sub5[i] <- list(orig_inds_in_group)
     }
   }
 }
 
 #number in each subgroup
-splits_df$n_orig <- sapply(splits_df$orig_group, function(x){return(sum(!is.na(x)))})
-splits_df$n_sub1 <- sapply(splits_df$sub1, function(x){return(sum(!is.na(x)))})
-splits_df$n_sub2 <- sapply(splits_df$sub2, function(x){return(sum(!is.na(x)))})
-splits_df$n_sub3 <- sapply(splits_df$sub3, function(x){return(sum(!is.na(x)))})
+merge_df$n_merge <- sapply(merge_df$merge_group, function(x){return(sum(!is.na(x)))})
+merge_df$n_sub1 <- sapply(merge_df$sub1, function(x){return(sum(!is.na(x)))})
+merge_df$n_sub2 <- sapply(merge_df$sub2, function(x){return(sum(!is.na(x)))})
+merge_df$n_sub3 <- sapply(merge_df$sub3, function(x){return(sum(!is.na(x)))})
 
-#save(splits_df, file = "C:/Users/egrout/Dropbox/coatithon/coatithon_code/splits_on_map/splits_df.Rdata")  
+save(merge_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/merge_on_map/merge_df.Rdata")  
 
 #DONE WITH DATAFRAME!
 
-p_dyad_together <- get_p_dyad_together(splits_df_local = splits_df, n_inds_local = n_inds)
-
-#Compute consistency based on consistency metric (see coati_function_library)
-consistency_data <- get_consistency(p_dyad_together)
-
-#randomize splits and recompute consistency metric
-n_rands <- 1000
-rando_consistencies <- rep(NA, n_rands)
-for (i in 1:n_rands){
-  
-  rando <- randomise_splits(splits_df)
-  rando_dyad <- get_p_dyad_together(splits_df_local = rando, n_inds_local = n_inds)
-  consist <- get_consistency(rando_dyad)
-  rando_consistencies[i] <- consist
-  
-}
-
-png(height = 600, width = 900, units = 'px', filename = paste0(plot_dir,'consistency_splits_hist.png'))
-par(mfrow=c(1,1), mar = c(6,6,3,3))#(bottom, left, top, right)
-hist(rando_consistencies, breaks=seq(0,0.5,0.005), main = "", xlab = "Consistency of random sub-group allocations", col = "slategray4",  cex.lab = 2.5, cex.axis=2.5)
-abline(v=consistency_data, col = 'orange2', lwd=4)
-dev.off()
-
-
-#this graph shows that the mean consistency of individuals splitting with others is more likely than randomly assigning individuals into sub-groups
-
-#should look into repeatability of binary data - to see if there is a better metric for getting consistency values from binary data
-
-#symmetrize matrix - copy entries from p_dyad_together[i,j] to p_dyad_together[j,i]
-for(i in 1:(n_inds-1)){
-  for(j in (i+1):n_inds){
-    p_dyad_together[j,i] <- p_dyad_together[i,j]
-  }
-}
-
-
-diag(p_dyad_together) <- NA
-new_order <- c(5,1,11,4,10,2,3,6,7,8,9)
-p_dyad_together_reorder <- p_dyad_together[new_order, new_order]
-
-png(height = 400, width = 400, units = 'px', filename = paste0(plot_dir,'subgroup_network_splits.png'))
-par(mfrow=c(1,1), mar = c(1,2,1,1))#(bottom, left, top, right)
-visualize_network_matrix(p_dyad_together_reorder, coati_ids[new_order,])
-dev.off()
-#image.plot(p_dyad_together)
 
 
 
-#make plot for the number of individuals tracked over time
-n_tr <- as.data.frame(n_tracked) 
-n_tr <- cbind(n_tr, ts)
-hist(n_tracked)
-
-#get the hour
-n_tr$hour <- as_hms(n_tr$ts)
-
-#remove the times when no individuals are tracked
-no_zero <- n_tr[n_tr$n_tracked != 0,]
-
-plot(no_zero$hour, no_zero$n_tracked)
 
 
-png(height = 600, width = 800, units = 'px', filename = paste0(plot_dir,'hist_number_tracked.png'))
-par(mfrow=c(1,1), mar = c(6,8,6,6))#(bottom, left, top, right)
-hist(no_zero$n_tracked, breaks = 11, main = "", xlab = "Number of individuals tracked", ylab = "Frequency", col = "turquoise4", cex.lab = 2, cex.axis = 2)
-dev.off()
 
 
-#getting the number of NAs for each individual
-xs_df <- as.data.frame(xs)
-xs_df$nas <- sapply(1:nrow(xs_df), function(i) sum((xs_df[i,] %in% "NA")))
 
-nas <- xs_df$nas
-coati_ids$nas <- nas
-data <- 1633-nas
 
-png(height = 600, width = 800, units = 'px', filename = paste0(plot_dir,'number_tracked_perind.png'))
-par(mfrow=c(1,1), mar = c(10,10,10,10))
-barplot(data, col ='turquoise4', names.arg = coati_ids$name, las = 2, cex.axis = 2,cex.names = 2, cex.lab = 2)
-title(ylab = "Number of GPS points", line = 5, cex.lab=2)
-dev.off()
-  
- 
+
