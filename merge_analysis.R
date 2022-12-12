@@ -156,6 +156,20 @@ save(merge_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/merge_on_map/
 
 
 
+#now look at time difference between merges and splits
+#open splits_df
+load("C:/Users/egrout/Dropbox/coatithon_notgithub/splits_on_map/splits_df.Rdata")
+
+#luckily the number of merges and split events is 29
+time_diff <- data.frame(splits_t = splits_df$t, merge_t = merge_df$t)
+time_diff$diff <- time_diff$merge - time_diff$splits_t
+time_diff$diff_time <- time_diff$diff*10
+
+png(file = "C:/Users/egrout/Dropbox/coatithon_notgithub/merge_on_map/split_duration_hist.png", width = 1000, height = 600, units = "px")
+
+par(mar=c(8, 8, 8, 8))
+hist(time_diff$diff_time, breaks = 40, xlab = "Time between splits and merges (mins)", col = "lightblue3", main = "", xaxp = round(c(min(time_diff$diff_time),max(time_diff$diff_time)+450, 50)), cex.lab = 2,cex.axis = 1.5)
+dev.off()
 
 
 
