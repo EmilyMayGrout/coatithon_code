@@ -149,11 +149,10 @@ merge_df$n_sub1 <- sapply(merge_df$sub1, function(x){return(sum(!is.na(x)))})
 merge_df$n_sub2 <- sapply(merge_df$sub2, function(x){return(sum(!is.na(x)))})
 merge_df$n_sub3 <- sapply(merge_df$sub3, function(x){return(sum(!is.na(x)))})
 
-save(merge_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/merge_on_map/merge_df.Rdata")  
+save(merge_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/merge_results/merge_df.Rdata")  
+
 
 #DONE WITH DATAFRAME!
-
-
 
 
 #now look at time difference between merges and splits
@@ -163,14 +162,49 @@ load("C:/Users/egrout/Dropbox/coatithon_notgithub/splits_on_map/splits_df.Rdata"
 #luckily the number of merges and split events is 29
 time_diff <- data.frame(splits_t = splits_df$t, merge_t = merge_df$t)
 time_diff$diff <- time_diff$merge - time_diff$splits_t
-time_diff$diff_time <- time_diff$diff*10
+time_diff$diff_time_hour <- (time_diff$diff*10)/60
+time_diff$diff_time_hour <-  format(round(time_diff$diff_time_hour, 1), nsmall = 1)
+time_diff$diff_time_hour <- as.numeric(time_diff$diff_time_hour)
 
-png(file = "C:/Users/egrout/Dropbox/coatithon_notgithub/merge_on_map/split_duration_hist.png", width = 1000, height = 600, units = "px")
+png(file = "C:/Users/egrout/Dropbox/coatithon_notgithub/merge_results/split_duration_hist.png", width = 1000, height = 600, units = "px")
 
 par(mar=c(8, 8, 8, 8))
-hist(time_diff$diff_time, breaks = 40, xlab = "Time between splits and merges (mins)", col = "lightblue3", main = "", xaxp = round(c(min(time_diff$diff_time),max(time_diff$diff_time)+450, 50)), cex.lab = 2,cex.axis = 1.5)
+hist(time_diff$diff_time_hour, breaks = 80, xlab = "Time between splits and merges (hours)", col = "lightblue3", main = "", cex.lab = 2,cex.axis = 1.5)
 dev.off()
 
+#------------------------------------------------------------------
+#get latlon coords for merge events
+
+#get the index of when there was a split
+merge_indx <- merge_df$t
+
+#find the x and y UTM coords of those splits
+merge_xs <- xs[,merge_indx]
+merge_ys <- ys[,merge_indx]
+
+#make this into a dataframe to reshape it so its not a matrix and that we can join the x and y coords together for the mapping
+merge_xs <- as.data.frame(merge_xs) 
+merge_xs <- reshape(merge_xs, varying=1:ncol(merge_xs), v.names="xs", direction ="long", idvar = "ID")
+
+merge_ys <- as.data.frame(merge_ys)
+merge_ys <- reshape(merge_ys, varying=1:ncol(merge_ys), v.names="xs", direction ="long", idvar = "ID")
+
+merge_xy <- cbind(merge_xs, merge_ys)
+merge_xy <- merge_xy[,-c(3,4)]
+colnames(merge_xy) <- c("event", "xs","ys", "ID")
+
+#quick plot of merge locations 
+plot(merge_xy$xs, merge_xy$ys, col = merge_xy$ID) 
+
+#remove id column
+merge_xy_1 <- merge_xy[,-c(1,4)]
+
+#convert to latlon
+merge_latlon <- as.data.frame(utm.to.latlon(merge_xy_1, utm.zone = '17',southern_hemisphere=FALSE))
+merges_utm_latlon <- cbind(merge_latlon, merge_xy)
+merges_utm_latlon$event <- as.factor(merges_utm_latlon$event)
+
+save(merges_utm_latlon, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/merge_results/merges_utm_latlon.RData") 
 
 
 
