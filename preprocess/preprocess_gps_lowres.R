@@ -107,7 +107,7 @@ setwd(indir)
 
 
 
-
+#----------------------------------------------------------------------------------
 
 #create times vector - only for the times that are in the DAY 11:00 (6am) - 23:00 (6pm)
 #first make list of 10 min intervals then remove the times overnight

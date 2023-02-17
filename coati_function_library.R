@@ -158,12 +158,13 @@ visualize_network_matrix <- function(net, coati_ids){
   
   zmin <- min(net, na.rm=T)
   zmax <- max(net, na.rm=T)
-  image.plot(net, col = viridis(256), zlim=c(zmin,zmax), xaxt= 'n', yaxt = 'n', legend.cex = 5, legend.width = 1.3, axis.args=list(cex.axis=1))
-  axis(1, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2, cex.axis=1)
-  axis(2, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2,  cex.axis=1)
+  par(mgp=c(3, 1, 0), mar=c(11,10,4,2)) #bottom, left, top, and right
+  image.plot(net, col = viridis(256), zlim=c(zmin,zmax), xaxt= 'n', yaxt = 'n', legend.cex = 5, legend.width = 1.3,legend.mar = 6, axis.args=list(cex.axis=2))
+  axis(1, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2, cex.axis=1.5)
+  axis(2, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2,  cex.axis=1.5)
   
-  points(rep(-.08, nrow(net)),seq(0,1,length.out=n_inds),col=coati_ids$color, xpd = T, pch = 19)
-  points(seq(0,1,length.out=nrow(net)),rep(-.08,n_inds),col=coati_ids$color, xpd = T, pch = 19)
+  points(rep(-.04, nrow(net)),seq(0,1,length.out=n_inds),col=coati_ids$color, xpd = T, pch = 19)
+  points(seq(0,1,length.out=nrow(net)),rep(-.04,n_inds),col=coati_ids$color, xpd = T, pch = 19)
 }
 
 #changed the size of the labels with cex.axis = 1.5, default is 1
