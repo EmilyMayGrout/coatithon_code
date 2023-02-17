@@ -1,6 +1,12 @@
 #fission fusion analysis script with Presedente group
 #first define groups for each time step (each 10 mins)
 
+#TO DO:
+#make matrix for each day for group only
+#make ff graph over time
+#work out how to exclude times when collars came off animals so this doesn't influence the results (need to add this to Venus in Galaxy group too)
+
+
 #--------PARAMS-------
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
@@ -63,7 +69,7 @@ dev.off()
 
 
 #------plot 1: number of sub groups when the radius is changed (graph put in dropbox results folder) -----------
-png(height = 1080, width = 480, units = 'px', filename = paste0(plot_dir,'n_subgroups_hists.png'))
+png(height = 1080, width = 480, units = 'px', filename = paste0(plot_dir,'n_subgroups_hists_onlyGroup.png'))
 par(mfrow=c(6,1), mar = c(6,5,1,1))
 
 for (i in 1:length(Rs)){
@@ -83,7 +89,7 @@ dev.off()
 
 #------plot 2: number of individuals in each sub group when radius is 50m -----------
 
-png(height = 540, width = 270, units = 'px', filename = paste0(plot_dir,'subgroup_size_hists_50m.png'))
+png(height = 540, width = 270, units = 'px', filename = paste0(plot_dir,'subgroup_size_hists_50m_onlyGroup.png'))
 subgroup_data <- get_subgroup_data(xs, ys, R=50)
 subgroup_counts <- subgroup_data$subgroup_counts[,all_tracked_idxs]
 n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
@@ -94,36 +100,10 @@ s4 <- which(n_subgroups == 4)
 
 
 par(mfrow=c(2,1), mar = c(6,5,1,1))
-hist(subgroup_counts[,s2], breaks=seq(0.5,22,1), xlab = '', main = '2 subgroups', col = "darkolivegreen4", cex.lab = 1.5, cex.main = 1.5, cex.axis=1.5, freq = FALSE, ylim=c(0,.6))
-hist(subgroup_counts[,s3], breaks=seq(0.5,22,1), xlab = 'Subgroup size', main = '3 subgroups', col = "darkolivegreen4", cex.lab = 1.5, cex.main = 1.5, cex.axis=1.5, freq = FALSE, ylim=c(0,.6))
+hist(subgroup_counts[,s2], breaks=seq(0.5,16,1), xlab = '', main = '2 subgroups', col = "darkolivegreen4", cex.lab = 1.5, cex.main = 1.5, cex.axis=1.5, freq = FALSE, ylim=c(0,.6))
+hist(subgroup_counts[,s3], breaks=seq(0.5,16,1), xlab = 'Subgroup size', main = '3 subgroups', col = "darkolivegreen4", cex.lab = 1.5, cex.main = 1.5, cex.axis=1.5, freq = FALSE, ylim=c(0,.6))
 
 dev.off()
-
-
-
-#-------plot 2.2 subgroups at 50m omitting times when there are solitary individuals in their own group
-
-# remove instances when the sub-group is 1 individual as this is not really a sub-group
-
-#first make values equal to 1 and 10 equal to NA for the 2 sub groups and change 9 to NA in 3 subgroups
-subgroup_data <- get_subgroup_data(xs, ys, R=50)
-subgroup_counts <- subgroup_data$subgroup_counts[,all_tracked_idxs]
-n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
-
-s2 <- which(n_subgroups == 2)
-s3 <- which(n_subgroups == 3)
-s4 <- which(n_subgroups == 4)
-
-par(mfrow=c(2,1), mar = c(6,5,2,1))
-#for 2 subgroups
-subgroup_counts_NA <- subgroup_counts
-#subgroup_counts_NA[subgroup_counts_NA == "1"] <- NA
-#subgroup_counts_NA[subgroup_counts_NA == "10"] <- NA
-hist(subgroup_counts_NA[,s2], breaks=seq(0.5,22,1), xlab = '', main = '2 subgroups', col = "darkolivegreen4", cex.lab = 1.5, cex.main = 1.5, cex.axis=1.5, freq = FALSE, ylim=c(0,.6))
-#for 3 subgroups
-subgroup_counts_NA[subgroup_counts_NA == "9"] <- NA
-hist(subgroup_counts_NA[,s3], breaks=seq(0.5,22,1), xlab = 'Subgroup size', main = '3 subgroups', col = "darkolivegreen4", cex.lab = 1.5, cex.main = 1.5, cex.axis=1.5, freq = FALSE, ylim=c(0,.6))
-
 
 
 #----------plot 3: which individuals tend to be in the same subgroup--------------
@@ -208,7 +188,7 @@ dev.off()
 #get mean group size for each timepoint - so need to get the total number of individuals divided by the number of groups
 
 sub_counts <- as.data.frame(t(subgroup_data$subgroup_counts))
-colnames(sub_counts) <- c("sub1", "sub2", "sub3", "sub4", "sub5")
+colnames(sub_counts) <- c("sub1", "sub2", "sub3", "sub4")
 n_groups <- as.data.frame(subgroup_data$n_subgroups)
 #combine to make dataframe with the number of individuals in each sub group and the number of subgroups
 n_subs <- cbind(sub_counts, n_groups)
@@ -243,24 +223,26 @@ dev.off()
 
 
 #subsetting to smaller date range
-n_subs_subset <- n_subs %>%  filter(date > as.Date("2021-12-25") & date < as.Date("2022-01-10"))
+n_subs_subset <- n_subs %>%  filter(date > as.Date("2023-01-18") & date < as.Date("2023-02-03"))
 #looking at mean group size per day 
 g1 <- ggplot(data=n_subs_subset, aes(x=`hour`, y=mean_group_size, group = `hour`))+geom_boxplot()+ theme_classic() + facet_wrap(~date, ncol = 4)
-#png(height = 800, width = 800, units = 'px', filename = paste0(plot_dir, "mean_group_size.png"))
+png(height = 800, width = 800, units = 'px', filename = paste0(plot_dir, "mean_group_size.png"))
 g1 + stat_summary(fun = median,
                   geom = "line",
                   aes(group = 1),
                   col = "red")
-#dev.off()
+dev.off()
 
 #look at the number of groups
+
 g2 <- ggplot(data=n_subs_subset, aes(x=`hour`, y=n_groups, group = `hour`))+geom_boxplot()+ theme_classic() + facet_wrap(~date, ncol = 4)
 
+png(height = 800, width = 800, units = 'px', filename = paste0(plot_dir, "mean_number_of_groups.png"))
 g2 + stat_summary(fun = median,
                   geom = "line",
                   aes(group = 1),
                   col = "red")
-
+dev.off()
 
 #plot number of subgroups over time
 
