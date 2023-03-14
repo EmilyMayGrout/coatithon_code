@@ -1,4 +1,4 @@
-#this script is to visualise the social networks 
+#this script is to visualize the social networks to make movies (rainbow points on black or white background)
 
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'

@@ -2,15 +2,15 @@
 
 #---PARAMS----
 R <- 50
-dt <- 10 #time interval between points (=10 for coati low res). 10 is metres per minute.
-min_tracked <- 7 #minimum number of individuals tracked to include in analysis (=7)
+dt <- 10 #time interval between points (=10 for coati low res). 10 is meters per minute.
+min_tracked <- 10 #minimum number of individuals tracked to include in analysis (=7)
 
 #---DIRECTORIES----
 
-data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/"
+data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/'
-gps_file <- "galaxy_xy_10min_level0.RData"
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/'
+gps_file <- "presedente_xy_10min_level0.RData"
 id_file <- 'coati_ids.RData'
 
 #-----LIBRARIES-----
@@ -108,7 +108,7 @@ for (i in 1:nrow(speed_df)){
   
   #adding context: alone, split or group together
   if(subgroup_size == 1){
-   speed_df$context[i] <-  "alone"
+    speed_df$context[i] <-  "alone"
   }
   
   if(split == TRUE & subgroup_size > 1){
@@ -140,6 +140,12 @@ hist(speed_days$speed)
 #plot speeds for each context
 
 vioplot(log(speed_days$speed) ~ speed_days$context)
+
+# function for number of observations 
+give.n <- function(x){
+  return(c(y = median(x)*1.05, label = length(x))) 
+  # experiment with the multiplier to find the perfect position
+}
 
 
 png(height = 600, width = 900, units = 'px', filename = paste0(plot_dir,'speeds_in_subgroups_all.png'))
@@ -178,7 +184,6 @@ ggplot(speed_days, aes(x = context, y = speed, fill = context)) +
   ylim(0, 25)+ facet_wrap(~name)
 
 dev.off()
-
 
 
 

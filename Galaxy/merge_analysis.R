@@ -3,9 +3,9 @@
 #NOTE: this code only works for up to 3 subgroups per split
 #TODO: if more than 3 subgroups present, need to generalize
 
-data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/"
+data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/'
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/'
 gps_file <- "galaxy_xy_10min_level0.RData"
 id_file <- 'coati_ids.RData' 
 
@@ -149,7 +149,7 @@ merge_df$n_sub1 <- sapply(merge_df$sub1, function(x){return(sum(!is.na(x)))})
 merge_df$n_sub2 <- sapply(merge_df$sub2, function(x){return(sum(!is.na(x)))})
 merge_df$n_sub3 <- sapply(merge_df$sub3, function(x){return(sum(!is.na(x)))})
 
-save(merge_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/merge_results/merge_df.Rdata")  
+save(merge_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Galaxy/merge_df.Rdata")  
 
 
 #DONE WITH DATAFRAME!
@@ -157,7 +157,7 @@ save(merge_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/merge_results
 
 #now look at time difference between merges and splits
 #open splits_df
-load("C:/Users/egrout/Dropbox/coatithon_notgithub/splits_on_map/splits_df.Rdata")
+load("C:/Users/egrout/Dropbox/coatithon_notgithub/Galaxy_fission_fusion/splits_df.Rdata")
 
 #luckily the number of merges and split events is 29
 time_diff <- data.frame(splits_t = splits_df$t, merge_t = merge_df$t)
@@ -166,7 +166,7 @@ time_diff$diff_time_hour <- (time_diff$diff*10)/60
 time_diff$diff_time_hour <-  format(round(time_diff$diff_time_hour, 1), nsmall = 1)
 time_diff$diff_time_hour <- as.numeric(time_diff$diff_time_hour)
 
-png(file = "C:/Users/egrout/Dropbox/coatithon_notgithub/merge_results/split_duration_hist.png", width = 1000, height = 600, units = "px")
+png(file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Galaxy/split_duration_hist.png", width = 1000, height = 600, units = "px")
 
 par(mar=c(8, 8, 8, 8))
 hist(time_diff$diff_time_hour, breaks = 80, xlab = "Time between splits and merges (hours)", col = "lightblue3", main = "", cex.lab = 2,cex.axis = 1.5)
@@ -204,7 +204,7 @@ merge_latlon <- as.data.frame(utm.to.latlon(merge_xy_1, utm.zone = '17',southern
 merges_utm_latlon <- cbind(merge_latlon, merge_xy)
 merges_utm_latlon$event <- as.factor(merges_utm_latlon$event)
 
-save(merges_utm_latlon, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/merge_results/merges_utm_latlon.RData") 
+save(merges_utm_latlon, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Galaxy/merges_utm_latlon.RData") 
 
 
 

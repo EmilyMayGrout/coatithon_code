@@ -1,4 +1,4 @@
-## this script is for making the fission fusion animation over time
+## this script is for making the fission fusion animation over time for galaxy group
 
 #--------PARAMS-------
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/"

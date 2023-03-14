@@ -158,8 +158,8 @@ visualize_network_matrix <- function(net, coati_ids){
   
   zmin <- min(net, na.rm=T)
   zmax <- max(net, na.rm=T)
-  par(mgp=c(3, 1, 0), mar=c(11,10,4,2)) #bottom, left, top, and right
-  image.plot(net, col = viridis(256), zlim=c(zmin,zmax), xaxt= 'n', yaxt = 'n', legend.cex = 5, legend.width = 1.3,legend.mar = 6, axis.args=list(cex.axis=2))
+  par(mgp=c(3, 1, 0), mar=c(11,10,6,8)) #bottom, left, top, and right ##CHANGE THESE VALUES IF DOING FORLOOP OF THE MATRIX PLOTS AND THEY DON'T FIT
+  image.plot(net, col = viridis(256), zlim=c(zmin,zmax), xaxt= 'n', yaxt = 'n', legend.cex = 5, legend.width = 5,legend.mar = 6, axis.args=list(cex.axis=2))
   axis(1, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2, cex.axis=1.5)
   axis(2, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2,  cex.axis=1.5)
   
@@ -169,6 +169,9 @@ visualize_network_matrix <- function(net, coati_ids){
 
 #changed the size of the labels with cex.axis = 1.5, default is 1
 #also changed the size of the legend axis values with: axis.args=list(cex.axis=2), remove if want default
+#legend width was 1.3, changed to 5 for the multiple matrix plots
+
+
 
 
 #Function for getting distance between individuals over time

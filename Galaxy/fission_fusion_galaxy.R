@@ -25,10 +25,10 @@
 
 
 #--------PARAMS-------
-data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/"
+data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/'
-gps_file <- "galaxy_xy_10min_level0.RData"
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
+gps_file <- "galaxy_xy_10min_level1.RData" #level0 is when Venus is not removed
 id_file <- 'coati_ids.RData'
 
 #list of Rs
@@ -63,7 +63,7 @@ all_tracked_idxs <- which(n_tracked==n_inds)
 
 
 #------plot 1: number of sub groups when the radius is changed (graph put in dropbox results folder) -----------
-png(height = 1080, width = 480, units = 'px', filename = paste0(plot_dir,'n_subgroups_hists.png'))
+png(height = 1080, width = 480, units = 'px', filename = paste0(plot_dir,'n_subgroups_hists_level1.png'))
 par(mfrow=c(6,1), mar = c(6,5,1,1))
 
 for (i in 1:length(Rs)){
@@ -83,7 +83,7 @@ dev.off()
  
 #------plot 2: number of individuals in each sub group when radius is 50m -----------
 
-png(height = 540, width = 270, units = 'px', filename = paste0(plot_dir,'subgroup_size_hists_50m.png'))
+png(height = 540, width = 270, units = 'px', filename = paste0(plot_dir,'subgroup_size_hists_50m_level1.png'))
 subgroup_data <- get_subgroup_data(xs, ys, R=50)
 subgroup_counts <- subgroup_data$subgroup_counts[,all_tracked_idxs]
 n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
@@ -102,7 +102,7 @@ dev.off()
 
 #------plot 2.1: subgroup size at 100m----------------------
 
-png(height = 540, width = 270, units = 'px', filename = paste0(plot_dir,'subgroup_size_hists_100m.png'))
+png(height = 540, width = 270, units = 'px', filename = paste0(plot_dir,'subgroup_size_hists_100m_level1.png'))
 subgroup_data <- get_subgroup_data(xs, ys, R=100)
 subgroup_counts <- subgroup_data$subgroup_counts[,all_tracked_idxs]
 n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
@@ -197,8 +197,9 @@ diag(ff_net) <- NA
 new_order <- c(5,1,11,4,10,2, 3,6,7,8,9)
 ffnet_reorder <- ff_net[new_order, new_order]
 
+### NEED TO MAKE THIS GRAPH BETTER FOR PAPER - MOVE THE AXES LABELS OUTSIDE THE GRAPH
 
-png(height = 400, width = 400, units = 'px', filename = paste0(plot_dir,'subgroup_network.png'))
+png(height = 500, width = 500, units = 'px', filename = paste0(plot_dir,'subgroup_network_level1.png'))
 
 visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
 dev.off()
@@ -233,7 +234,7 @@ within_group_data <- get_proximity_data(subset_x, subset_y, 10)
 
 new_order <- c(5,1,11,4,10,2,3,6,7,8,9)
 
-png(height = 400, width = 400, units = 'px', filename = paste0(plot_dir,'withingroup_network_withgus.png'))
+png(height = 500, width = 500, units = 'px', filename = paste0(plot_dir,'withingroup_network_withgus_level1.png'))
 visualize_network_matrix(within_group_data$proximity_net, coati_ids[new_order,])
 dev.off()
 
@@ -281,7 +282,7 @@ within_group_data <- get_proximity_data(subset_x, subset_y, 10)
 
 new_order <- c(1,10,4,9,2,3,5,6,7,8)
 
-png(height = 400, width = 400, units = 'px', filename = paste0(plot_dir,'withingroup_network_withoutgus.png'))
+png(height = 500, width = 500, units = 'px', filename = paste0(plot_dir,'withingroup_network_withoutgus_level1.png'))
 visualize_network_matrix(within_group_data$proximity_net, coati_ids_nogus[new_order,])
 dev.off()
 
@@ -329,7 +330,7 @@ n_subs$date <- as.Date(n_subs$ts)
 
 library("vioplot")
 #now plotting mean group size for each hour of the day
-png(height = 500, width = 800, units = 'px', filename = paste0(plot_dir, "mean_group_size_violin.png"))
+png(height = 500, width = 800, units = 'px', filename = paste0(plot_dir, "mean_group_size_violin_level1.png"))
 vioplot(n_subs$mean_group_size ~ n_subs$panama_time,  xlab = "panama time", ylab = "mean subgroup size", col = "cyan3")
 dev.off()
 

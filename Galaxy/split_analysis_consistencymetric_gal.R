@@ -1,12 +1,12 @@
-#analyse split events'
+#analyse split events for Galaxy group
 #get consistency metric
 
 #NOTE: this code only works for up to 3 subgroups per split
 #TODO: if more than 3 subgroups present, need to generalize
 
-data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/"
+data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/'
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/'
 gps_file <- "galaxy_xy_10min_level0.RData"
 id_file <- 'coati_ids.RData' 
 
@@ -164,7 +164,7 @@ splits_df$n_sub1 <- sapply(splits_df$sub1, function(x){return(sum(!is.na(x)))})
 splits_df$n_sub2 <- sapply(splits_df$sub2, function(x){return(sum(!is.na(x)))})
 splits_df$n_sub3 <- sapply(splits_df$sub3, function(x){return(sum(!is.na(x)))})
 
-#save(splits_df, file = "C:/Users/egrout/Dropbox/coatithon/coatithon_code/splits_on_map/splits_df.Rdata")  
+#save(splits_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/splits_on_map/Galaxy/splits_df.Rdata")  
 
 #DONE WITH DATAFRAME!
 

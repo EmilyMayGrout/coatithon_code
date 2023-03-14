@@ -1,4 +1,4 @@
-#this script is for making a dataframe with time, and list group members in original group and then the sub groups for each 
+#this script is for making a dataframe with time, and list group members in original group and then the sub groups for each - this is to then be used for the ff over time graph (help from Alie)
 
 
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/"
