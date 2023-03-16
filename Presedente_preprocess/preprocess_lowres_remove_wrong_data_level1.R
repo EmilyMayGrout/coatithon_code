@@ -38,4 +38,5 @@ ys[17,195:540] <- NA
 xs[14,741:772] <- NA
 ys[14,741:772] <- NA
 
+
 save(list=c('xs','ys','ts'), file = paste0(outdir,'presedente_xy_10min_level1.RData'))

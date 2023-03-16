@@ -9,8 +9,8 @@ min_tracked <- 10 #minimum number of individuals tracked to include in analysis 
 
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/'
-gps_file <- "presedente_xy_10min_level0.RData"
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
+gps_file <- "presedente_xy_10min_level1.RData"
 id_file <- 'coati_ids.RData'
 
 #-----LIBRARIES-----
@@ -32,6 +32,18 @@ source('coati_function_library.R')
 setwd(data_dir)
 load(gps_file)
 load(id_file)
+
+
+#REMOVING MALES AND WILDFLOWER -- ids: 5,8,9,10,18,21
+
+xs <- xs[-c(5,8,9,10,18,21),]
+ys <- ys[-c(5,8,9,10,18,21),]
+
+coati_ids <- coati_ids[-c(5,8,9,10,18,21),]
+
+coati_ids <- coati_ids                           
+rownames(coati_ids) <- NULL                 
+
 
 #-----MAIN------
 
@@ -148,11 +160,18 @@ give.n <- function(x){
 }
 
 
-png(height = 600, width = 900, units = 'px', filename = paste0(plot_dir,'speeds_in_subgroups_all.png'))
+#remove times when alone
+
+speed_days <- speed_days[!(speed_days$context == "alone"),]
+
+
+
+
+png(height = 600, width = 900, units = 'px', filename = paste0(plot_dir,'speeds_in_subgroups_onlygroup.png'))
 
 ggplot(speed_days, aes(x = context, y = speed, fill = context)) + 
   geom_violin() +theme_classic()+
-  scale_fill_manual(values=c("darkslategray2","darkslategray3", "darkslategray4"))+
+  scale_fill_manual(values=c("darkslategray2","darkslategray4"))+
   theme(axis.text=element_text(size=20),
         axis.title=element_text(size=24),
         legend.title = element_text(size=24),
@@ -174,7 +193,7 @@ png(height = 1200, width = 1500, units = 'px', filename = paste0(plot_dir,'speed
 
 ggplot(speed_days, aes(x = context, y = speed, fill = context)) + 
   geom_violin() +theme_classic()+
-  scale_fill_manual(values=c("darkslategray2","darkslategray3", "darkslategray4"))+
+  scale_fill_manual(values=c("darkslategray2", "darkslategray4"))+
   theme(axis.text=element_text(size=20),
         axis.title=element_text(size=24),
         legend.title = element_text(size=24),

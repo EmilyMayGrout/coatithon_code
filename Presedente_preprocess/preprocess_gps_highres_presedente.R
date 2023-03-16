@@ -5,13 +5,13 @@ library(lubridate)
 #load useful functions
 source('C:/Users/egrout/Dropbox/coatithon/coatithon_code/coati_function_library.R')
 
-firsttime <- as.POSIXct('2021-12-24 11:00', tz = 'UTC')
-lasttime <-  as.POSIXct('2022-01-09 23:00', tz = 'UTC')
+firsttime <- as.POSIXct('2023-01-19 11:00', tz = 'UTC')
+lasttime <-  as.POSIXct('2023-02-02 23:00', tz = 'UTC')
 #to do: get the last day of data and rbind it to the same file - then change the last date
 
-indir <-  "C:/Users/egrout/Dropbox/coatithon/rawdata/2022/galaxy/gps/binded_files"
-outdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
-metadatadir <-  "C:/Users/egrout/Dropbox/coatithon/rawdata/2022/galaxy/metadata/"
+indir <-  "C:/Users/egrout/Dropbox/coatithon/rawdata/2023/presedente/gps/"
+outdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
+metadatadir <-  "C:/Users/egrout/Dropbox/coatithon/rawdata/2023/presedente/metadata/"
 
 #setting the working directory to the raw data file in dropbox
 setwd(indir)
@@ -33,13 +33,10 @@ i = 1
 for(i in 1:length(all_files)){
   
   #filter columns to ones needed
-  tagdata <- read.table(all_files[i], sep =  ",")
-  #getting the correct dat and time column
-  tagdata <- tagdata[, c( 6, 7, 14, 16)]
-  colnames(tagdata) <- c("lon", "lat", "date", "time")
+  tagdata <- read.table(all_files[i], sep =  " ")
+  colnames(tagdata) <- c("name","lon", "lat", "datetime")
   #make datetime format
-  tagdata$datetime <- paste(tagdata$date, tagdata$time)
-  tagdata$datetime <- as.POSIXct(tagdata$datetime, format="%d.%m.%Y %H:%M:%S", tz="UTC")
+  tagdata$datetime <- as.POSIXct(tagdata$datetime, format="%Y-%m-%d %H:%M:%S", tz="UTC")
   #getting the last gps point per burst
   tagdata$test <- !duplicated(tagdata$datetime, fromLast = T )
   
@@ -98,11 +95,13 @@ coati_ids$color[which(coati_ids$age == 'Sub-adult' & coati_ids$sex == 'Male')] <
 coati_ids$color[which(coati_ids$age == 'Juvenile')] <- '#666666'
 save(coati_ids, file = paste0(outdir, 'coati_ids.RData'))
 
-save(list=c('xs','ys','ts'), file = paste0(outdir,'galaxy_xy_highres_level0.RData'))
-save(list=c('lats','lons','ts'), file = paste0(outdir,'galaxy_latlon_highres_level0.RData'))  
+save(list=c('xs','ys','ts'), file = paste0(outdir,'presedente_xy_highres_level0.RData'))
+save(list=c('lats','lons','ts'), file = paste0(outdir,'presedente_latlon_highres_level0.RData'))
 
 
-#load("C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/galaxy_xy_highres_level0.RData")
+
+
+
 
 
 
