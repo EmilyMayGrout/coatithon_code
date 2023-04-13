@@ -218,7 +218,7 @@ ggplot(data = test, aes(x = Panama_time,
                              y = subgroup_mod, 
                              color = id, 
                              group = id)) +
-  scale_y_continuous("Sub-group number", limits = c(0, 5),expand=c(0,0), breaks = 0:8) +
+  scale_y_continuous("sub group ID", limits = c(0, 5),expand=c(0,0), breaks = 0:8) +
   theme(panel.background = element_rect(fill = 'azure3'), #changed colour to snow2 for the recursion markdown
         panel.grid.major = element_line(color = 'azure3'),  
         panel.grid.minor = element_line(color = 'azure3', size = 2)) +
@@ -255,7 +255,7 @@ ggplot(data = test, aes(x = Panama_time,
                              y = subgroup_mod, 
                              color = id, 
                              group = id)) +
-  scale_y_continuous("Sub-group number", limits = c(0, 5),expand=c(0,0), breaks = 0:5) +
+  scale_y_continuous("sub group ID", limits = c(0, 5),expand=c(0,0), breaks = 0:5) +
   theme(panel.background = element_rect(fill = 'azure3'), #changed colour to snow2 for the recursion markdown
         panel.grid.major = element_line(color = 'azure3'),  
         panel.grid.minor = element_line(color = 'azure3', size = 2)) +
