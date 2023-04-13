@@ -344,6 +344,23 @@ get_p_dyad_together <- function(splits_df_local, n_inds_local){
   
 }
 
+#Function to match names in fission/fusion manual events table to coati ids idxs
+#INPUTS:
+# subgroup_names: a character string containing the names of the coatis in a given subgroup
+# coati_ids: table of coati ids to match to
+#OUTPUTS:
+# subgroup_idxs: a vector of the indexes associated with the subgroup members
+match_coati_names <- function(subgroup_names, coati_ids){
+  names_split <- strsplit(subgroup_names,',')[[1]]
+  names_split <- sub(' ','',names_split)
+  names_short <- sapply(names_split, function(x){return(substr(x,1,3))})
+  
+  #match names to get individual indexes
+  subgroup_idxs <- match(names_short, coati_ids$name_short)
+  return(subgroup_idxs)
+  
+}
+
 
 
 
