@@ -4,6 +4,7 @@
 library(dbscan)
 library(rgdal)
 library(lubridate)
+library(stringr)
 
 
 #LAT/LON TO UTM CONVERSIONS (AND VICE VERSA)
@@ -360,6 +361,134 @@ match_coati_names <- function(subgroup_names, coati_ids){
   return(subgroup_idxs)
   
 }
+
+#analyse and make a visualization of the fission-fusion event
+#INPUTS:
+# events: a data frame of manually-labeled ff events
+# i: index to the row to use
+# xs, ys: matrices of x and y coordinates
+#OUTPUTS:
+# some info (TBD) about the ff event
+# a plot showing (top) dyadic distance over time and (bottom) a visualization of trajectories
+analyse_ff_event <- function(i, events, xs, ys, max_time = 1200, thresh_h = 50, thresh_l = 15, plot = T){
+  t_event <- events$tidx[i] #time of the event
+  group_A <- events$group_A_idxs[i][[1]] #group A individual idxs
+  group_B <- events$group_B_idxs[i][[1]] #group B individual idxs
+  group_A_names <- events$group_A[i]
+  group_B_names <- events$group_B[i]
+  ti <- t_event - max_time #initial time to plot
+  tf <- t_event + max_time #final time to plot
+  event_type <- events$event_type[i]
+  datetime <- events$datetime[i]
+  nA <- length(group_A)
+  nB <- length(group_B)
+  nT <- ncol(xs)
+  
+  #get x and y coordinates of the relevant individuals in each subgroup
+  xA <- matrix(xs[group_A,],nrow=nA,ncol=nT)
+  xB <- matrix(xs[group_B,],nrow=nB,ncol=nT)
+  yA <- matrix(ys[group_A,],nrow=nA,ncol=nT)
+  yB <- matrix(ys[group_B,],nrow=nB,ncol=nT)
+  
+  #get centroids of the two subgroups
+  xcA <- colMeans(xA, na.rm=T)
+  ycA <- colMeans(yA, na.rm=T)
+  xcB <- colMeans(xB, na.rm=T)
+  ycB <- colMeans(yB, na.rm=T)
+  
+  #get distance between centroids
+  dyad_dist <- sqrt((xcA - xcB)^2 + (ycA - ycB)^2)
+  
+  #classify the dyadic distance into categories:
+  #0 = below lower thershold
+  #1 = between thresholds
+  #2 = above higher threshold
+  dyad_dist_event <- dyad_dist[ti:tf]
+  if(max(dyad_dist_event,na.rm=T) < thresh_h){
+    upper <- max(dyad_dist_event,na.rm=T) - .001
+  } else{
+    upper <- thresh_h
+  }
+  if(min(dyad_dist_event,na.rm=T) > thresh_l){
+    lower <- min(dyad_dist_event,na.rm=T) + .001
+  } else{
+    lower <- thresh_l
+  }
+  
+  category <- rep(NA, length(dyad_dist_event))
+  category[which(dyad_dist_event < lower)] <- 0
+  category[which(dyad_dist_event >= lower & dyad_dist_event < upper)] <- 1
+  category[which(dyad_dist_event >= upper)] <- 2
+  
+  #run length encoding to get sequences of each category
+  seqs <- rle(category)
+  
+  #find sequences of high-middle-low (2,1,0) or low-mid-high (0,1,2)
+  seqs_str <- paste0(as.character(seqs$values), collapse = '') #convert to string
+  if(event_type=='fission'){
+    event_loc <- as.data.frame(str_locate_all(seqs_str,'012')[[1]])
+  } 
+  if(event_type == 'fusion'){
+    event_loc <- as.data.frame(str_locate_all(seqs_str,'210')[[1]])
+  }
+  
+  #for seuqneces of hml or lmh (for fission and fusion respectively), get the time index when they start and end
+  for(r in 1:nrow(event_loc)){
+    event_loc$start_time <- ti + sum(seqs$lengths[1:event_loc$start[r]])
+    event_loc$end_time <- ti + sum(seqs$lengths[1:event_loc$end[r]-1])
+  }
+  
+  #create an object to output the start and end times
+  start_time <- event_loc$start_time
+  end_time <- event_loc$end_time
+  out <- list(start_time = start_time, end_time = end_time)
+  
+
+  if(plot == T){
+    quartz() #open a new plot
+    par(mfrow=c(2,1))
+    plot(ti:tf, dyad_dist[ti:tf],type='l', main = paste(event_type, datetime),xlab='Time (min)',ylab = 'Distance apart (m)')
+    abline(v=t_event,col='black', lty = 2)
+    abline(h = thresh_h, col = 'darkorange1')
+    abline(h = thresh_l, col = 'magenta')
+    for(r in 1:nrow(event_loc)){
+      abline(v=event_loc$start_time[r], col = 'green')
+      abline(v=event_loc$end_time[r], col = 'green')
+    }
+    
+    xmin <- min(min(xA[,ti:tf],na.rm=T),min(xB[,ti:tf],na.rm=T))
+    xmax <- max(max(xA[,ti:tf],na.rm=T),max(xB[,ti:tf],na.rm=T))
+    ymin <- min(min(yA[,ti:tf],na.rm=T),min(yB[,ti:tf],na.rm=T))
+    ymax <- max(max(yA[,ti:tf],na.rm=T),max(yB[,ti:tf],na.rm=T))
+    plot(NULL, xlim=c(xmin,xmax),ylim=c(ymin,ymax),asp=1, xlab='Northing', ylab = 'Easting', main = paste('(Red =', group_A_names, '), (Blue =', group_B_names,')'))
+    for(j in 1:nrow(xA)){
+      lines(xA[j,ti:tf],yA[j,ti:tf],type='l',col='#FF000033')
+    }
+    for(j in 1:nrow(xB)){
+      lines(xB[j,ti:tf],yB[j,ti:tf],type='l',col='#0000FF33')
+    }
+    lines(xcA[ti:tf],ycA[ti:tf], col = '#FF0000', lwd = 2)
+    lines(xcB[ti:tf],ycB[ti:tf], col = '#0000FF', lwd = 2)
+    
+    points(xcA[t_event], ycA[t_event], pch = 8, col = 'black')
+    points(xcB[t_event], ycB[t_event], pch = 8, col = 'black')
+    points(xcA[ti], ycA[ti], pch = 1, col = 'black')
+    points(xcB[ti], ycB[ti], pch = 1, col = 'black')
+    points(xcA[tf], ycA[tf], pch = 4, col = 'black')
+    points(xcB[tf], ycB[tf], pch = 4, col = 'black')
+    
+    #algorithm-identified start and end
+    points(xcA[event_loc$start_time],ycA[event_loc$start_time],pch = 1, col = 'green')
+    points(xcB[event_loc$start_time],ycB[event_loc$start_time],pch = 1, col = 'green')
+    points(xcA[event_loc$end_time],ycA[event_loc$end_time],pch = 4, col = 'green')
+    points(xcB[event_loc$end_time],ycB[event_loc$end_time],pch = 4, col = 'green')
+    
+    
+  }
+  invisible(out)
+}
+
+
 
 
 

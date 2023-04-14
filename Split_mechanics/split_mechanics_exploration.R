@@ -9,7 +9,7 @@ Sys.setenv(TZ='UTC')
 #DIRECTORIES AND PARAMETERS
 codedir <- '~/Dropbox/code_ari/coatithon_code/'
 dir <- '~/Dropbox/coati/processed/' #directory where all data is stored
-group <- 'presedente' #subdirectory where the group data is stored
+group <- 'galaxy' #subdirectory where the group data is stored
 
 #get directory to group data
 groupdir <- paste0(dir,group)
@@ -64,5 +64,7 @@ events$datetime <- as.POSIXct(paste(events$date, events$time_min), format = "%Y-
 #match times to get indexes into matrices
 events$tidx <- match(events$datetime, ts)
 
-
+#count up how many individuals are in each group
+events$n_A <- unlist(lapply(events$group_A_idxs,length))
+events$n_B <- unlist(lapply(events$group_B_idxs,length))
 
