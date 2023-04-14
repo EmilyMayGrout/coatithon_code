@@ -21,12 +21,13 @@ source('coati_function_library.R')
 
 #LOAD DATA
 #navigate into directory
-setwd(groupdir)
+setwd(codedir)
 
 #read in events
-events <- read.csv(paste0(group,'_manual_split_merge_clean.csv'), sep=';')
+events <- read.csv(paste0('Split_mechanics/',group,'_manual_split_merge_clean.csv'), sep=';')
 
 #read in coati ids
+setwd(groupdir)
 load(file=paste0(group,'_coati_ids.RData'))
 
 #read in timestamp data
@@ -68,3 +69,4 @@ events$tidx <- match(events$datetime, ts)
 events$n_A <- unlist(lapply(events$group_A_idxs,length))
 events$n_B <- unlist(lapply(events$group_B_idxs,length))
 
+analyse_ff_event(1, events, xs, ys)
