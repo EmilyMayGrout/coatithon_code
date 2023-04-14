@@ -21,10 +21,10 @@ setwd(indir)
 # #NEED TO DO THIS IF DOWNLOADING DATA FROM MOVEBANK RATHER THAN USING DECODER
 # #first read in csv and split into files for each individual and save as txt file into the indir
 # presedente_all <- read.csv("F:/PhD/BCI coatis 2023/logger files/Coati Presedente CCAS BCI 2023.csv")
-# 
+# # 
 # #filter presedente_all to "name", "lon", "lat", "date", "time")
 # 
-# presedente_all_filter <- presedente_all[,c(36,5,4,3)]
+# presedente_all_filter <- presedente_all[,c(36,4,5,3)]
 # 
 # colnames(presedente_all_filter) <- c("name", "lon", "lat", "datetime")
 # 
