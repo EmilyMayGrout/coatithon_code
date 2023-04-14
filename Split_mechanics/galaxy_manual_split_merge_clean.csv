@@ -1,19 +1,10 @@
 date;event_type;fission_time;fusion_time;group_A;group_B;direction;comments
-2021-12-25;fission ;before start;;Lun, Plu, Pla, Ven, Gus;Qua, Sat, Luc, Orb, Est, Com;;
-2021-12-25;fusion;;11:59;Lun, Plu, Pla, Ven, Gus;Qua, Sat, Luc, Orb, Est, Com;B -> A;
-2021-12-25;fission ;12:21;;Gus, Ven, Orb;Lun, Luc, Est, Plu, Qua, Pla, Sat, Com;B <- A;
-2021-12-25;fission ;12:31;;Orb;Ven, Gus;A <- B;
-2021-12-25;fusion;;12:32;Orb;Lun, Luc, Est, Plu, Qua, Pla, Sat, Com;A -> B;
-2021-12-25;fission;12:36;;Ven;Gus;A <- B;
-2021-12-25;fusion;;12:40;Ven;Lun, Luc, Est, Plu, Qua, Pla, Sat, Com, Orb;A -> B;
 2021-12-26;fission;before start;;Gus ;Lun, Luc, Est, Plu, Qua, Pla, Sat, Com, Orb;;
 2021-12-26;fission;before start;;Ven;Lun, Luc, Est, Plu, Qua, Pla, Sat, Com, Orb;;
 2021-12-26;fission;12:04;;Est;Lun, Luc, Plu, Qua, Pla, Sat, Orb, Com;A <=> B;
 2021-12-26;fusion;;12:19;Est;Lun, Luc, Plu, Qua, Pla, Sat, Orb, Com;A -> B;
 2021-12-26;fission;13:06;;Lun, Luc, Plu, Qua, Pla, Sat, Orb, Com;Est;A -> B;
 2021-12-26;fusion;;13:37;Est;Lun, Luc, Plu, Qua, Pla, Sat, Orb, Com;A -> B;
-2021-12-26;fission;13:50;;Com;Lun, Luc, Plu, Qua, Pla, Sat, Orb, Est;A <- B;could be GPS error
-2021-12-26;fusion;;14:00;Com;Lun, Luc, Plu, Qua, Pla, Sat, Orb, Est;A -> B;could be GPS error
 2021-12-27;fusion;before start;;Gus;Lun, Luc, Plu, Qua, Pla, Sat, Orb, Com, Est;;
 2021-12-27;fusion;before start;;Ven;Lun, Luc, Plu, Qua, Pla, Sat, Orb, Com, Est;;
 2021-12-27;fission;12:20;;Pla, Orb, Plu, Sat;Lun, Est, Com, Qua, Luc;A <- B;

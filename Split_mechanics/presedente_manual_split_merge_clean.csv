@@ -69,7 +69,7 @@ date;event_type;fission_time;fusion_time;focus_group;group_A;group_B;group_C;dir
 2023-01-29;fission;12:02;;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan, Gillard;Merkel, Kenyatta;;B <- A;Kenyatta GPS started when Merkel joined
 2023-01-29;fission;12:23;;sub group (15);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan, Gillard;Ardern;;A <- B;Ardern still foraging at same place
 2023-01-29;fusion;;12:27;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Mujica, Cleopatra, Castro, Gandhi, Moscoso, May, Genghis Khan, Gillard;Merkel, Kenyatta;;A -> B;
-2023-01-29;fusion;;12:39;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Mujica, Cleopatra, Castro, Gandhi, Moscoso, May, Genghis Khan, Gillard, Merkel, Kenyatta;Ardern;;B -> A;
+2023-01-29;fission;;12:39;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Mujica, Cleopatra, Castro, Gandhi, Moscoso, May, Genghis Khan, Gillard, Merkel, Kenyatta;Ardern;;B -> A;
 2023-01-29;fission;12:40;;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Mujica, Cleopatra, Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan, Gillard, Ardern;Kenyatta;;B <- A;
 2023-01-30;fission;before start;;full group (16); Peron, Obama, Mujica, Cleopatra, Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan, Ardern;Truss, Zelenskyy, Meir, Torrijos, Gillard; ;A <=> B;
 2023-01-30;fission;11:52;;sub group (11); Peron, Obama, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Genghis Khan, Ardern;Gandhi;;A <- B;
@@ -101,7 +101,7 @@ date;event_type;fission_time;fusion_time;focus_group;group_A;group_B;group_C;dir
 2023-01-31;fission;13:15;;sub group (9);Gandhi, Mujica, Cleopatra, Ardern, Obama, Merkel, Castro, Peron, Moscoso, Kenyatta;Lula;;B <- A;
 2023-01-31;fission;13:32; ;sub group (9);Gandhi, Mujica, Cleopatra, Ardern, Obama, Merkel, Castro, Peron, Moscoso;Kenyatta;;A <- B;
 2023-01-31;fission;13:42;;sub group (9);Gandhi, Mujica, Cleopatra, Obama, Merkel, Castro, Peron, Moscoso;Ardern;;A <=> B;
-2023-01-31;fusion;;14:00;sub group (7);Torrijos, Gillard, Zelenskyy, May, Ghengis Khan, Meir, Truss;Gendry;;A -> B;
+2023-01-31;fusion;;13:59;sub group (7);Torrijos, Gillard, Zelenskyy, May, Ghengis Khan, Meir, Truss;Gendry;;A -> B;
 2023-02-01;fission;before start;;full group (16);Meir, Torrijos, Truss;Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Genghis Khan, Gillard, Gandhi, Ardern, Gendry; ; ;
 2023-02-01;fission;11:42;;sub group (13);Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Genghis Khan, Gillard, Gandhi, Ardern;Gendry;;B <- A;
 2023-02-01;fusion;;11:18;sub group (3);Meir, Torrijos, Truss;Kenyatta;Sam;A + B -> C;
@@ -117,8 +117,8 @@ date;event_type;fission_time;fusion_time;focus_group;group_A;group_B;group_C;dir
 2023-02-01;fission;13:20;;sub group (2);Torrijos;Kenyatta;;A <=> B;
 2023-02-01;fission;13:20;;sub group (13);Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Genghis Khan, Gillard, Gandhi, Ardern;Sam;;A <- B;
 2023-02-01;fusion;;13:32;sub group (3);Meir, Truss;Torrijos;;B -> A;
-2023-02-01;fusion;;13:59;sub group (3);Meir, Torrijos, Truss;Gendry;;B -> A;
-2023-02-01;fusion;;;full group (16);Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Genghis Khan, Gillard, Gandhi, Ardern;Meir, Torrijos, Truss, Gendry;;A -> B;
+2023-02-01;fusion;;13:56;sub group (3);Meir, Torrijos, Truss;Gendry;;B -> A;
+2023-02-01;fusion;;13:59;full group (16);Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Genghis Khan, Gillard, Gandhi, Ardern;Meir, Torrijos, Truss, Gendry;;A -> B;
 2023-02-02;fission;11:35;;full group (16);Truss, Gillard, Cleopatra;Meir, Peron, Torrijos, Obama, Zelenskyy, Ardern, Mujica, Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan;;B <- A;
 2023-02-02;fusion;;11:42;sub group (3);Truss, Gillard, Cleopatra;Lula;;B -> A;
 2023-02-02;fission;11:49;;sub group (3);Truss, Gillard, Lula;Cleopatra;;B <- A;
