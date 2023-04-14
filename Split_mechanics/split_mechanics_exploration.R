@@ -9,7 +9,7 @@ Sys.setenv(TZ='UTC')
 #DIRECTORIES AND PARAMETERS
 codedir <- '~/Dropbox/code_ari/coatithon_code/'
 dir <- '~/Dropbox/coati/processed/' #directory where all data is stored
-group <- 'galaxy' #subdirectory where the group data is stored
+group <- 'presedente' #subdirectory where the group data is stored
 
 #get directory to group data
 groupdir <- paste0(dir,group)
@@ -69,4 +69,8 @@ events$tidx <- match(events$datetime, ts)
 events$n_A <- unlist(lapply(events$group_A_idxs,length))
 events$n_B <- unlist(lapply(events$group_B_idxs,length))
 
-analyse_ff_event(1, events, xs, ys)
+for(i in 1:nrow(events)){
+  print(i)
+  analyse_ff_event(i, events, xs, ys, plot=T, max_time = 1200)
+  print('')
+}

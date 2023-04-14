@@ -404,16 +404,34 @@ analyse_ff_event <- function(i, events, xs, ys, max_time = 1200, thresh_h = 50, 
   #1 = between thresholds
   #2 = above higher threshold
   dyad_dist_event <- dyad_dist[ti:tf]
-  if(max(dyad_dist_event,na.rm=T) < thresh_h){
-    upper <- max(dyad_dist_event,na.rm=T) - .001
-  } else{
-    upper <- thresh_h
+  after_idxs <- (max_time+1):(2*max_time+1) #indexes after the marked event
+  middle_idxs <- (max_time / 2):(max_time*3/2)
+  before_idxs <- 1:max_time #indexes before the marked event
+  if(event_type == 'fission'){
+    if(max(dyad_dist_event[after_idxs],na.rm=T) < thresh_h){
+      upper <- max(dyad_dist_event[after_idxs],na.rm=T) - .001
+    } else{
+      upper <- thresh_h
+    }
+    if(min(dyad_dist_event[middle_idxs],na.rm=T) > thresh_l){
+      lower <- min(dyad_dist_event[middle_idxs],na.rm=T) + .001
+    } else{
+      lower <- thresh_l
+    }
   }
-  if(min(dyad_dist_event,na.rm=T) > thresh_l){
-    lower <- min(dyad_dist_event,na.rm=T) + .001
-  } else{
-    lower <- thresh_l
+  if(event_type == 'fusion'){
+    if(max(dyad_dist_event[before_idxs],na.rm=T) < thresh_h){
+      upper <- max(dyad_dist_event[before_idxs],na.rm=T) - .001
+    } else{
+      upper <- thresh_h
+    }
+    if(min(dyad_dist_event[middle_idxs],na.rm=T) > thresh_l){
+      lower <- min(dyad_dist_event[middle_idxs],na.rm=T) + .001
+    } else{
+      lower <- thresh_l
+    }
   }
+  
   
   category <- rep(NA, length(dyad_dist_event))
   category[which(dyad_dist_event < lower)] <- 0
@@ -433,17 +451,16 @@ analyse_ff_event <- function(i, events, xs, ys, max_time = 1200, thresh_h = 50, 
   }
   
   #for seuqneces of hml or lmh (for fission and fusion respectively), get the time index when they start and end
-  for(r in 1:nrow(event_loc)){
-    event_loc$start_time <- ti + sum(seqs$lengths[1:event_loc$start[r]])
-    event_loc$end_time <- ti + sum(seqs$lengths[1:event_loc$end[r]-1])
+  if(nrow(event_loc)>0){
+    for(r in 1:nrow(event_loc)){
+      event_loc$start_time[r] <- ti + sum(seqs$lengths[1:event_loc$start[r]])
+      event_loc$end_time[r] <- ti + sum(seqs$lengths[1:event_loc$end[r]-1])
+    }
   }
+ 
+  print(nrow(event_loc))
+  #get the before and after times
   
-  #create an object to output the start and end times
-  start_time <- event_loc$start_time
-  end_time <- event_loc$end_time
-  out <- list(start_time = start_time, end_time = end_time)
-  
-
   if(plot == T){
     quartz() #open a new plot
     par(mfrow=c(2,1))
@@ -460,7 +477,7 @@ analyse_ff_event <- function(i, events, xs, ys, max_time = 1200, thresh_h = 50, 
     xmax <- max(max(xA[,ti:tf],na.rm=T),max(xB[,ti:tf],na.rm=T))
     ymin <- min(min(yA[,ti:tf],na.rm=T),min(yB[,ti:tf],na.rm=T))
     ymax <- max(max(yA[,ti:tf],na.rm=T),max(yB[,ti:tf],na.rm=T))
-    plot(NULL, xlim=c(xmin,xmax),ylim=c(ymin,ymax),asp=1, xlab='Northing', ylab = 'Easting', main = paste('(Red =', group_A_names, '), (Blue =', group_B_names,')'))
+    plot(NULL, xlim=c(xmin,xmax),ylim=c(ymin,ymax),asp=1, xlab='Easting', ylab = 'Northing', main = paste('(Red =', group_A_names, '), (Blue =', group_B_names,')'))
     for(j in 1:nrow(xA)){
       lines(xA[j,ti:tf],yA[j,ti:tf],type='l',col='#FF000033')
     }
@@ -483,8 +500,14 @@ analyse_ff_event <- function(i, events, xs, ys, max_time = 1200, thresh_h = 50, 
     points(xcA[event_loc$end_time],ycA[event_loc$end_time],pch = 4, col = 'green')
     points(xcB[event_loc$end_time],ycB[event_loc$end_time],pch = 4, col = 'green')
     
-    
   }
+  
+  #create an object to output the start and end times
+  start_time <- event_loc$start_time
+  end_time <- event_loc$end_time
+  out <- list(start_time = start_time, end_time = end_time)
+  
+  #return the output object
   invisible(out)
 }
 
