@@ -204,59 +204,120 @@ for(d in 1:(length(day_start_idxs)-1)){
 }
 
 
-#WORKING HERE - CLASSIFY EVENTS
 #go through event times and classify events into types
 changes <- data.frame(tidx = event_times)
 changes$datetime <- ts[changes$tidx]
 changes$event_type <- NA
-changes$group_A_idxs <- changes$group_B_idxs <- changes$group_C_idxs <- list(c(0,0))
-changes$group_A <- changes$group_B <- changes$group_C <- list(c(0,0))
-
+changes$n_groups_curr <- unlist(lapply(groups_list, length))[event_times]
+changes$n_groups_next <- unlist(lapply(groups_list, length))[event_times+1]
+changes$n_inds_curr <- changes$n_inds_next <- NA
 for(i in 1:nrow(changes)){
-  
   t <- changes$tidx[i]
   groups_curr <- groups_list[[t]]
   groups_next <- groups_list[[t+1]]
-  n_groups_curr <- length(groups_curr)
-  n_groups_next <- length(groups_next)
+  changes$n_inds_curr[i] <- sum(unlist(lapply(groups_curr, length)))
+  changes$n_inds_next[i] <- sum(unlist(lapply(groups_next, length)))
+}
+
+changes$event_type[which(changes$n_groups_curr < changes$n_groups_next & changes$n_inds_curr==changes$n_inds_next)] <- 'fission'
+changes$event_type[which(changes$n_groups_curr > changes$n_groups_next & changes$n_inds_curr==changes$n_inds_next)] <- 'fusion'
+
+#get groups for fissions and fusions
+changes$group_A_idxs <- changes$group_A <- changes$group_B_idxs <- changes$group_B <- list(c(0))
+fissions <- which(changes$event_type=='fission')
+fusions <- which(changes$event_type=='fusion')
+for(i in fissions){
   
-  #going from fewer to more groups
-  if((n_groups_next == 2) & (n_groups_curr == 1)){
-    changes$event_type[i] <- 'fission'
+  groups_curr <- groups_list[[changes$tidx[i]]]
+  groups_next <- groups_list[[changes$tidx[i]+1]]
+  n_groups_next <- changes$n_groups_next[i]
+  n_groups_curr <- changes$n_groups_curr[i]
+  
+  #if there are only 2 groups at the end, then name them A and B
+  if(n_groups_next==2){
     changes$group_A_idxs[i] <- groups_next[1]
     changes$group_B_idxs[i] <- groups_next[2]
   }
   
-  if((n_groups_next == 1) & (n_groups_next == 2)){
-    changes$event_type[i] <- 'fusion'
+  #if there are more than 2 groups, need to figure out which one changed
+  if(n_groups_next > 2){
+    matched_groups <- c()
+    for(j in 1:n_groups_next){
+      matched <- F
+      for(k in 1:n_groups_curr){
+        if(setequal(groups_next[[j]], groups_curr[[k]])){
+          matched <- T
+        }
+      }
+      if(matched){
+        matched_groups <- c(matched_groups, j)
+      }
+    }
+    unmatched_groups <- setdiff(1:n_groups_next, matched_groups)
+    if(length(unmatched_groups)==2){
+      changes$group_A_idxs[i] <- groups_next[unmatched_groups[1]]
+      changes$group_B_idxs[i] <- groups_next[unmatched_groups[2]]
+    }else{
+      print(i)
+    }
+    
+  }
+}
+
+for(i in fusions){
+  
+  groups_curr <- groups_list[[changes$tidx[i]]]
+  groups_next <- groups_list[[changes$tidx[i]+1]]
+  n_groups_next <- changes$n_groups_next[i]
+  n_groups_curr <- changes$n_groups_curr[i]
+  
+  #if there are only 2 groups at the start, then name them A and B
+  if(n_groups_curr==2){
     changes$group_A_idxs[i] <- groups_curr[1]
     changes$group_B_idxs[i] <- groups_curr[2]
   }
   
-
+  #if there are more than 2 groups, need to figure out which one changed
+  if(n_groups_curr > 2){
+    matched_groups <- c()
+    for(j in 1:n_groups_curr){
+      matched <- F
+      for(k in 1:n_groups_next){
+        if(setequal(groups_curr[[j]], groups_next[[k]])){
+          matched <- T
+        }
+      }
+      if(matched){
+        matched_groups <- c(matched_groups, j)
+      }
+    }
+    unmatched_groups <- setdiff(1:n_groups_curr, matched_groups)
+    if(length(unmatched_groups)==2){
+      changes$group_A_idxs[i] <- groups_curr[unmatched_groups[1]]
+      changes$group_B_idxs[i] <- groups_curr[unmatched_groups[2]]
+    }else{
+      print(i)
+    }
+    
+  }
 }
-changes$group_A <- changes$group_A_idxs
-changes$group_B <- changes$group_B_idxs
 
-which(changes$event_type=='fusion')
-
-
-analyse_ff_event(479, events = changes, xs, ys)
-
-i <- 105
-ti <- changes$tidx[i] - 600
-tf <- changes$tidx[i] + 600
-xmin <- min(xs[,ti:tf],na.rm=T)
-xmax <- max(xs[,ti:tf],na.rm=T)
-ymin <- min(ys[,ti:tf],na.rm=T)
-ymax <- max(ys[,ti:tf],na.rm=T)
-plot(NULL, xlim=c(xmin,xmax), ylim=c(ymin,ymax),asp=1)
-group_A <- changes$group_A_idxs[i][[1]]
-group_B <- changes$group_B_idxs[i][[1]]
-for(i in 1:length(group_A)){
-  lines(xs[group_A[i],ti:tf],ys[group_A[i],ti:tf], col = '#FF000033')
+#get coati names
+for(i in c(fissions,fusions)){
+  changes$group_A[i] <- list(coati_ids$name_short[changes$group_A_idxs[i][[1]]])
+  changes$group_B[i] <- list(coati_ids$name_short[changes$group_B_idxs[i][[1]]])
 }
-for(i in 1:length(group_B)){
-  lines(xs[group_B[i],ti:tf],ys[group_B[i],ti:tf], col = '#0000FF33')
-}
+
+#final events dataframe (call it events_detected)
+events_detected <- changes[c(fissions, fusions),c('tidx','datetime','event_type','group_A_idxs','group_B_idxs','group_A','group_B')]
+
+#get number of individuals in each subgroup
+events_detected$n_A <- sapply(events_detected$group_A_idxs, length)
+events_detected$n_B <- sapply(events_detected$group_B_idxs, length)
+
+#non-single-individual events
+non_singles <- which(events_detected$n_A != 1 & events_detected$n_B!=1)
+
+#visualize events
+analyse_ff_event(14, events = events_detected, xs, ys)
 
