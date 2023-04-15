@@ -3,8 +3,8 @@
 #--------PARAMS-------
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/'
-gps_file <- "galaxy_xy_10min_level0.RData"
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
+gps_file <- "galaxy_xy_10min_level1.RData"
 id_file <- 'coati_ids.RData'
 
 #list of Rs
@@ -167,7 +167,7 @@ library(ggthemes)
 #final plot:
 
 
-png(height = 600, width = 2000, units = 'px', filename = paste0(plot_dir,'sub_groupings_over_time_50m_4.png'))
+png(height = 800, width = 2000, units = 'px', filename = paste0(plot_dir,'sub_groupings_over_time_50m_2.png'))
 
 
 #g1 <- 
@@ -190,15 +190,16 @@ ggplot(data = test, aes(x = Panama_time,
                              color = id, 
                              group = id)) +
   scale_y_continuous("Sub-group number", limits = c(0, 6),expand=c(0,0), breaks = 0:5) +
-  theme(panel.background = element_rect(fill = 'azure3'), #changed colour to snow2 for the recursion markdown
-        panel.grid.major = element_line(color = 'azure3'),  
-        panel.grid.minor = element_line(color = 'azure3', size = 2)) +
-  scale_x_datetime(limits=c(as.POSIXct("2021-12-29 06:00:00"), as.POSIXct("2022-01-02 06:00:00"), tz = "America/Panama"), position = "top", date_breaks="1 day", expand=c(0,0)) +
+  theme(panel.background = element_rect(fill = 'lightsteelblue3'), #changed colour to snow2 for the recursion markdown
+        panel.grid.major = element_line(color = 'lightsteelblue3'),  
+        panel.grid.minor = element_line(color = 'lightsteelblue3', size = 2)) +
+  scale_x_datetime(limits=c(as.POSIXct("2022-01-05 10:00:00"), as.POSIXct("2022-01-06 00:00:00"), tz = "America/Panama"), position = "top", date_breaks="1 day", expand=c(0,0)) +
   xlab("Panama time") +
-  theme(axis.text=element_text(size=20),
-        axis.title=element_text(size=25),
-        legend.title = element_text(size=25),
-        legend.text = element_text(size=25), legend.key=element_rect(fill="white"))
+  theme(axis.text.x=element_text(size=25),
+        axis.text.y=element_text(size=30),
+        axis.title=element_text(size=30),
+        legend.title = element_text(size=35),
+        legend.text = element_text(size=35), legend.key=element_rect(fill="white"))
 #saveRDS(g1, file = paste0(plot_dir,"sub_groupings_over_time_50m_2.rds"))
 
 #readRDS(file = "C:/Users/egrout/Dropbox/coatithon/results/sub_groupings_over_time_50m_2.rds")
@@ -242,10 +243,10 @@ ggplot(data = test, aes(x = Panama_time,
                              group = id)) +
   scale_x_continuous(expand=c(0,0))+
   scale_y_continuous("Sub-group number", limits = c(-0.1, 6),expand=c(0,-0.2), breaks = 0:5) +
-  theme(panel.background = element_rect(fill = 'azure3'), #changed colour to snow2 for the recursion markdown
-        panel.grid.major = element_line(color = 'azure3'),  
-        panel.grid.minor = element_line(color = 'azure3', size = 2))+
-  scale_x_datetime(limits=c(as.POSIXct("2022-01-05 11:00:00"), as.POSIXct("2022-01-06 01:00:00"), tz = "America/Panama"), position = "top", date_breaks="6 hour", expand=c(0,0)) +
+  theme(panel.background = element_rect(fill = 'lightsteelblue3'), #changed colour to snow2 for the recursion markdown
+        panel.grid.major = element_line(color = 'lightsteelblue3'),  
+        panel.grid.minor = element_line(color = 'lightsteelblue3', size = 2))+
+  scale_x_datetime(limits=c(as.POSIXct("2022-01-05 10:00:00"), as.POSIXct("2022-01-06 00:00:00"), tz = "America/Panama"), position = "top", date_breaks="6 hour", expand=c(0,0)) +
   xlab("Panama time") +
   theme(axis.text=element_text(size=20),
         axis.title=element_text(size=25),
