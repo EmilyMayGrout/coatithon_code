@@ -14,6 +14,10 @@ group <- 'galaxy' #subdirectory where the group data is stored
 #get directory to group data
 groupdir <- paste0(dir,group)
 
+#SOURCE FUNCTIONS
+setwd(codedir)
+source('coati_function_library.R')
+
 #LOAD DATA
 #navigate into directory
 setwd(codedir)
@@ -187,6 +191,7 @@ for(d in 1:(length(day_start_idxs)-1)){
     }
     n_groups_curr <- length(groups_curr)
     n_groups_next <- length(groups_next)
+    matches <- rep(F, n_groups_curr)
     for(i in 1:n_groups_curr){
       group_curr <- groups_curr[[i]]
       matched <- F
@@ -196,8 +201,9 @@ for(d in 1:(length(day_start_idxs)-1)){
           matched <- T
         }
       }
+      matches[i] <- matched
     }
-    if(!matched){
+    if(sum(matches)<n_groups_curr){
       event_times <- c(event_times, t)
     }
   }
@@ -303,6 +309,7 @@ for(i in fusions){
 }
 
 #get coati names
+coati_ids$name_short <- sapply(coati_ids$name, function(x){return(substr(x,1,3))})
 for(i in c(fissions,fusions)){
   changes$group_A[i] <- list(coati_ids$name_short[changes$group_A_idxs[i][[1]]])
   changes$group_B[i] <- list(coati_ids$name_short[changes$group_B_idxs[i][[1]]])
@@ -315,9 +322,44 @@ events_detected <- changes[c(fissions, fusions),c('tidx','datetime','event_type'
 events_detected$n_A <- sapply(events_detected$group_A_idxs, length)
 events_detected$n_B <- sapply(events_detected$group_B_idxs, length)
 
+#sort by time
+events_detected <- events_detected[order(events_detected$tidx),]
+
 #non-single-individual events
 non_singles <- which(events_detected$n_A != 1 & events_detected$n_B!=1)
 
 #visualize events
-analyse_ff_event(14, events = events_detected, xs, ys)
 
+analyse_ff_event(11, events = events_detected, xs, ys, max_time = 600)
+
+#animate events
+i <- 10
+max_time <- 600
+step <- 5
+
+ti <- events_detected$tidx[i] - max_time
+tf <- events_detected$tidx[i] + max_time
+group_A_idxs <- events_detected$group_A_idxs[i][[1]]
+group_B_idxs <- events_detected$group_B_idxs[i][[1]]
+all_idxs <- 1:nrow(xs)
+not_involved_idxs <- setdiff(all_idxs, c(group_A_idxs, group_B_idxs))
+event_type <- events_detected$event_type[i]
+xmin <- min(xs[,ti:tf],na.rm=T)
+xmax <- max(xs[,ti:tf],na.rm=T)
+ymin <- min(ys[,ti:tf],na.rm=T)
+ymax <- max(ys[,ti:tf],na.rm=T)
+quartz()
+tseq <- seq(ti,tf,step)
+for(t in tseq){
+  #clear()
+  if(t >= events_detected$tidx[i]){
+    points((xmax+xmin)/2,(ymin+ymax)/2,col='orange',cex = 5)
+  }
+  plot(NULL, xlim=c(xmin,xmax),ylim=c(ymin,ymax),asp=1,xlab='Easting',ylab='Northing',main = event_type)
+  if(length(not_involved_idxs)>0){
+    points(xs[not_involved_idxs,t],ys[not_involved_idxs,t],col='#00000033',pch=19)
+  }
+  points(xs[group_A_idxs,t],ys[group_A_idxs,t],pch=19, col = 'red')
+  points(xs[group_B_idxs,t],ys[group_B_idxs,t],pch=19, col = 'blue')
+  Sys.sleep(.01)
+}
