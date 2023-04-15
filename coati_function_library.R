@@ -159,7 +159,7 @@ visualize_network_matrix <- function(net, coati_ids){
   
   zmin <- min(net, na.rm=T)
   zmax <- max(net, na.rm=T)
-  par(mgp=c(3, 1, 0), mar=c(11,10,6,8)) #bottom, left, top, and right ##CHANGE THESE VALUES IF DOING FORLOOP OF THE MATRIX PLOTS AND THEY DON'T FIT
+  par(mgp=c(3, 1, 0), mar=c(11,10,6,4)) #bottom, left, top, and right ##CHANGE THESE VALUES IF DOING FORLOOP OF THE MATRIX PLOTS AND THEY DON'T FIT
   image.plot(net, col = viridis(256), zlim=c(zmin,zmax), xaxt= 'n', yaxt = 'n', legend.cex = 5, legend.width = 5,legend.mar = 6, axis.args=list(cex.axis=2))
   axis(1, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2, cex.axis=1.5)
   axis(2, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2,  cex.axis=1.5)
@@ -462,7 +462,8 @@ analyse_ff_event <- function(i, events, xs, ys, max_time = 1200, thresh_h = 50, 
   #get the before and after times
   
   if(plot == T){
-    quartz() #open a new plot
+    #quartz() #open a new plot for mac
+    windows() #for windows
     par(mfrow=c(2,1))
     plot(ti:tf, dyad_dist[ti:tf],type='l', main = paste(event_type, datetime),xlab='Time (min)',ylab = 'Distance apart (m)')
     abline(v=t_event,col='black', lty = 2)

@@ -9,10 +9,17 @@ Sys.setenv(TZ='UTC')
 #DIRECTORIES AND PARAMETERS
 codedir <- '~/Dropbox/code_ari/coatithon_code/'
 dir <- '~/Dropbox/coati/processed/' #directory where all data is stored
-group <- 'presedente' #subdirectory where the group data is stored
+group <- 'galaxy' #subdirectory where the group data is stored
 
 #get directory to group data
 groupdir <- paste0(dir,group)
+
+#for Emily:
+codedir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
+groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
+groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
+
+
 
 #FUNCTIONS
 #read in functions

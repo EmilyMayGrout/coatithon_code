@@ -9,8 +9,8 @@ min_tracked <- 7 #minimum number of individuals tracked to include in analysis (
 
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/'
-gps_file <- "galaxy_xy_10min_level0.RData"
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
+gps_file <- "galaxy_xy_10min_level1.RData"
 id_file <- 'coati_ids.RData'
 
 #-----LIBRARIES-----
@@ -148,11 +148,17 @@ give.n <- function(x){
 }
 
 
+#remove times when alone
+
+speed_days <- speed_days[!(speed_days$context == "alone"),]
+
+
+
 png(height = 600, width = 900, units = 'px', filename = paste0(plot_dir,'speeds_in_subgroups_all.png'))
 
 ggplot(speed_days, aes(x = context, y = speed, fill = context)) + 
   geom_violin() +theme_classic()+
-  scale_fill_manual(values=c("darkslategray2","darkslategray3", "darkslategray4"))+
+  scale_fill_manual(values=c("darkslategray2", "darkslategray4"))+
   theme(axis.text=element_text(size=20),
         axis.title=element_text(size=24),
         legend.title = element_text(size=24),
@@ -174,7 +180,7 @@ png(height = 1200, width = 1500, units = 'px', filename = paste0(plot_dir,'speed
 
 ggplot(speed_days, aes(x = context, y = speed, fill = context)) + 
   geom_violin() +theme_classic()+
-  scale_fill_manual(values=c("darkslategray2","darkslategray3", "darkslategray4"))+
+  scale_fill_manual(values=c("darkslategray2", "darkslategray4"))+
   theme(axis.text=element_text(size=20),
         axis.title=element_text(size=24),
         legend.title = element_text(size=24),
