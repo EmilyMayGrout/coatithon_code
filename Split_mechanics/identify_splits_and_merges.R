@@ -33,7 +33,26 @@ library(dbscan)
 #In cases where the number of subgroups went from 1 to 2 (for a fission) or 2 to
 #1 (for a fusion), identify the members of the 2 subgroups as group A and B 
 #(labels arbitrary). In cases where there were more subgroups, first 
-
+#INPUTS:
+# R_inner, R_outer: [numeric] inner and outer thresholds respectively
+# xs, ys: [n_inds x n_times matrices] of x and y UTM coordinates
+# ts: vector of timestamps
+# coati_ids: coati ids data frame
+#OUTPUTS:
+# out: a list of outputs containing
+#   out$events_detected: data frame with info on detected fissions and fusions.
+#     $tidx: (initial) time index of the event
+#     $event_type: "fissin" or "fusion"
+#     $group_A_idxs, $group_B_idxs: individual idxs of subgroup members
+#     $group_A, $group_B: first 3 letters of names of subgroup members
+#     $n_A, n_B: number of individuals in each subgroup
+#   out$groups_list: list of subgroups in each timestep
+#     groups_list[[t]] gives a list of the subgroups
+#     groups_list[[t]][[1]] gives the vector of the first subgroup, etc.
+#   out$together: [n_inds x n_inds x n_times matrix] of whether individuals are 
+#     connected (1) or not (0) or unknown (NA)
+#   changes: data frame containing all the subgroups membership changes (not 
+#     just ones identified as fissions or fusions)
 detect_fissions_and_fusions <- function(R_inner, R_outer, xs = xs, ys = ys, ts = ts, coati_ids = coati_ids, verbose = T){
   
   #----Identify subgroups at each point
@@ -366,7 +385,7 @@ load(file=paste0(group,'_xy_highres_level1.RData'))
 
 ff_data <- detect_fissions_and_fusions(R_inner, R_outer, xs, ys, ts, coati_ids)
 
-analyse_ff_event(11, events = events_detected, xs, ys, max_time = 600)
+analyse_ff_event(11, events = ff_data$events_detected, xs, ys, max_time = 600)
 
 #animate events
 i <- 10
