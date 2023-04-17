@@ -9,7 +9,7 @@ Sys.setenv(TZ='UTC')
 #DIRECTORIES AND PARAMETERS
 codedir <- '~/Dropbox/code_ari/coatithon_code/'
 dir <- '~/Dropbox/coati/processed/' #directory where all data is stored
-group <- 'galaxy' #subdirectory where the group data is stored
+group <- 'presedente' #subdirectory where the group data is stored
 
 #get directory to group data
 groupdir <- paste0(dir,group)
@@ -79,10 +79,9 @@ events$n_B <- unlist(lapply(events$group_B_idxs,length))
 events$before_time <- events$start_time <- events$end_time <- events$after_time <- NA
 events$AB_before_disp <- events$A_during_disp <- events$B_during_disp <- NA
 events$split_angle <- events$turn_angle_A <- events$turn_angle_B <- NA
-for(i in c(1:nrow(events))[-58]){
+for(i in c(1:nrow(events))){
   print(i)
   ff_data <- analyse_ff_event(i, events, xs, ys, ts, plot=F, max_time = 600)
-  print('')
   if(!is.null(ff_data$disps)){
     events$AB_before_disp[i] <- ff_data$disps['AB','before']
     events$A_during_disp[i] <- ff_data$disps['A','during']
@@ -96,5 +95,3 @@ for(i in c(1:nrow(events))[-58]){
   events$end_time[i] <- ff_data$end_time
   events$after_time[i] <- ff_data$after_time
 }
-
-plot(events$A_during_disp, events$B_during_disp)

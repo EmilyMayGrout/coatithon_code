@@ -1,5 +1,4 @@
 #TODO: Fix the border case in event 58, where the lower threshold gets set to 81
-#TODO: Add in speed instead of displacement
 
 #library of general functions
 
@@ -88,7 +87,6 @@ utm.to.latlon <- function(EastNorths,LonsCol1=TRUE,utm.zone = '34',southern_hemi
 #   $subgroup_counts [max_n_subgroups x n_times matrix]: matrix giving the number of individuals in each subgroup (with NAs when there are fewer subgroups than the max)
 #   $R [numeric]: radius used in DBSCAN
 get_subgroup_data <- function(xs, ys, R){
-  
   
   n_inds <- nrow(xs)
   n_times <- ncol(xs)
@@ -384,7 +382,7 @@ match_coati_names <- function(subgroup_names, coati_ids){
 #OUTPUTS:
 # some info (TBD) about the ff event
 # a plot showing (top) dyadic distance over time and (bottom) a visualization of trajectories
-analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 1200, thresh_h = 50, thresh_l = 15, time_window = 300, plot = T){
+analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 600, thresh_h = 50, thresh_l = 15, time_window = 300, plot = T){
   t_event <- events$tidx[i] #time of the event
   group_A <- events$group_A_idxs[i][[1]] #group A individual idxs
   group_B <- events$group_B_idxs[i][[1]] #group B individual idxs
@@ -446,7 +444,17 @@ analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 1200, thresh_h = 
     }
   }
   
+  #if the upper bound was changed to something < thresh_l, move threshold back to thresh_h
+  if(upper <= thresh_l){
+    upper <- thresh_h
+  }
+  #likewise for lower bound
+  if(lower >= thresh_h){
+    lower <- thresh_l
+  }
   
+  #get category of each moment in time
+  #0 = below lower, 1 = middle, 2 = above upper
   category <- rep(NA, length(dyad_dist_event))
   category[which(dyad_dist_event < lower)] <- 0
   category[which(dyad_dist_event >= lower & dyad_dist_event < upper)] <- 1
@@ -472,9 +480,6 @@ analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 1200, thresh_h = 
     }
   }
  
-  print(nrow(event_loc))
-  #get the before and after times
-  
   if(plot == T){
     quartz() #open a new plot for mac
     par(mfrow=c(2,1))
@@ -519,7 +524,6 @@ analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 1200, thresh_h = 
   #create an object to output the start and end times
   start_time <- event_loc$start_time
   end_time <- event_loc$end_time
-  out <- list(start_time = start_time, end_time = end_time)
   
   #if there is more than one start time, go with the closest to the identified fission or fusion point
   if(length(start_time)>1){
@@ -533,7 +537,12 @@ analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 1200, thresh_h = 
     time_diff <- abs(end_time-ff_time)
     end_time <- end_time[which(time_diff==min(time_diff))]
   }
+  #save to output
+  out <- list(start_time = start_time, end_time = end_time)
   
+  #if start time not found (NULL) change to NA
+  if(is.null(start_time)){start_time <- NA}
+  if(is.null(end_time)){end_time <- NA}
   
   if(!is.na(start_time) & !is.na(end_time)){
     #GET BEFORE AND AFTER TIMES
@@ -627,6 +636,15 @@ analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 1200, thresh_h = 
     colnames(xdiffs) <- colnames(ydiffs) <- c('before','during','after')
     disps <- sqrt(xdiffs^2 + ydiffs^2)
     out$disps <- disps
+    
+    #speeds in m / min
+    dts <- diff(times)
+    speeds <- disps
+    for(j in 1:length(dts)){
+      speeds[,j] <- disps[,j] / dts[j] * 60
+    }
+    
+    out$speeds <- speeds
     
     #GET ANGLES
     #split angle, turn angle of A, turn angle of B relative to initial group heading
