@@ -6,6 +6,11 @@ library(rgdal)
 library(lubridate)
 library(stringr)
 
+#GRAPHICS FOR WINDOWS AND MAC
+if(.Platform$OS.type=="windows") {
+  quartz<-function() windows()
+}
+
 
 #LAT/LON TO UTM CONVERSIONS (AND VICE VERSA)
 #Converts a matrix of lons and lats (lons first column, lats second column) to UTM
@@ -462,8 +467,7 @@ analyse_ff_event <- function(i, events, xs, ys, max_time = 1200, thresh_h = 50, 
   #get the before and after times
   
   if(plot == T){
-    #quartz() #open a new plot for mac
-    windows() #for windows
+    quartz() #open a new plot for mac
     par(mfrow=c(2,1))
     plot(ti:tf, dyad_dist[ti:tf],type='l', main = paste(event_type, datetime),xlab='Time (min)',ylab = 'Distance apart (m)')
     abline(v=t_event,col='black', lty = 2)
