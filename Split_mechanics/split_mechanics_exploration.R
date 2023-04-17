@@ -15,9 +15,9 @@ group <- 'galaxy' #subdirectory where the group data is stored
 groupdir <- paste0(dir,group)
 
 #for Emily:
-codedir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
-groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
+#codedir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
+#groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
+#groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
 
 
 
@@ -76,8 +76,25 @@ events$tidx <- match(events$datetime, ts)
 events$n_A <- unlist(lapply(events$group_A_idxs,length))
 events$n_B <- unlist(lapply(events$group_B_idxs,length))
 
-for(i in 1:nrow(events)){
+events$before_time <- events$start_time <- events$end_time <- events$after_time <- NA
+events$AB_before_disp <- events$A_during_disp <- events$B_during_disp <- NA
+events$split_angle <- events$turn_angle_A <- events$turn_angle_B <- NA
+for(i in c(1:nrow(events))[-58]){
   print(i)
-  analyse_ff_event(i, events, xs, ys, plot=T, max_time = 1200)
+  ff_data <- analyse_ff_event(i, events, xs, ys, ts, plot=F, max_time = 600)
   print('')
+  if(!is.null(ff_data$disps)){
+    events$AB_before_disp[i] <- ff_data$disps['AB','before']
+    events$A_during_disp[i] <- ff_data$disps['A','during']
+    events$B_during_disp[i] <- ff_data$disps['B','during']
+  }
+  events$split_angle[i] <- ff_data$split_angle
+  events$turn_angle_A[i] <- ff_data$turn_angle_A
+  events$turn_angle_B[i] <- ff_data$turn_angle_B
+  events$before_time[i] <- ff_data$before_time
+  events$start_time[i] <- ff_data$start_time
+  events$end_time[i] <- ff_data$end_time
+  events$after_time[i] <- ff_data$after_time
 }
+
+plot(events$A_during_disp, events$B_during_disp)

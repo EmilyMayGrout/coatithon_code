@@ -1,3 +1,6 @@
+#TODO: Fix the border case in event 58, where the lower threshold gets set to 81
+#TODO: Add in speed instead of displacement
+
 #library of general functions
 
 #LIBRARIES
@@ -372,10 +375,16 @@ match_coati_names <- function(subgroup_names, coati_ids){
 # events: a data frame of manually-labeled ff events
 # i: index to the row to use
 # xs, ys: matrices of x and y coordinates
+# ts:
+# max_time
+# thresh_h
+# thresh_l
+# time_window
+# plot:
 #OUTPUTS:
 # some info (TBD) about the ff event
 # a plot showing (top) dyadic distance over time and (bottom) a visualization of trajectories
-analyse_ff_event <- function(i, events, xs, ys, max_time = 1200, thresh_h = 50, thresh_l = 15, plot = T){
+analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 1200, thresh_h = 50, thresh_l = 15, time_window = 300, plot = T){
   t_event <- events$tidx[i] #time of the event
   group_A <- events$group_A_idxs[i][[1]] #group A individual idxs
   group_B <- events$group_B_idxs[i][[1]] #group B individual idxs
@@ -512,8 +521,177 @@ analyse_ff_event <- function(i, events, xs, ys, max_time = 1200, thresh_h = 50, 
   end_time <- event_loc$end_time
   out <- list(start_time = start_time, end_time = end_time)
   
+  #if there is more than one start time, go with the closest to the identified fission or fusion point
+  if(length(start_time)>1){
+    ff_time <- events$tidx[i]
+    time_diff <- abs(start_time-ff_time)
+    start_time <- start_time[which(time_diff==min(time_diff))]
+  }
+  #same for end time
+  if(length(end_time)>1){
+    ff_time <- events$tidx[i]
+    time_diff <- abs(end_time-ff_time)
+    end_time <- end_time[which(time_diff==min(time_diff))]
+  }
+  
+  
+  if(!is.na(start_time) & !is.na(end_time)){
+    #GET BEFORE AND AFTER TIMES
+    #find the before_time and after_time (times before the start time and after 
+    #the end time of the event)
+    min_before_time <- start_time - time_window
+    max_after_time <- end_time + time_window
+    thresh_m <- (thresh_h + thresh_l)/2 #middle threshold is average of upper and lower
+    #go backward in time until the two groups cross thresh_m or until the time window has elapsed 
+    for(t in seq(start_time, min_before_time, -1)){
+      xc_A <- mean(xs[events$group_A_idxs[i][[1]], t], na.rm=T)
+      yc_A <- mean(ys[events$group_A_idxs[i][[1]], t], na.rm=T)
+      xc_B <- mean(xs[events$group_B_idxs[i][[1]], t], na.rm=T)
+      yc_B <- mean(ys[events$group_B_idxs[i][[1]], t], na.rm=T)
+      dist_apart <- sqrt((xc_A - xc_B)^2 + (yc_A - yc_B)^2)
+      #if you hit an NA, then the before time is undefined - t <- NA and break
+      if(is.na(dist_apart)){
+        t <- NA
+        break
+      }
+      if(events$event_type[i] == 'fission' & dist_apart > thresh_m){
+        break
+      }
+      if(events$event_type[i] == 'fusion' & dist_apart < thresh_m){
+        break
+      }
+    }
+    #store the time, which will either be determined by the time window or by the 
+    #groups crossing the threshold
+    before_time <- t
+    
+    #if the before time is on a different date, make it NA
+    if(!is.na(before_time)){
+      if(date(ts[before_time])!= date(ts[start_time])){
+        before_time <- NA
+      }
+    }
+    
+    #same thing for the after times
+    for(t in seq(end_time, max_after_time, 1)){
+      xc_A <- mean(xs[events$group_A_idxs[i][[1]], t], na.rm=T)
+      yc_A <- mean(ys[events$group_A_idxs[i][[1]], t], na.rm=T)
+      xc_B <- mean(xs[events$group_B_idxs[i][[1]], t], na.rm=T)
+      yc_B <- mean(ys[events$group_B_idxs[i][[1]], t], na.rm=T)
+      dist_apart <- sqrt((xc_A - xc_B)^2 + (yc_A - yc_B)^2)
+      #if you hit an NA, then the after time is undefined - t <- NA and break
+      if(is.na(dist_apart)){
+        t <- NA
+        break
+      }
+      if(events$event_type[i] == 'fission' & dist_apart < thresh_m){
+        break
+      }
+      if(events$event_type[i] == 'fusion' & dist_apart > thresh_m){
+        break
+      }
+    }
+    
+    after_time <- t
+    
+    #if the after time is on a different date, make it NA
+    if(!is.na(after_time)){
+      if(date(ts[after_time])!= date(ts[end_time])){
+        after_time <- NA
+      }
+    }
+    
+    #store the before and after times for later returning
+    out$before_time <- before_time
+    out$after_time <- after_time
+    
+    #GET SPEEDS BEFORE AND AFTER 
+    #Get centroid locations for time_before, time_start, time_end, time_after
+    times <- c(before_time, start_time, end_time, after_time)
+    xs_AB <- ys_AB <- matrix(NA, nrow = 3, ncol = length(times))
+    row.names(xs_AB) <- row.names(ys_AB) <- c('A','B','AB')
+    colnames(xs_AB) <- colnames(ys_AB) <- c('before_time','start_time','end_time','after_time')
+    for(t in 1:length(times)){
+      xs_AB[1,t] <- mean(xs[events$group_A_idxs[i][[1]], times[t]],na.rm=T)
+      xs_AB[2,t] <- mean(xs[events$group_B_idxs[i][[1]], times[t]],na.rm=T)
+      xs_AB[3,t] <- mean(xs[c(events$group_A_idxs[i][[1]],events$group_B_idxs[i][[1]]), times[t]],na.rm=T)
+      ys_AB[1,t] <- mean(ys[events$group_A_idxs[i][[1]], times[t]],na.rm=T)
+      ys_AB[2,t] <- mean(ys[events$group_B_idxs[i][[1]], times[t]],na.rm=T)
+      ys_AB[3,t] <- mean(ys[c(events$group_A_idxs[i][[1]],events$group_B_idxs[i][[1]]), times[t]],na.rm=T)
+    }
+    
+    #get displacements before during and after
+    xdiffs <- t(diff(t(xs_AB)))
+    ydiffs <- t(diff(t(ys_AB)))
+    
+    colnames(xdiffs) <- colnames(ydiffs) <- c('before','during','after')
+    disps <- sqrt(xdiffs^2 + ydiffs^2)
+    out$disps <- disps
+    
+    #GET ANGLES
+    #split angle, turn angle of A, turn angle of B relative to initial group heading
+    #see diagram
+    split_angle <- angle_between_vectors(x1_i = xs_AB['AB','start_time'],
+                                         y1_i = ys_AB['AB','start_time'],
+                                         x1_f = xs_AB['A','end_time'],
+                                         y1_f = ys_AB['A', 'end_time'],
+                                         x2_i = xs_AB['AB', 'start_time'],
+                                         y2_i = ys_AB['AB', 'start_time'],
+                                         x2_f = xs_AB['B', 'end_time'],
+                                         y2_f = ys_AB['B', 'end_time'])
+    turn_angle_A <- angle_between_vectors(x1_i = xs_AB['AB','before_time'],
+                                          y1_i = ys_AB['AB','before_time'],
+                                          x1_f = xs_AB['AB','start_time'],
+                                          y1_f = ys_AB['AB', 'start_time'],
+                                          x2_i = xs_AB['AB', 'start_time'],
+                                          y2_i = ys_AB['AB', 'start_time'],
+                                          x2_f = xs_AB['A', 'end_time'],
+                                          y2_f = ys_AB['A', 'end_time'])
+    turn_angle_B <- angle_between_vectors(x1_i = xs_AB['AB','before_time'],
+                                          y1_i = ys_AB['AB','before_time'],
+                                          x1_f = xs_AB['AB','start_time'],
+                                          y1_f = ys_AB['AB', 'start_time'],
+                                          x2_i = xs_AB['AB', 'start_time'],
+                                          y2_i = ys_AB['AB', 'start_time'],
+                                          x2_f = xs_AB['B', 'end_time'],
+                                          y2_f = ys_AB['B', 'end_time'])
+    
+    out$turn_angle_A <- turn_angle_A
+    out$turn_angle_B <- turn_angle_B
+    out$split_angle <- split_angle
+  } else{
+    out$start_time <- out$end_time <- out$before_time <- out$after_time <- NA
+    out$turn_angle_A <- out$turn_angle_B <- out$split_angle <- NA
+    out$disps <- NULL
+  }
+  
   #return the output object
   invisible(out)
+}
+
+#Angle between vectors in degrees
+angle_between_vectors <- function(x1_i, y1_i, x1_f, y1_f, x2_i, y2_i, x2_f, y2_f){
+  
+  dx1 <- x1_f - x1_i
+  dx2 <- x2_f - x2_i
+  dy1 <- y1_f - y1_i
+  dy2 <- y2_f - y2_i
+  
+  #get dot product
+  dot <- dx1*dx2 + dy1*dy2
+  
+  #magnitude of vectors (length)
+  mag1 <- sqrt(dx1^2 + dy1^2)
+  mag2 <- sqrt(dx2^2 + dy2^2)
+  
+  #cos of angle
+  cosang <- dot / (mag1* mag2)
+  
+  #get the angle
+  angle <- acos(cosang)*180/pi
+  
+  return(angle)
+
 }
 
 #Detect fissions and fusions using "sticky-DBSCAN" method from Libera et al. 
@@ -856,6 +1034,9 @@ detect_fissions_and_fusions <- function(R_inner, R_outer, xs = xs, ys = ys, ts =
   
   #sort by time
   events_detected <- events_detected[order(events_detected$tidx),]
+  
+  #add index column
+  events_detected$event_idx <- 1:nrow(events_detected)
   
   if(verbose){print('Done.')}
   
