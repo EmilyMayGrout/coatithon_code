@@ -15,10 +15,11 @@ group <- 'galaxy' #subdirectory where the group data is stored
 groupdir <- paste0(dir,group)
 
 #for Emily:
-#codedir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-#groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
+codedir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
+groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
 #groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
-
+#plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
 
 
 #FUNCTIONS
@@ -97,4 +98,66 @@ for(i in c(1:nrow(events))[-58]){
   events$after_time[i] <- ff_data$after_time
 }
 
-plot(events$A_during_disp, events$B_during_disp)
+
+png(height = 1700, width = 2000, units = 'px', filename = paste0(plot_dir,'subgroup_dist_travelled_duringfission.png'))
+par(mfrow=c(2,2), mar = c(10,10,10,10),(mgp=c(3,5,1))) #bottom, left, top, right)
+plot(events$A_during_disp, events$B_during_disp, pch = 20, xlab = "sub-group A", ylab = "sub-group B", main = 'Distance travelled during fission event (m)', cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3,col = "aquamarine3",mgp=c(5,2,.5))
+plot(events$turn_angle_A, events$turn_angle_B, pch = 20, xlab = "sub-group A", ylab = "sub-group B", main = 'Turn angle after fission event (degrees)', cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3,col = "coral3",mgp=c(5,2,.5))
+hist(events$AB_before_disp, main = "Distance travelled 10 minutes before displacement (m)", xlab = '', col = "aquamarine3",cex.axis = 3, cex.lab = 3, cex.main = 3,mgp=c(5,2,.5))
+hist(events$split_angle, main = "Split angle between sub-groups (degrees)", xlab = '', cex.axis = 3, cex.lab = 3, cex.main = 3,col = "coral3",mgp=c(5,2,.5))
+
+dev.off()
+
+#adding age class as a number in coati_ids
+coati_ids$age_class <- NA
+coati_ids$age_class[coati_ids$age == "Juvenile"] <- 1
+coati_ids$age_class[coati_ids$age == "Sub-adult"] <- 2
+coati_ids$age_class[coati_ids$age == "Adult"] <- 3
+
+
+#this for loop is running through each groups IDs and assigning their age class and getting the groups average age
+events$A_average_grp_age <- NA
+events$A_age_each_ind <- events$group_A_idxs
+events$B_average_grp_age <- NA
+events$B_age_each_ind <- events$group_B_idxs
+
+i = 2
+for (i in 1:nrow(events)){
+  v1 <- unlist(events$A_age_each_ind[i])
+  v1[v1 == 1] <- 1
+  v1[v1 == 2] <- 3
+  v1[v1 == 3] <- 3
+  v1[v1 == 4] <- 3
+  v1[v1 == 5] <- 3
+  v1[v1 == 6] <- 3
+  v1[v1 == 7] <- 2
+  v1[v1 == 8] <- 2
+  v1[v1 == 9] <- 2
+  v1[v1 == 10] <- 3
+  v1[v1 == 11] <- 3
+  events$A_average_grp_age[i] <- mean(v1)
+  events$A_n_adults[i] <- length(v1[v1=="3"])
+  events$A_age_each_ind[i] <- relist((v1), skeleton=events$A_age_each_ind[i])
+  
+  #for  group
+  v1 <- unlist(events$B_age_each_ind[i])
+  v1[v1 == 1] <- 1
+  v1[v1 == 2] <- 3
+  v1[v1 == 3] <- 3
+  v1[v1 == 4] <- 3
+  v1[v1 == 5] <- 3
+  v1[v1 == 6] <- 3
+  v1[v1 == 7] <- 2
+  v1[v1 == 8] <- 2
+  v1[v1 == 9] <- 2
+  v1[v1 == 10] <- 3
+  v1[v1 == 11] <- 3
+  events$B_average_grp_age[i] <- mean(v1)
+  events$B_n_adults[i] <- length(v1[v1=="3"])
+  events$B_age_each_ind[i] <- relist((v1), skeleton=events$B_age_each_ind[i])
+
+  
+}
+
+
+
