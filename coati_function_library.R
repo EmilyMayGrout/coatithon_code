@@ -368,20 +368,124 @@ match_coati_names <- function(subgroup_names, coati_ids){
   
 }
 
-#analyse and make a visualization of the fission-fusion event
+#ANALYSE_FF_EVENT
+#Analyse (and, if plot=T make a visualization of) a fission-fusion event
+#This function takes in information about a fission or fusion event as well as
+#tracking data to identify relevant time points in a fission or fusion event.
+#In particular, the start_time and end_time of the event are determined based on
+#a double threshold method, then a before_time and after_time are identified. 
+#This identifies 3 phases of the event: before (before_time:start_time), during
+#(start_time:end_time) and after (end_time:after_time).
+#Finally the displacements and speeds of the subgroups during these phases and various 
+#relevant angles are calculated. More details below.
+#---How are the start and end time identified?---
+#As a start, we look at a window of time around an identified event (can be 
+#manually or automatically identified). The size of the window is determined by
+#the parameter 'max_time', and we go from (tidx - max_time):(tidx + max_time) 
+#where tidx is the identified event time index.
+#Within the window, we compute the distance between the centroids of the two 
+#subgroups that are fissioning or fusioning at each time (again, the subgroups
+#could be manually identified or automatically identified). 
+#We then use a double threshold method to determine the start and end point of
+#the fission or fusion event within that time window. To do so, we first 
+#categorize all time points as being above the higher threshold thresh_h (2), 
+#between the two thresholds (1), or below the lower threshold thresh_l (0). We 
+#then identify contiguous periods of time where the dyadic distance went from 
+#2-111111(any number of ones)-0 (i.e. high-mid-low) for a fusion or 0-1111...-2
+#(i.e. low-mid-high) for a fission. If there are multiple possible time periods
+#detected within the window, we choose the one that is closest to tidx. (See also
+#subtlety 1 below).
+#---How are the before and after times identified?---
+#The before time is defined as the time point tidx - time_window (default 
+#time_window = 300s), unless the two groups are not sufficiently together (for
+#a fission) or apart (for a fusion) at that time. If the latter, the before_time
+#is identified as the point just before the two subgroups cross a threshold midway
+#between thresh_l and thresh_h (i.e. at (thresh_l + thresh_h) / 2). The logic here
+#is that, for a fusion we are looking for what the full group (combination of the
+#two eventual subgroups) was doing before they began to split. However, we do not
+#want this point to fall during a prior fusion event, so we require the centroids
+#of the two subgroups to be less than (thresh_l + thresh_h) / 2 distance apart.
+#The after time is defined in a parallel way, but using the time period after the
+#event. It is usually set to tidx + time_window, unless the subgroups come back too
+#close together (for a fission) or go too far apart (for a fusion). Again, we use
+#the time just prior to crossing the midway point between the two thresholds as
+#the end time, if this threshold is crossed before time_window seconds has elapsed.
+#---How are the displacements defined?---
+#We compute the displacement of the centroid of each subgroup (group A and group B)
+#as well as the displacement of the centroid of the combined group (group AB) during
+#each of the time windows: before (before_time:start_time), during (start_time:end_time)
+#and after (end_time:after_time).
+#---How are the angles defined?---
+#We define 3 relevant angles relevant to a fission event (might define more later
+#for merge events):
+# split_angle: this is the angle at which the two groups split. It is defined as
+#   the angle traced out by the points p_A(end_time), p_AB(start_time), and p_B(end_time)
+#   where p_A(t) is the position of subgroup A's centroid at time (t) and likewise
+#   for subgroup B and the combined group. 
+# turn_angle_A: the turning angle of subgroup A. This is defined as the angle
+#   formed by the points p_AB(before_time), p_AB(start_time), and p_A(end_time)
+# turn_angle_B: likewise for subgroup B
+# Note that all angles use the point p_AB(start_time) as their central point
 #INPUTS:
 # events: a data frame of manually-labeled ff events
 # i: index to the row to use
-# xs, ys: matrices of x and y coordinates
-# ts:
-# max_time
-# thresh_h
-# thresh_l
-# time_window
-# plot:
+# xs, ys: matrices of x and y coordinates [n_inds x n_times]
+# ts: vector times in datetime format [length = n_times]
+# max_time: [numeric] maximum time forward and back to look for the start and end of the event
+# thresh_h: upper threshold for determining when individuals are "apart" (default 50)
+# thresh_l: lower threshold for determining when individuals are "together" (default 15)
+# time_window: time to move backward or forward in time to identify the before and after times
+# plot: [boolean] whether to plot the event or not
 #OUTPUTS:
-# some info (TBD) about the ff event
-# a plot showing (top) dyadic distance over time and (bottom) a visualization of trajectories
+# (if plot == T) a plot showing (top) dyadic distance over time and (bottom) a visualization of trajectories
+# out: a list of information extracted about the event
+# out$start_time: start time
+# out$end_time: end time
+# out$before_time: before time
+# out$after_time: after time
+# out$disps: matrix of displacements of the different subgroups (rows) during the different
+#   time intervals (columns). Rows and columns are named for easy access.
+# out$speeds: same as disps matrix, but with speeds (so dividing by the time differences)
+# out$split_angle: split angle in degrees, description above
+# out$turn_angle_A: turn angle for subgroup A in degrees, description above
+# out$turn_angle_B: turn angle for subgroup B in degrees, description above.
+#SUBTLETIES:
+#Subtlety 1: Sometimes, due to the multi-scale nature of these events and the
+#fact that we are approximating subgroup locations with centroids, the dyadic
+#distance does not go below the lower threshold thresh_l and/or above the upper 
+#threshold thresh_h. In this case, we still try to identify the start_time and 
+#end_time, but modify the thresholds as follows. 
+#First, let's define the period between tidx - max_time and tidx as the prior period,
+#the period between tidx  and tidx + max_time as the subsequent period, and the 
+#period between (tidx - max_time/2) and (tidx + max_time/2) as the middle period.
+#--> For a fission, if the dyadic distance does not go above thresh_h in the subsequent
+#period, then we instead replace thresh_h with the maximum - .001 of the dyadic 
+#distance during that time period. Second, if the dyadic distance during the middle
+#period does not drop below thresh_l, then we instead move thresh_l to the minimum + .001
+#of the dyadic distance during that middle period.
+#--> For a fusion, everything is reversed. If the dyadic distance does not go
+#above thresh_h during the prior period, we replace thresh_h with the maximum - .001
+#of the dyadic distance during the subsequent period. And if the dyadic distance does
+#not go below thresh_l during the middle period, we replace thresh_l with the minimum + .001
+#of the dyadic distance during the middle period.
+#In very rare cases, due to these rules the upper bound may get changed to 
+#something below the original thresh_l, or the lower bound may get changed to
+#something above the original thresh_h. In that case, we revert to the original thresholds.
+#Subtlety 2: NA handling. NAs are handled in a couple of different ways.
+#--For finding the start_time and end_time, NAs are essentially ignored, and cannot
+#be part of the sequence from start_time:end_time (at least not in terms of the)
+#dyadic distance... individuals can drop out and they will just be excluded from
+#the centroid calculation.
+#If no start and end times are found, nothing else is computed (all vaules are
+#filled in with NAs or NULL for matrices).
+#--For finding the before_time and after_time, if an NA is hit in the forward or
+#backward direction, the before_time (or respectively, the after_time) is marked
+#as NA. Metrics involving that time point can then not be computed and are also 
+#NA. 
+#--If the start and end time are on different days, then both are given NA.
+#--If the before and start time, or after and end time, are on different days, then
+#both are given NA. 
+#--If the before or after time are NA, then other metrics stemming from those times get NA
 analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 600, thresh_h = 50, thresh_l = 15, time_window = 300, plot = T){
   t_event <- events$tidx[i] #time of the event
   group_A <- events$group_A_idxs[i][[1]] #group A individual idxs
@@ -416,6 +520,8 @@ analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 600, thresh_h = 5
   #1 = between thresholds
   #2 = above higher threshold
   dyad_dist_event <- dyad_dist[ti:tf]
+  
+  #first consider modifying thresholds according to subtlety 1 above
   after_idxs <- (max_time+1):(2*max_time+1) #indexes after the marked event
   middle_idxs <- (max_time / 2):(max_time*3/2)
   before_idxs <- 1:max_time #indexes before the marked event
@@ -459,6 +565,7 @@ analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 600, thresh_h = 5
   category[which(dyad_dist_event < lower)] <- 0
   category[which(dyad_dist_event >= lower & dyad_dist_event < upper)] <- 1
   category[which(dyad_dist_event >= upper)] <- 2
+  category[which(is.na(dyad_dist_event))] <- 3 #NAs are denoted with 3
   
   #run length encoding to get sequences of each category
   seqs <- rle(category)
@@ -537,12 +644,21 @@ analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 600, thresh_h = 5
     time_diff <- abs(end_time-ff_time)
     end_time <- end_time[which(time_diff==min(time_diff))]
   }
-  #save to output
-  out <- list(start_time = start_time, end_time = end_time)
   
   #if start time not found (NULL) change to NA
   if(is.null(start_time)){start_time <- NA}
   if(is.null(end_time)){end_time <- NA}
+  
+  #if the start time is on a different date from the end time, make both NA
+  if(!is.na(start_time) & !is.na(end_time)){
+    if(date(ts[start_time])!= date(ts[end_time])){
+      start_time <- NA
+      end_time <- NA
+    }
+  }
+  
+  #save to output
+  out <- list(start_time = start_time, end_time = end_time)
   
   if(!is.na(start_time) & !is.na(end_time)){
     #GET BEFORE AND AFTER TIMES
@@ -621,12 +737,14 @@ analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 600, thresh_h = 5
     row.names(xs_AB) <- row.names(ys_AB) <- c('A','B','AB')
     colnames(xs_AB) <- colnames(ys_AB) <- c('before_time','start_time','end_time','after_time')
     for(t in 1:length(times)){
-      xs_AB[1,t] <- mean(xs[events$group_A_idxs[i][[1]], times[t]],na.rm=T)
-      xs_AB[2,t] <- mean(xs[events$group_B_idxs[i][[1]], times[t]],na.rm=T)
-      xs_AB[3,t] <- mean(xs[c(events$group_A_idxs[i][[1]],events$group_B_idxs[i][[1]]), times[t]],na.rm=T)
-      ys_AB[1,t] <- mean(ys[events$group_A_idxs[i][[1]], times[t]],na.rm=T)
-      ys_AB[2,t] <- mean(ys[events$group_B_idxs[i][[1]], times[t]],na.rm=T)
-      ys_AB[3,t] <- mean(ys[c(events$group_A_idxs[i][[1]],events$group_B_idxs[i][[1]]), times[t]],na.rm=T)
+      if(!is.na(times[t])){
+        xs_AB[1,t] <- mean(xs[events$group_A_idxs[i][[1]], times[t]],na.rm=T)
+        xs_AB[2,t] <- mean(xs[events$group_B_idxs[i][[1]], times[t]],na.rm=T)
+        xs_AB[3,t] <- mean(xs[c(events$group_A_idxs[i][[1]],events$group_B_idxs[i][[1]]), times[t]],na.rm=T)
+        ys_AB[1,t] <- mean(ys[events$group_A_idxs[i][[1]], times[t]],na.rm=T)
+        ys_AB[2,t] <- mean(ys[events$group_B_idxs[i][[1]], times[t]],na.rm=T)
+        ys_AB[3,t] <- mean(ys[c(events$group_A_idxs[i][[1]],events$group_B_idxs[i][[1]]), times[t]],na.rm=T)
+      }
     }
     
     #get displacements before during and after
@@ -680,7 +798,7 @@ analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 600, thresh_h = 5
   } else{
     out$start_time <- out$end_time <- out$before_time <- out$after_time <- NA
     out$turn_angle_A <- out$turn_angle_B <- out$split_angle <- NA
-    out$disps <- NULL
+    out$disps <- out$speeds <- NULL
   }
   
   #return the output object
