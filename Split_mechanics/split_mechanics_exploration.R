@@ -7,19 +7,21 @@ library(lubridate)
 Sys.setenv(TZ='UTC')
 
 #DIRECTORIES AND PARAMETERS
-codedir <- '~/Dropbox/code_ari/coatithon_code/'
-dir <- '~/Dropbox/coati/processed/' #directory where all data is stored
-group <- 'presedente' #subdirectory where the group data is stored
+#codedir <- '~/Dropbox/code_ari/coatithon_code/'
+#dir <- '~/Dropbox/coati/processed/' #directory where all data is stored
+group <- 'galaxy' #subdirectory where the group data is stored
 
 #get directory to group data
-groupdir <- paste0(dir,group)
+
+#groupdir <- paste0(dir,group)
 
 #for Emily:
 codedir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-#groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
-#plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
-groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
+groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
+
+#groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
+#plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
 
 
 #FUNCTIONS
@@ -113,50 +115,126 @@ events$B_average_grp_age <- NA
 events$B_age_each_ind <- events$group_B_idxs
 
 for (i in 1:nrow(events)){
-  v1 <- unlist(events$A_age_each_ind[i])
-  v1[v1 == 1] <- 1
-  v1[v1 == 2] <- 3
-  v1[v1 == 3] <- 3
-  v1[v1 == 4] <- 3
-  v1[v1 == 5] <- 3
-  v1[v1 == 6] <- 3
-  v1[v1 == 7] <- 2
-  v1[v1 == 8] <- 2
-  v1[v1 == 9] <- 2
-  v1[v1 == 10] <- 3
-  v1[v1 == 11] <- 3
-  events$A_average_grp_age[i] <- mean(v1)
-  events$A_n_adults[i] <- length(v1[v1=="3"])
-  events$A_n_subadults[i] <- length(v1[v1=="2"])
-  events$A_n_juveniles[i] <- length(v1[v1=="1"])
-  events$A_proportion_adults[i] <- length(v1[v1=="3"])/length(v1)
-  events$A_subgroup_size[i] <- length(v1)
-  events$A_age_each_ind[i] <- relist((v1), skeleton=events$A_age_each_ind[i])
   
-  #for  group
-  v1 <- unlist(events$B_age_each_ind[i])
-  v1[v1 == 1] <- 1
-  v1[v1 == 2] <- 3
-  v1[v1 == 3] <- 3
-  v1[v1 == 4] <- 3
-  v1[v1 == 5] <- 3
-  v1[v1 == 6] <- 3
-  v1[v1 == 7] <- 2
-  v1[v1 == 8] <- 2
-  v1[v1 == 9] <- 2
-  v1[v1 == 10] <- 3
-  v1[v1 == 11] <- 3
-  events$B_average_grp_age[i] <- mean(v1)
-  events$B_n_adults[i] <- length(v1[v1=="3"])
-  events$B_n_subadults[i] <- length(v1[v1=="2"])
-  events$B_n_juveniles[i] <- length(v1[v1=="1"])
-  events$B_proportion_adults[i] <- length(v1[v1=="3"])/length(v1)
-  events$B_subgroup_size[i] <- length(v1)
-  events$B_age_each_ind[i] <- relist((v1), skeleton=events$B_age_each_ind[i])
+  if (group == "galaxy"){
+    v1 <- unlist(events$A_age_each_ind[i])
+    v1[v1 == 1] <- 1
+    v1[v1 == 2] <- 3
+    v1[v1 == 3] <- 3
+    v1[v1 == 4] <- 3
+    v1[v1 == 5] <- 3
+    v1[v1 == 6] <- 3
+    v1[v1 == 7] <- 2
+    v1[v1 == 8] <- 2
+    v1[v1 == 9] <- 2
+    v1[v1 == 10] <- 3
+    v1[v1 == 11] <- 3
+    events$A_average_grp_age[i] <- mean(v1)
+    events$A_n_adults[i] <- length(v1[v1=="3"])
+    events$A_n_subadults[i] <- length(v1[v1=="2"])
+    events$A_n_juveniles[i] <- length(v1[v1=="1"])
+    events$A_proportion_adults[i] <- length(v1[v1=="3"])/length(v1)
+    events$A_proportion_subadults[i] <- length(v1[v1=="2"])/length(v1)
+    events$A_proportion_juveniles[i] <- length(v1[v1=="1"])/length(v1)
+    events$A_subgroup_size[i] <- length(v1)
+    events$A_age_each_ind[i] <- relist((v1), skeleton=events$A_age_each_ind[i])
+    
+    #for  group
+    v1 <- unlist(events$B_age_each_ind[i])
+    v1[v1 == 1] <- 1
+    v1[v1 == 2] <- 3
+    v1[v1 == 3] <- 3
+    v1[v1 == 4] <- 3
+    v1[v1 == 5] <- 3
+    v1[v1 == 6] <- 3
+    v1[v1 == 7] <- 2
+    v1[v1 == 8] <- 2
+    v1[v1 == 9] <- 2
+    v1[v1 == 10] <- 3
+    v1[v1 == 11] <- 3
+    events$B_average_grp_age[i] <- mean(v1)
+    events$B_n_adults[i] <- length(v1[v1=="3"])
+    events$B_n_subadults[i] <- length(v1[v1=="2"])
+    events$B_n_juveniles[i] <- length(v1[v1=="1"])
+    events$B_proportion_adults[i] <- length(v1[v1=="3"])/length(v1)
+    events$B_proportion_subadults[i] <- length(v1[v1=="2"])/length(v1)
+    events$B_proportion_juveniles[i] <- length(v1[v1=="1"])/length(v1)
+    events$B_subgroup_size[i] <- length(v1)
+    events$B_age_each_ind[i] <- relist((v1), skeleton=events$B_age_each_ind[i])
+    
+} else if (group == "presedente"){
   
-  
+    v1 <- unlist(events$A_age_each_ind[i])
+    v1[v1 == 1] <- 3
+    v1[v1 == 2] <- 1
+    v1[v1 == 3] <- 1
+    v1[v1 == 4] <- 1
+    v1[v1 == 5] <- 3
+    v1[v1 == 6] <- 2
+    v1[v1 == 7] <- 2
+    v1[v1 == 8] <- 3
+    v1[v1 == 9] <- 3
+    v1[v1 == 10] <- 2
+    v1[v1 == 11] <- 1
+    v1[v1 == 12] <- 1
+    v1[v1 == 13] <- 3
+    v1[v1 == 14] <- 2
+    v1[v1 == 15] <- 1
+    v1[v1 == 16] <- 1
+    v1[v1 == 17] <- 2
+    v1[v1 == 18] <- 3
+    v1[v1 == 19] <- 2
+    v1[v1 == 20] <- 3
+    v1[v1 == 21] <- 3
+    v1[v1 == 22] <- 1
+    
+    events$A_average_grp_age[i] <- mean(v1)
+    events$A_n_adults[i] <- length(v1[v1=="3"])
+    events$A_n_subadults[i] <- length(v1[v1=="2"])
+    events$A_n_juveniles[i] <- length(v1[v1=="1"])
+    events$A_proportion_adults[i] <- length(v1[v1=="3"])/length(v1)
+    events$A_proportion_subadults[i] <- length(v1[v1=="2"])/length(v1)
+    events$A_proportion_juveniles[i] <- length(v1[v1=="1"])/length(v1)
+    
+    events$A_subgroup_size[i] <- length(v1)
+    events$A_age_each_ind[i] <- relist((v1), skeleton=events$A_age_each_ind[i])
+    
+    #for  group
+    v1 <- unlist(events$B_age_each_ind[i])
+    v1[v1 == 1] <- 3
+    v1[v1 == 2] <- 1
+    v1[v1 == 3] <- 1
+    v1[v1 == 4] <- 1
+    v1[v1 == 5] <- 3
+    v1[v1 == 6] <- 2
+    v1[v1 == 7] <- 2
+    v1[v1 == 8] <- 3
+    v1[v1 == 9] <- 3
+    v1[v1 == 10] <- 2
+    v1[v1 == 11] <- 1
+    v1[v1 == 12] <- 1
+    v1[v1 == 13] <- 3
+    v1[v1 == 14] <- 2
+    v1[v1 == 15] <- 1
+    v1[v1 == 16] <- 1
+    v1[v1 == 17] <- 2
+    v1[v1 == 18] <- 3
+    v1[v1 == 19] <- 2
+    v1[v1 == 20] <- 3
+    v1[v1 == 21] <- 3
+    v1[v1 == 22] <- 1
+    events$B_average_grp_age[i] <- mean(v1)
+    events$B_n_adults[i] <- length(v1[v1=="3"])
+    events$B_n_subadults[i] <- length(v1[v1=="2"])
+    events$B_n_juveniles[i] <- length(v1[v1=="1"])
+    events$B_proportion_adults[i] <- length(v1[v1=="3"])/length(v1)
+    events$B_proportion_subadults[i] <- length(v1[v1=="2"])/length(v1)
+    events$B_proportion_juveniles[i] <- length(v1[v1=="1"])/length(v1)
+    
+    events$B_subgroup_size[i] <- length(v1)
+    events$B_age_each_ind[i] <- relist((v1), skeleton=events$B_age_each_ind[i])
+  }else {print("fail")}
 }
-
 
 ### FISSION PLOTTING ###
 
@@ -192,6 +270,32 @@ hist(events$AB_before_disp[fis], main = "Distance traveled 10 minutes before dis
 hist(events$split_angle[fis], main = "Split angle between sub-groups after fission (degrees)", xlab = '', cex.axis = 3, cex.lab = 3, cex.main = 3,col = "coral3",mgp=c(5,2,.5))
 
 dev.off()
+
+
+
+### PLOTTING EACH AGE CLASS IN ONE GRAPH ###
+#changing the ylim for Galaxy to 60 (Presedente is 80)
+a <- 0.5
+png(height = 800, width = 800, units = 'px', filename = paste0(plot_dir,'subgroup_ages_duringfission.png'))
+par(mfrow=c(1,1), mar = c(10,10,2,2),(mgp=c(3,5,1))) #bottom, left, top, right)
+#combine the 3 plots above into one plot
+plot(events$A_during_disp[fis], events$A_proportion_adults[fis], pch = 19, ylab = "Proportion of age class in sub-group", xlab="Distance traveled during fission event (m)",xlim = c(0, 60), ylim = c(0,1), cex = 4, cex.axis = 2, cex.lab = 2, cex.main = 3, col = alpha("hotpink4",a), mgp=c(5,2,.5))
+points(events$B_during_disp[fis], events$B_proportion_adults[fis], pch = 19,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("hotpink4",a))
+#plot distance traveled depending on proportion of sub-adults in subgroup
+points(events$A_during_disp[fis], events$A_proportion_subadults[fis], pch = 17,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("orange3", a),mgp=c(5,2,.5))
+points(events$B_during_disp[fis], events$B_proportion_subadults[fis], pch = 17,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("orange3", a))
+
+#plot distance traveled depending on proportion of juveniles in subgroup
+points(events$A_during_disp[fis], events$A_proportion_juveniles[fis], pch = 15, ylim = c(0,1), cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("cadetblue3",a), mgp=c(5,2,.5))
+points(events$B_during_disp[fis], events$B_proportion_juveniles[fis], pch = 15,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("cadetblue3", a))
+legend(x = "topright",         
+       legend = c("Adult", "Sub-adult", "Juvenile"),
+       pch = c(19, 17, 15),
+       col = c("hotpink4", "orange3", "cadetblue3"),
+       cex = 2, pt.cex = 2,
+       bty = "n")
+dev.off()
+
 
 
 
@@ -240,8 +344,63 @@ fus <- events$event_type == "fusion"
 
 #need to think about what sort of plots to do...
 
+#combine the A_subgroup_size and B_sub_group_size with A_during_disp and B_during_disp to make abline
+combined_fus_1 <- data.frame(events$A_subgroup_size[fus])
+colnames(combined_fus_1) <- "sub_size"
+disp_fus_1 <- data.frame(events$A_during_disp[fus])
+colnames(disp_fus_1) <- "disp"
+combined_fus_2 <- data.frame(events$B_subgroup_size[fus])
+colnames(combined_fus_2) <- "sub_size"
+disp_fus_2 <- data.frame(events$B_during_disp[fus])
+colnames(disp_fus_2) <- "disp"
+
+combined_fus <- rbind(combined_fus_1,combined_fus_2)
+disp_fus <- rbind(disp_fus_1, disp_fus_2)
+comb_fus <- cbind(combined_fus, disp_fus)
+
+##want to look at distance traveled before a fusion 
+png(height = 800, width = 2500, units = 'px', filename = paste0(plot_dir,'subgroup_dist_travelled_duringfusion.png'))
+par(mfrow=c(1,3), mar = c(10,10,10,10),(mgp=c(3,5,1))) #bottom, left, top, right)
+
+#plot 1:
+plot(events$A_during_disp[fus], events$B_during_disp[fus], pch = 20, xlab = "sub-group A", ylab = "sub-group B", main = 'Distance traveled during fusion event (m)', col = "cadetblue4",cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3,mgp=c(5,2,.5))
+abline(lm(events$B_during_disp[fus] ~ events$A_during_disp[fus]))
+
+#plot 2:
+#combined the A_subgroup_size and B_sub_group_size with A_during_disp and B_during_disp so I could add the abline
+plot(comb_fus$disp, comb_fus$sub_size, pch = 20, ylim = c(0, 10), xlab = "Distance traveled during fusion event (m)", ylab = "Sub-group size", cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3,col = "hotpink4",mgp=c(5,2,.5))
+abline(lm(comb_fus$sub_size ~ comb_fus$disp))
+
+hist(events$split_angle[fus], xlab = "Angle between sub-groups during fusion (degrees)", main = " ",cex.axis = 3, cex.lab = 3, cex.main = 3,col = "hotpink4",mgp=c(5,2,.5))
+
+dev.off()
 
 
 
 
+#for changing the alpha values
+library("scales") 
+
+#change xlim for galaxy to 60, presedente is 100
+
+a <- 0.5
+png(height = 800, width = 800, units = 'px', filename = paste0(plot_dir,'subgroup_ages_duringfusion.png'))
+par(mfrow=c(1,1), mar = c(10,10,2,2),(mgp=c(3,5,1))) #bottom, left, top, right)
+#combine the 3 plots above into one plot
+plot(events$A_during_disp[fus], events$A_proportion_adults[fus], pch = 19, ylab = "Proportion of age class in sub-group", xlab="Distance traveled during fusion event (m)",xlim = c(0, 60), ylim = c(0,1), cex = 4, cex.axis = 2, cex.lab = 2, cex.main = 3, col = alpha("hotpink4",a), mgp=c(5,2,.5))
+points(events$B_during_disp[fus], events$B_proportion_adults[fus], pch = 19,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("hotpink4",a))
+#plot distance traveled depending on proportion of sub-adults in subgroup
+points(events$A_during_disp[fus], events$A_proportion_subadults[fus], pch = 17,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("orange3", a),mgp=c(5,2,.5))
+points(events$B_during_disp[fus], events$B_proportion_subadults[fus], pch = 17,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("orange3", a))
+
+#plot distance traveled depending on proportion of juveniles in subgroup
+points(events$A_during_disp[fus], events$A_proportion_juveniles[fus], pch = 15, ylim = c(0,1), cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("cadetblue3",a), mgp=c(5,2,.5))
+points(events$B_during_disp[fus], events$B_proportion_juveniles[fus], pch = 15,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("cadetblue3", a))
+legend(x = "topright",         
+       legend = c("Adult", "Sub-adult", "Juvenile"),
+       pch = c(19, 17, 15),
+       col = c("hotpink4", "orange3", "cadetblue3"),
+       cex = 2, pt.cex = 2,
+       bty = "n")
+dev.off()
 
