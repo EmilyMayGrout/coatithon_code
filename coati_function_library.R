@@ -494,6 +494,15 @@ analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 600, thresh_h = 5
   group_B_names <- events$group_B[i]
   ti <- t_event - max_time #initial time to plot
   tf <- t_event + max_time #final time to plot
+  
+  if(ti <1 | tf > length(ts)){
+    out <- list()
+    out$start_time <- out$end_time <- out$before_time <- out$after_time <- NA
+    out$disps <- out$speeds <- NULL
+    out$turn_angle_A <- out$turn_angle_B <- out$split_angle <- NA
+    return(out)
+  }
+  
   event_type <- events$event_type[i]
   datetime <- events$datetime[i]
   nA <- length(group_A)
@@ -526,27 +535,35 @@ analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 600, thresh_h = 5
   middle_idxs <- (max_time / 2):(max_time*3/2)
   before_idxs <- 1:max_time #indexes before the marked event
   if(event_type == 'fission'){
-    if(max(dyad_dist_event[after_idxs],na.rm=T) < thresh_h){
-      upper <- max(dyad_dist_event[after_idxs],na.rm=T) - .001
-    } else{
-      upper <- thresh_h
-    }
-    if(min(dyad_dist_event[middle_idxs],na.rm=T) > thresh_l){
-      lower <- min(dyad_dist_event[middle_idxs],na.rm=T) + .001
-    } else{
-      lower <- thresh_l
+    if(sum(!is.na(dyad_dist_event[after_idxs]))>1){
+      if(max(dyad_dist_event[after_idxs],na.rm=T) < thresh_h){
+        upper <- max(dyad_dist_event[after_idxs],na.rm=T) - .001
+      } else{
+        upper <- thresh_h
+      }
+    } 
+    if(sum(!is.na(dyad_dist_event[middle_idxs]))){
+      if(min(dyad_dist_event[middle_idxs],na.rm=T) > thresh_l){
+        lower <- min(dyad_dist_event[middle_idxs],na.rm=T) + .001
+      } else{
+        lower <- thresh_l
+      }
     }
   }
   if(event_type == 'fusion'){
-    if(max(dyad_dist_event[before_idxs],na.rm=T) < thresh_h){
-      upper <- max(dyad_dist_event[before_idxs],na.rm=T) - .001
-    } else{
-      upper <- thresh_h
+    if(sum(!is.na(dyad_dist_event[before_idxs]))>1){
+      if(max(dyad_dist_event[before_idxs],na.rm=T) < thresh_h){
+        upper <- max(dyad_dist_event[before_idxs],na.rm=T) - .001
+      } else{
+        upper <- thresh_h
+      }
     }
-    if(min(dyad_dist_event[middle_idxs],na.rm=T) > thresh_l){
-      lower <- min(dyad_dist_event[middle_idxs],na.rm=T) + .001
-    } else{
-      lower <- thresh_l
+    if(sum(!is.na(dyad_dist_event[middle_idxs]))>1){
+      if(min(dyad_dist_event[middle_idxs],na.rm=T) > thresh_l){
+        lower <- min(dyad_dist_event[middle_idxs],na.rm=T) + .001
+      } else{
+        lower <- thresh_l
+      }
     }
   }
   
@@ -830,6 +847,7 @@ angle_between_vectors <- function(x1_i, y1_i, x1_f, y1_f, x2_i, y2_i, x2_f, y2_f
 
 }
 
+#DETECT FF EVENTS
 #Detect fissions and fusions using "sticky-DBSCAN" method from Libera et al. 
 #Start by defining an adjacency matrix ('together' in the code) of which dyads 
 #are "connected" at any moment in time. Dyads are considered to be connected if
