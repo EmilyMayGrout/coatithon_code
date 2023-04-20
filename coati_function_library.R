@@ -531,6 +531,8 @@ analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 600, thresh_h = 5
   dyad_dist_event <- dyad_dist[ti:tf]
   
   #first consider modifying thresholds according to subtlety 1 above
+  upper <- thresh_h
+  lower <- thresh_l
   after_idxs <- (max_time+1):(2*max_time+1) #indexes after the marked event
   middle_idxs <- (max_time / 2):(max_time*3/2)
   before_idxs <- 1:max_time #indexes before the marked event
