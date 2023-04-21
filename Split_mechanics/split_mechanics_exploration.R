@@ -19,7 +19,6 @@ group <- 'galaxy' #subdirectory where the group data is stored
 codedir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
 groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
-
 #groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
 #plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
 
@@ -254,8 +253,8 @@ comb <- cbind(combined, disp)
 
 fis <- events$event_type == "fission"
 
-png(height = 1800, width = 2000, units = 'px', filename = paste0(plot_dir,'subgroup_dist_travelled_duringfission.png'))
-par(mfrow=c(2,2), mar = c(10,10,10,10),(mgp=c(3,5,1))) #bottom, left, top, right)
+png(height = 800, width = 2500, units = 'px', filename = paste0(plot_dir,'subgroup_dist_travelled_duringfission.png'))
+par(mfrow=c(1,3), mar = c(10,10,10,10),(mgp=c(3,5,1))) #bottom, left, top, right)
 #plot 1:
 plot(events$A_during_disp[fis], events$B_during_disp[fis], pch = 20, xlab = "sub-group A", ylab = "sub-group B", main = 'Distance traveled during fission event (m)', cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3,col = "aquamarine3",mgp=c(5,2,.5))
 abline(lm(events$B_during_disp[fis] ~ events$A_during_disp[fis]))
@@ -263,11 +262,13 @@ abline(lm(events$B_during_disp[fis] ~ events$A_during_disp[fis]))
 #plot 2:
 #combined the A_subgroup_size and B_sub_group_size with A_during_disp and B_during_disp so I could add the abline
 plot(comb$disp, comb$sub_size, pch = 20, ylim = c(0, 10), xlab = "Distance traveled during fission event (m)", ylab = "Sub-group size", cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3,col = "coral2",mgp=c(5,2,.5))
-abline(lm(comb$sub_size ~ comb$disp))
+#abline(lm(comb$sub_size ~ comb$disp))
 
 hist(events$AB_before_disp[fis], main = "Distance traveled 10 minutes before displacement (m)", xlab = '', col = "aquamarine3",cex.axis = 3, cex.lab = 3, cex.main = 3,mgp=c(5,2,.5))
 
-hist(events$split_angle[fis], main = "Split angle between sub-groups after fission (degrees)", xlab = '', cex.axis = 3, cex.lab = 3, cex.main = 3,col = "coral3",mgp=c(5,2,.5))
+#filtering split angle times when distance of full group travelled more that 20m
+#events_dist_20 <- events[events$AB_before_disp > 20,]
+#hist(events_dist_20$split_angle[events_dist_20$event_type == "fission"], main = "Split angle between sub-groups after fission (degrees)", xlab = '', cex.axis = 3, cex.lab = 3, cex.main = 3,col = "coral3",mgp=c(5,2,.5))
 
 dev.off()
 
@@ -359,8 +360,8 @@ disp_fus <- rbind(disp_fus_1, disp_fus_2)
 comb_fus <- cbind(combined_fus, disp_fus)
 
 ##want to look at distance traveled before a fusion 
-png(height = 800, width = 2500, units = 'px', filename = paste0(plot_dir,'subgroup_dist_travelled_duringfusion.png'))
-par(mfrow=c(1,3), mar = c(10,10,10,10),(mgp=c(3,5,1))) #bottom, left, top, right)
+png(height = 1000, width = 2000, units = 'px', filename = paste0(plot_dir,'subgroup_dist_travelled_duringfusion.png'))
+par(mfrow=c(1,2), mar = c(10,10,10,10),(mgp=c(3,5,1))) #bottom, left, top, right)
 
 #plot 1:
 plot(events$A_during_disp[fus], events$B_during_disp[fus], pch = 20, xlab = "sub-group A", ylab = "sub-group B", main = 'Distance traveled during fusion event (m)', col = "cadetblue4",cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3,mgp=c(5,2,.5))
@@ -369,9 +370,9 @@ abline(lm(events$B_during_disp[fus] ~ events$A_during_disp[fus]))
 #plot 2:
 #combined the A_subgroup_size and B_sub_group_size with A_during_disp and B_during_disp so I could add the abline
 plot(comb_fus$disp, comb_fus$sub_size, pch = 20, ylim = c(0, 10), xlab = "Distance traveled during fusion event (m)", ylab = "Sub-group size", cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3,col = "hotpink4",mgp=c(5,2,.5))
-abline(lm(comb_fus$sub_size ~ comb_fus$disp))
+#abline(lm(comb_fus$sub_size ~ comb_fus$disp))
 
-hist(events$split_angle[fus], xlab = "Angle between sub-groups during fusion (degrees)", main = " ",cex.axis = 3, cex.lab = 3, cex.main = 3,col = "hotpink4",mgp=c(5,2,.5))
+#hist(events$split_angle[fus], xlab = "Angle between sub-groups during fusion (degrees)", main = " ",cex.axis = 3, cex.lab = 3, cex.main = 3,col = "hotpink4",mgp=c(5,2,.5))
 
 dev.off()
 
@@ -403,4 +404,42 @@ legend(x = "topright",
        cex = 2, pt.cex = 2,
        bty = "n")
 dev.off()
+
+
+
+
+#the plot above isn't a good way of looking at the age class and distance traveled 
+#now want to plot distance traveled with the proportion of age calls based on the total number of that age class
+
+
+events$total_n_adults <- events$A_n_adults + events$B_n_adults
+events$total_n_subadults <- events$A_n_subadults + events$B_n_subadults
+events$total_n_juveniles <- events$A_n_juveniles + events$B_n_juveniles
+
+#filter events to remove instances when one individual is fissioning or fusioning
+events_groups <- subset(events, events$A_subgroup_size > 1 & events$B_subgroup_size > 1, drop = TRUE)
+
+#filter events_groups to when one group moves and the other stays (moved less than 15m during event)
+events_groups <- subset(events_groups, events_groups$A_during_disp < 20 | events_groups$B_during_disp  < 20, drop = TRUE)
+
+
+
+
+
+#adults
+plot(events_groups$A_during_disp[fis], (events_groups$A_n_adults[fis]/events_groups$total_n_adults[fis]), xlim = c(0,90))
+points(events_groups$B_during_disp[fis], (events_groups$B_n_adults[fis]/events_groups$total_n_adults[fis]))
+#subadults
+plot(events_groups$A_during_disp[fis], (events_groups$A_n_subadults[fis]/events_groups$total_n_subadults[fis]), xlim = c(0,90))
+points(events_groups$B_during_disp[fis], (events_groups$B_n_subadults[fis]/events_groups$total_n_subadults[fis]))
+
+
+
+
+
+
+
+
+
+
 
