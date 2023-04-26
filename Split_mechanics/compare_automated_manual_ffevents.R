@@ -6,13 +6,13 @@ library(lubridate)
 #set time zone to UTC to avoid confusing time zone issues
 Sys.setenv(TZ='UTC')
 
-group <- 'galaxy' #subdirectory where the group data is stored
+group <- 'presedente' #subdirectory where the group data is stored
 
 codedir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
-#groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
-#plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
+#groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
+#plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
+groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
 
 #FUNCTIONS
 #read in functions
@@ -90,15 +90,24 @@ for(i in c(1:nrow(events))){
 }
 
 #now have events as the manual labels
+#reduce number of columns for easier comparison
+events_man <- events[, c("tidx", "datetime", "event_type", "group_A_idxs", "group_B_idxs","group_A", "group_B", "n_A", "n_B" )]
+#manual labels start 2 days after gps on - but can't find where in code we excluded the first 2 days?
 
-
-
+#make automated labels using Ari's function 
 R_inner <- 15
 R_outer <- 50
 
 events_aut <- detect_fissions_and_fusions(R_inner = R_inner, R_outer = R_outer,  xs = xs, ys = ys, ts = ts, coati_ids = coati_ids, verbose = T )
+events_aut_detected <- events_aut$events_detected
+
+events_man_txt <- events[, c("tidx", "datetime", "event_type", "n_A", "n_B" )]
+events_aut_txt <- events_aut_detected[, c("tidx", "datetime", "event_type", "n_A", "n_B" )]
 
 
-
+#save the events_man and events_aut_detected to txt files 
+setwd('C:/Users/egrout/Dropbox/coatithon/coatithon_code/Split_mechanics/labels/')
+write.table(events_man_txt, paste0(group, "_events_man.txt"))
+write.table(events_aut_txt, paste0(group, "_events_aut.txt"))
 
 
