@@ -193,4 +193,14 @@ dev.off()
 
 
 
+#Run Mantel test
+
+
+
+
+
+
+
+
+
 
