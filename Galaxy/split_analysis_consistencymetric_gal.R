@@ -6,7 +6,7 @@
 
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/'
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
 gps_file <- "galaxy_xy_10min_level0.RData"
 id_file <- 'coati_ids.RData' 
 
@@ -208,7 +208,7 @@ diag(p_dyad_together) <- NA
 new_order <- c(5,1,11,4,10,2,3,6,7,8,9)
 p_dyad_together_reorder <- p_dyad_together[new_order, new_order]
 
-png(height = 400, width = 400, units = 'px', filename = paste0(plot_dir,'subgroup_network_splits.png'))
+png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'subgroup_network_splits.png'))
 par(mfrow=c(1,1), mar = c(1,2,1,1))#(bottom, left, top, right)
 visualize_network_matrix(p_dyad_together_reorder, coati_ids[new_order,])
 dev.off()

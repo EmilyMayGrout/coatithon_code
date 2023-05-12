@@ -6,7 +6,7 @@
 
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/'
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
 gps_file <- "presedente_xy_10min_level0.RData"
 id_file <- 'coati_ids.RData' 
 
@@ -22,6 +22,13 @@ setwd(data_dir)
 load(gps_file)
 load(id_file)
 
+
+#removing males and wildflower
+xs <- xs[c(1:4,6,7,11:17,19,20,22),]
+ys <- ys[c(1:4,6,7,11:17,19,20,22),]
+coati_ids <- coati_ids[-c(5,8,9,10,18,21),]
+
+
 #-----FUNCTIONS----
 mode <- function(x) {
   return(as.numeric(names(which.max(table(x)))))
@@ -31,6 +38,8 @@ mode <- function(x) {
 
 n_inds <- nrow(xs)
 n_times <- ncol(xs)
+
+
 
 
 #number of individuals tracked at each time point
@@ -179,12 +188,15 @@ for(i in 1:(n_inds-1)){
 
 
 diag(p_dyad_together) <- NA
-new_order <- c(21,1,13,20,7,14,17,6,10,19,3,4,11,12,16,2,15,22,5,8,9,18)
+#new_order <- c(21,1,13,20,7,14,17,6,10,19,3,4,11,12,16,2,15,22,5,8,9,18)
 #with subgroups rearanged:
-new_order <- c(17,1,13,14,3,4,16,2,15,11,6,22,12,20,7,19,9,10,5,8,18,21)
+#new_order <- c(17,1,13,14,3,4,16,2,15,11,6,22,12,20,7,19,9,10,5,8,18,21)
+new_order <- c(1,9,10,3,4,12,2,11,7,5,13,16,8,15,6,14)
+
+
 p_dyad_together_reorder <- p_dyad_together[new_order, new_order]
 
-png(height = 800, width = 800, units = 'px', filename = paste0(plot_dir,'subgroup_network_splits.png'))
+png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'subgroup_network_splits.png'))
 par(mfrow=c(1,1), mar = c(1,2,1,1))#(bottom, left, top, right)
 visualize_network_matrix(p_dyad_together_reorder, coati_ids[new_order,])
 dev.off()

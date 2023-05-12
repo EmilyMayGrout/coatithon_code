@@ -199,7 +199,7 @@ ffnet_reorder <- ff_net[new_order, new_order]
 
 ### NEED TO MAKE THIS GRAPH BETTER FOR PAPER - MOVE THE AXES LABELS OUTSIDE THE GRAPH
 
-png(height = 500, width = 500, units = 'px', filename = paste0(plot_dir,'subgroup_network_level1.png'))
+png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'subgroup_network_level1.png'))
 
 visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
 dev.off()
@@ -234,7 +234,7 @@ within_group_data <- get_proximity_data(subset_x, subset_y, 10)
 
 new_order <- c(5,1,11,4,10,2,3,6,7,8,9)
 
-png(height = 500, width = 500, units = 'px', filename = paste0(plot_dir,'withingroup_network_withgus_level1.png'))
+png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'withingroup_network_withgus_level1.png'))
 visualize_network_matrix(within_group_data$proximity_net, coati_ids[new_order,])
 dev.off()
 
@@ -282,7 +282,7 @@ within_group_data <- get_proximity_data(subset_x, subset_y, 10)
 
 new_order <- c(1,10,4,9,2,3,5,6,7,8)
 
-png(height = 500, width = 500, units = 'px', filename = paste0(plot_dir,'withingroup_network_withoutgus_level1.png'))
+png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'withingroup_network_withoutgus_level1.png'))
 visualize_network_matrix(within_group_data$proximity_net, coati_ids_nogus[new_order,])
 dev.off()
 

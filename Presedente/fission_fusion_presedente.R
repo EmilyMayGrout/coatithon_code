@@ -31,17 +31,14 @@ load(gps_file)
 load(id_file)
 
 #removing Wildflower
-xs <- xs[c(1:20,22),]
-ys <- ys[c(1:20,22),]
-coati_ids <- coati_ids[-21,]
+#xs <- xs[c(1:20,22),]
+#ys <- ys[c(1:20,22),]
+#coati_ids <- coati_ids[-21,]
 
 #removing males and wildflower
 xs <- xs[c(1:4,6,7,11:17,19,20,22),]
 ys <- ys[c(1:4,6,7,11:17,19,20,22),]
 coati_ids <- coati_ids[-c(5,8,9,10,18,21),]
-
-
-
 
 
 #-----MAIN------
@@ -60,9 +57,6 @@ all_tracked_idxs <- which(n_tracked==n_inds)
 png(height = 400, width = 480, units = 'px', filename = paste0(plot_dir,'hist_n_tracked.png'))
 hist(n_tracked, breaks = 15 )
 dev.off()
-
-
-
 
 
 
@@ -124,20 +118,21 @@ for(i in 1:n_inds){
 }
 
 diag(ff_net) <- NA
-new_order <- c(1:16)
+#new_order <- c(1:16)
 #order 1 - in age/sex class order: new_order <- c(21,1,13,20,7,14,17,6,10,19,3,4,11,12,16,2,15,22,5,8,9,18)
 
 #order 2 - with subgroups rearranged: new_order <- c(17,1,13,14,3,4,16,2,15,11,6,22,12,20,7,19,9,10,5,8,18,21)
 
 #order 3 - without Wildflower: new_order <- c(17,1,13,14,3,4,16,2,15,11,6,21,12,20,7,19,9,10,5,8,18)
 
-#order 3 - without Wildflower AND males: new_order <- c(1,9,10,3,4,12,2,11,7,5,13,16,8,15,6,14)
+#order 3 - without Wildflower AND males: 
+new_order <- c(1,9,10,3,4,12,2,11,7,5,13,16,8,15,6,14)
 
 
 par(mgp=c(3, 1, 0), mar=c(11,10,4,2))
 
 ffnet_reorder <- ff_net[new_order, new_order]
-png(height = 800, width = 800, units = 'px', filename = paste0(plot_dir,'subgroup_network_onlyGroup_level1.png'))
+png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'subgroup_network_onlyGroup_level1.png'))
 
 visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
 
@@ -174,7 +169,7 @@ within_group_data <- get_proximity_data(subset_x, subset_y, 10)
 
 new_order <- c(1,9,10,3,4,12,2,11,7,5,13,16,8,15,6,14)
 
-png(height = 800, width = 800, units = 'px', filename = paste0(plot_dir,'withingroup_network_onlyGroup_level1.png'))
+png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'withingroup_network_onlyGroup_level1.png'))
 visualize_network_matrix(within_group_data$proximity_net, coati_ids[new_order,])
 dev.off()
 
