@@ -196,11 +196,33 @@ time_diff$diff_time_hour <- (time_diff$diff*10)/60
 time_diff$diff_time_hour <-  format(round(time_diff$diff_time_hour, 1), nsmall = 1)
 time_diff$diff_time_hour <- as.numeric(time_diff$diff_time_hour)
 
+#to make a graph with galaxy distributions (running the merge_analysis of galaxy)
+time_diff_pres <- time_diff
+
+#time_diff_gal was made in the merge_analysis script
+hist(time_diff_gal$diff_time_hour, col='green', add=TRUE)
+
 png(file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Presedente/split_duration_hist.png", width = 1000, height = 600, units = "px")
 
 par(mar=c(8, 8, 8, 8))
-hist(time_diff$diff_time_hour, breaks = 80, xlab = "Time between splits and merges (hours)", col = "lightblue3", main = "", cex.lab = 2,cex.axis = 1.5)
+hist(time_diff_pres$diff_time_hour, breaks = 80, xlab = "Time between splits and merges (hours)", col = "lightblue3", main = "", cex.lab = 2,cex.axis = 1.5)
+#time_diff_gal was made in the merge_analysis script
 dev.off()
+
+
+
+#making a plot for both galaxy and presedente overlapping (need to run the merge_analysis for galaxy for this to work)
+png(file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/split_duration_hist_both1.png", width = 1000, height = 600, units = "px")
+par(mar=c(8, 8, 8, 8))
+hist(time_diff_gal$diff_time_hour, col='lightblue4', breaks = 80, xlab = "Time between splits and merges (hours)", main = "", cex.lab = 2,cex.axis = 1.5, ylim = c(0, 8))
+hist(time_diff_pres$diff_time_hour, breaks = 10 ,col=rgb(0.7,1,1,0.5),add=TRUE, alpha = 0.5)
+legend(x = "topright",
+       legend = c("Galaxy", "Presedente"),  
+       lty = c(1, 1),          
+       col = c('lightblue4', rgb(0.7,1,1)), lwd = 5, cex=2,  bty = "n")                
+dev.off()
+
+
 
 
 

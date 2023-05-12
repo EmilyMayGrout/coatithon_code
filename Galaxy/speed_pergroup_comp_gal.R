@@ -1,4 +1,5 @@
 #this script is to make a dataframe for every time step for which individual is in which subgroup, whether its in the full group and whether all individuals were tracked at that time. Getting speed for each individual at each time step.
+#then running anova of the speeds to look at variance between individuals
 
 #---PARAMS----
 R <- 50
@@ -21,6 +22,12 @@ library(dplyr)
 library(hms) 
 library(ggplot2)
 library(vioplot)
+library(ggpubr)
+library(tidyverse)
+library(broom)
+library(AICcmodavg)
+library(doBy)
+library(FSA)
 
 #read in library of functions
 setwd(code_dir)
@@ -193,7 +200,81 @@ dev.off()
 
 
 
-#Run Mantel test
+#removing Gus
+speed_df <- speed_df[!(speed_df$name == "Gus"),]
+#log the speed to make data normally distributed
+speed_df$logspeed <- log(speed_df$speed)
+
+# --------------------------------------------------------------------------
+# STATS
+
+#Run ANOVA -- THIS DATA IS NON PARAMETRIC SO WE WILL USE A KRUSKAL WALLIS TEST
+
+summary(speed_df)
+#one way anova testing whether the individual is affected by the speed
+one.way <- aov(speed ~ name, data = speed_df)
+summary(one.way)
+#two way anova testing whether individual and the context affects speed
+two.way <- aov(logspeed ~ name + context, data = speed_df)
+summary(two.way)
+
+model.set <- list(one.way, two.way)
+model.names <- c("one.way", "two.way")
+#look at which model best predicts the data
+aictab(model.set, modnames = model.names)
+
+#checking the data is normally distributed - IT IS NOT NORMAL
+png(height = 1000, width = 1000, units = 'px', filename = paste0(plot_dir,'residuals.png'))
+par(mfrow=c(2,2))
+plot(two.way)
+par(mfrow=c(1,1))
+dev.off()
+
+#  KRUSKAL WALLIS test
+summary(speed_df)
+summaryBy(speed ~ context,
+          data = speed_df,
+          FUN = median,
+          na.rm = TRUE
+)
+
+dev.off()
+#plotting the distributions
+ggplot(speed_df) +
+  aes(x = name, y = speed, fill = name) +
+  geom_boxplot() +
+  theme(legend.position = "none")
+
+#removing NA's
+speed_df <- speed_df %>% drop_na(context)
+speed_df <- speed_df %>% drop_na(name)
+speed_df <- speed_df %>% drop_na(speed)
+
+
+kruskal.test(speed ~ name, data = speed_df)
+
+dunnTest(speed ~ name,
+         data = speed_df,
+         method = "holm")
+
+
+
+
+#speeds before a split
+
+
+#variation of speeds depending on group size
+
+#variance in individual travel speeds will be greater in groups that split than stay cohesive 
+
+
+
+
+
+
+
+
+
 
 
 

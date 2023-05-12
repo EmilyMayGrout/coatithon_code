@@ -166,6 +166,9 @@ time_diff$diff_time_hour <- (time_diff$diff*10)/60
 time_diff$diff_time_hour <-  format(round(time_diff$diff_time_hour, 1), nsmall = 1)
 time_diff$diff_time_hour <- as.numeric(time_diff$diff_time_hour)
 
+#running to make a graph with presedente (code in merge_analysis_presedente)
+time_diff_gal <- time_diff
+
 png(file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Galaxy/split_duration_hist.png", width = 1000, height = 600, units = "px")
 
 par(mar=c(8, 8, 8, 8))
