@@ -9,7 +9,7 @@ Sys.setenv(TZ='UTC')
 #DIRECTORIES AND PARAMETERS
 #codedir <- '~/Dropbox/code_ari/coatithon_code/'
 #dir <- '~/Dropbox/coati/processed/' #directory where all data is stored
-group <- 'galaxy' #subdirectory where the group data is stored
+group <- 'presedente' #subdirectory where the group data is stored
 
 #get directory to group data
 
@@ -17,10 +17,10 @@ group <- 'galaxy' #subdirectory where the group data is stored
 
 #for Emily:
 codedir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
-#groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
-#plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
+#groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
+#plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
+groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
 
 
 #FUNCTIONS
@@ -275,12 +275,12 @@ dev.off()
 
 
 ### PLOTTING EACH AGE CLASS IN ONE GRAPH ###
-#changing the ylim for Galaxy to 60 (Presedente is 80)
+#changing the xlim for Galaxy to 60 (Presedente is 80)
 a <- 0.5
 png(height = 800, width = 800, units = 'px', filename = paste0(plot_dir,'subgroup_ages_duringfission.png'))
 par(mfrow=c(1,1), mar = c(10,10,2,2),(mgp=c(3,5,1))) #bottom, left, top, right)
 #combine the 3 plots above into one plot
-plot(events$A_during_disp[fis], events$A_proportion_adults[fis], pch = 19, ylab = "Proportion of age class in sub-group", xlab="Distance traveled during fission event (m)",xlim = c(0, 60), ylim = c(0,1), cex = 4, cex.axis = 2, cex.lab = 2, cex.main = 3, col = alpha("hotpink4",a), mgp=c(5,2,.5))
+plot(events$A_during_disp[fis], events$A_proportion_adults[fis], pch = 19, ylab = "Proportion of age class in sub-group", xlab="Distance traveled during fission event (m)",xlim = c(0, 80), ylim = c(0,1), cex = 4, cex.axis = 2, cex.lab = 2, cex.main = 3, col = alpha("hotpink4",a), mgp=c(5,2,.5))
 points(events$B_during_disp[fis], events$B_proportion_adults[fis], pch = 19,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("hotpink4",a))
 #plot distance traveled depending on proportion of sub-adults in subgroup
 points(events$A_during_disp[fis], events$A_proportion_subadults[fis], pch = 17,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("orange3", a),mgp=c(5,2,.5))
@@ -315,28 +315,41 @@ plot(events$A_during_disp[fis], events$A_average_grp_age[fis], xlim = c(0,51), y
 points(events$B_during_disp[fis], events$B_average_grp_age[fis], pch = 20)
 
 
+
+png(height = 600, width = 2400, units = 'px', filename = paste0(plot_dir,'inds_dist_traveled_duringfission.png'))
+
+par(mfrow=c(1,4), mar = c(8,8,5,8),(mgp=c(3,3,1)))
 #plot distance traveled depending on number of adults in subgroup
-plot(events$A_during_disp[fis], events$A_n_adults[fis], pch = 20, xlab = "Distance traveled during fission event (m)", ylab = "Number of adults in subgroup")
-points(events$B_during_disp[fis], events$B_n_adults[fis], pch = 20)
+plot(events$A_during_disp[fis], events$A_n_adults[fis], pch = 20, xlab = "Distance traveled during fission event (m)", ylab = "Number of adults in subgroup", cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, mgp=c(5,2,.5))
+points(events$B_during_disp[fis], events$B_n_adults[fis], pch = 20, cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3)
+
+#plot distance traveled depending on number of subadults in subgroup
+plot(events$A_during_disp[fis], events$A_n_subadults[fis], pch = 20,  xlab = "Distance traveled during fission event (m)", ylab = "Number of subadults in subgroup", cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, mgp=c(5,2,.5))
+points(events$B_during_disp[fis], events$B_n_subadults[fis], pch = 20, cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3)
+
+#plot distance traveled depending on number of juveniles in subgroup
+plot(events$A_during_disp[fis], events$A_n_juveniles[fis], pch = 20, xlab = "Distance traveled during fission event (m)", ylab = "Number of juveniles in subgroup", cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, mgp=c(5,2,.5))
+points(events$B_during_disp[fis], events$B_n_juveniles[fis], pch = 20, cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3)
+
+#change ylim to 10 when Galaxy group, 20 when Presedente
+#plot distance traveled depending on number of individuals in subgroup
+plot(events$A_during_disp[fis],events$A_subgroup_size[fis], pch = 20, xlab = "Distance traveled during fission event (m)", ylab = "Number of individuals in subgroup", ylim = c(0, 20), cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, mgp=c(5,2,.5), col = "cyan3")
+points(events$B_during_disp[fis], events$B_subgroup_size[fis], pch = 20, cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = "cyan3")
+
+dev.off()
+
+
+
+
 
 #plot distance traveled depending on proportion of adults in subgroup
 plot(events$A_during_disp[fis], events$A_proportion_adults[fis], pch = 20)
 points(events$B_during_disp[fis], events$B_proportion_adults[fis], pch = 20)
 
-#plot distance traveled depending on number of subadults in subgroup
-plot(events$A_during_disp[fis], events$A_n_subadults[fis], pch = 20)
-points(events$B_during_disp[fis], events$B_n_subadults[fis], pch = 20)
-
-#plot distance traveled depending on number of juveniles in subgroup
-plot(events$A_during_disp[fis], events$A_n_juveniles[fis], pch = 20)
-points(events$B_during_disp[fis], events$B_n_juveniles[fis], pch = 20)
-
-#plot distance traveled depending on number of individuals in subgroup
-plot(events$A_during_disp[fis],events$A_subgroup_size[fis], pch = 20, ylim = c(0, 10))
-points(events$B_during_disp[fis], events$B_subgroup_size[fis], pch = 20)
 
 
 
+# ----------------------------------------------------------------------
 
 
 ### FUSION PLOTTING ###
@@ -388,7 +401,7 @@ a <- 0.5
 png(height = 800, width = 800, units = 'px', filename = paste0(plot_dir,'subgroup_ages_duringfusion.png'))
 par(mfrow=c(1,1), mar = c(10,10,2,2),(mgp=c(3,5,1))) #bottom, left, top, right)
 #combine the 3 plots above into one plot
-plot(events$A_during_disp[fus], events$A_proportion_adults[fus], pch = 19, ylab = "Proportion of age class in sub-group", xlab="Distance traveled during fusion event (m)",xlim = c(0, 60), ylim = c(0,1), cex = 4, cex.axis = 2, cex.lab = 2, cex.main = 3, col = alpha("hotpink4",a), mgp=c(5,2,.5))
+plot(events$A_during_disp[fus], events$A_proportion_adults[fus], pch = 19, ylab = "Proportion of age class in sub-group", xlab="Distance traveled during fusion event (m)",xlim = c(0, 100), ylim = c(0,1), cex = 4, cex.axis = 2, cex.lab = 2, cex.main = 3, col = alpha("hotpink4",a), mgp=c(5,2,.5))
 points(events$B_during_disp[fus], events$B_proportion_adults[fus], pch = 19,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("hotpink4",a))
 #plot distance traveled depending on proportion of sub-adults in subgroup
 points(events$A_during_disp[fus], events$A_proportion_subadults[fus], pch = 17,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("orange3", a),mgp=c(5,2,.5))
