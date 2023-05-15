@@ -6,9 +6,6 @@ library(lubridate)
 #set time zone to UTC to avoid confusing time zone issues
 Sys.setenv(TZ='UTC')
 
-#FUNCTIONS
-source('~/Dropbox/code_ari/move_comm_analysis/audio_gps_processing/spatially_discretized_headings.R')
-
 #DIRECTORIES AND PARAMETERS
 codedir <- '~/Dropbox/code_ari/coatithon_code/'
 dir <- '~/Dropbox/coati/processed/' #directory where all data is stored
@@ -16,6 +13,10 @@ group <- 'galaxy' #subdirectory where the group data is stored
 
 #get directory to group data
 groupdir <- paste0(dir,group)
+
+#For Emily:
+codedir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
+groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
 
 #FUNCTIONS
 #read in functions
@@ -96,7 +97,10 @@ quartz()
 bins <- seq(-2,3,length=30)
 histo <- hist(log(dyad_dists, 10), plot=T, breaks=30, xlab = 'Log dyadic distance (m)',main='')
 abline(v=log(50,10), col ='red', lwd = 3, lty=2)
-text(y = max(histo$counts)*.95, x = log(50,10)+.4, labels = '50 m', col = 'red',cex=1.5)
+text(y = max(histo$counts)*0.95, x = log(50,10)+.35, labels = '50 m', col = 'red',cex=1)
+
+#plotting raw dyad_dists
+hist(dyad_dists, breaks = 100, xlim = c(0,1000))
 
 #Plot 2: Mean heading correlation as a function of distance 
 quartz()
