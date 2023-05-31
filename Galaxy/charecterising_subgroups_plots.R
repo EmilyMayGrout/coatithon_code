@@ -1,10 +1,10 @@
-#plots for the low res fission fusion paper
+#plots for the low res fission fusion paper galaxy
 
 #--------PARAMS-------
-data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/"
+data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/'
-gps_file <- "galaxy_xy_10min_level0.RData"
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
+gps_file <- "galaxy_xy_10min_level1.RData"
 id_file <- 'coati_ids.RData'
 
 #list of Rs
