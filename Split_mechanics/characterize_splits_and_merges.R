@@ -89,8 +89,15 @@ events$group_B_idxs <- list(c(0,0,0))
 
 
 for (i in 1:nrow(events)){
+  
   group_A_names <- events$group_A[i][[1]]
   group_B_names <- events$group_B[i][[1]]
+  
+  #if auto identified events, put in the right form (string) for matching
+  if(!use_manual_events){
+    group_A_names <- paste(group_A_names, collapse= ', ')
+    group_B_names <- paste(group_B_names, collapse= ', ')
+  }
   
   group_A_idxs <- match_coati_names(group_A_names, coati_ids)
   group_B_idxs <- match_coati_names(group_B_names, coati_ids)
