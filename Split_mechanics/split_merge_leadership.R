@@ -207,3 +207,44 @@ for(i in 1:nrow(events)){
   events$group_B_lead_rank_norm[i] <- list(norm_ranks_B)
   
 }
+
+#get normalized ranks for individuals during fissions and fusions
+fission_leaders <- fusion_leaders <- matrix(NA, nrow = n_inds, ncol = nrow(events))
+for(i in 1:nrow(events)){
+  
+  if(!is.na(events$A_moved[i])){
+    if(events$A_moved[i]){
+      inds <- events$group_A_idxs[i][[1]]
+      norm_ranks <- events$group_A_lead_rank_norm[i][[1]]
+      if(events$event_type[i] == 'fission'){
+        fission_leaders[inds,i] <- norm_ranks
+      }
+      if(events$event_type[i] == 'fusion'){
+        fusion_leaders[inds,i] <- norm_ranks
+      }
+    }
+  }
+  
+  if(!is.na(events$B_moved[i])){
+    if(events$B_moved[i]){
+      inds <- events$group_B_idxs[i][[1]]
+      norm_ranks <- events$group_B_lead_rank_norm[i][[1]]
+      if(events$event_type[i] == 'fission'){
+        fission_leaders[inds,i] <- norm_ranks
+      }
+      if(events$event_type[i] == 'fusion'){
+        fusion_leaders[inds,i] <- norm_ranks
+      }
+    }
+  }
+}
+
+rowMeans(fission_leaders, na.rm=T)
+apply(fission_leaders, 1, sd, na.rm=T)
+rowMeans(fusion_leaders, na.rm=T)
+
+quartz()
+par(mfrow=c(4,5))
+for(i in 1:n_inds){
+  hist(fusion_leaders[i,], breaks= seq(0,1,.2), main = coati_ids$name[i])
+}
