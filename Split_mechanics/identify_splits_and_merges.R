@@ -14,6 +14,14 @@ group <- 'galaxy' #subdirectory where the group data is stored
 #get directory to group data
 groupdir <- paste0(dir,group)
 
+#for Emily:
+codedir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
+groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
+#groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
+#plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
+
+
 #SOURCE FUNCTIONS
 setwd(codedir)
 source('coati_function_library.R')
@@ -34,7 +42,7 @@ load(file=paste0(group,'_xy_highres_level1.RData'))
 
 ff_data_50 <- detect_fissions_and_fusions(R_inner = 15, R_outer = 50, xs, ys, ts, coati_ids)
 
-analyse_ff_event(11, events = ff_data$events_detected, xs, ys, max_time = 600)
+analyse_ff_event(12, events = ff_data_50$events_detected, xs, ys, ts, max_time = 600)
 
 #animate events
 # i <- 10

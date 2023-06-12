@@ -2,6 +2,7 @@
 
 #LIBRARY
 library(lubridate)
+library(scales)
 
 #set time zone to UTC to avoid confusing time zone issues
 Sys.setenv(TZ='UTC')
@@ -236,6 +237,7 @@ for (i in 1:nrow(events)){
 }
 
 ### FISSION PLOTTING ###
+fis <- events$event_type == "fission"
 
 #combine the A_subgroup_size and B_sub_group_size with A_during_disp and B_during_disp to make abline
 combined_1 <- data.frame(events$A_subgroup_size[fis])
@@ -251,7 +253,6 @@ combined <- rbind(combined_1,combined_2)
 disp <- rbind(disp_1, disp_2)
 comb <- cbind(combined, disp)
 
-fis <- events$event_type == "fission"
 
 png(height = 800, width = 2500, units = 'px', filename = paste0(plot_dir,'subgroup_dist_travelled_duringfission.png'))
 par(mfrow=c(1,3), mar = c(10,10,10,10),(mgp=c(3,5,1))) #bottom, left, top, right)
