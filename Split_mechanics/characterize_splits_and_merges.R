@@ -5,43 +5,48 @@
 library(lubridate)
 library(scales)
 
-#group
-group <- 'presedente'
+#----------PARAMETERS - MODIFY HERE--------------
 
-#events filename - where to get the split/merge events for manually labeled events
-events.filename <- paste0('Split_mechanics/',group,'_manual_split_merge_clean.csv') #manual labels
+#which group (galaxy or presedente)
+group <- 'galaxy'
+
+#who is using (ari or emily)
+user <- 'ari'
 
 #whether to identify splits and merges automatically (if F) or use manually identified events (if T)
 use_manual_events <- F
+
+#---PARAMETERS (probably don't modify)---
+
+#events filename - where to get the split/merge events for manually labeled events
+events.filename <- paste0('Split_mechanics/',group,'_manual_split_merge_clean.csv') #manual labels
 
 #radii to use
 R_inner <- 15
 R_outer <- 50
 
+#------TIME ZONE------
 #set time zone to UTC to avoid confusing time zone issues
 Sys.setenv(TZ='UTC')
 
 #DIRECTORIES AND PARAMETERS
 
-codedir <- '~/Dropbox/code_ari/coatithon_code/'
-dir <- '~/Dropbox/coati/processed/' #directory where all data is stored
-if(group == 'galaxy'){
-  groupdir <- '~/Dropbox/coati/processed/galaxy/'
-} else if(group=='presendente'){
-  groupdir <- '~/Dropbox/coati/processed/presedente/'
+if(user %in% c('Ari','ari')){
+  codedir <- '~/Dropbox/code_ari/coatithon_code/'
+  dir <- '~/Dropbox/coati/processed/' #directory where all data is stored
+  if(group == 'galaxy'){
+    groupdir <- '~/Dropbox/coati/processed/galaxy/'
+  } else if(group=='presendente'){
+    groupdir <- '~/Dropbox/coati/processed/presedente/'
+  }
+} else{
+  codedir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
+  if(group == 'galaxy'){
+    groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
+  } else if(group == 'presedente'){
+    groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
+  }
 }
-#get directory to group data
-
-#for Emily:
-#codedir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-#if(group == 'galaxy'){
-#  groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
-#} else if(group == 'presedente'){
-#  groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
-#}
-
-groupdir <- paste0(dir,group)
-
 
 #FUNCTIONS
 #read in functions
