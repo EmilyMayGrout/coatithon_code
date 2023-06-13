@@ -8,13 +8,13 @@ library(scales)
 #----------PARAMETERS - MODIFY HERE--------------
 
 #which group (galaxy or presedente)
-group <- 'galaxy'
+group <- 'presedente'
 
 #who is using (ari or emily)
 user <- 'ari'
 
 #whether to identify splits and merges automatically (if F) or use manually identified events (if T)
-use_manual_events <- F
+use_manual_events <- T
 
 #---PARAMETERS (probably don't modify)---
 
@@ -36,7 +36,7 @@ if(user %in% c('Ari','ari')){
   dir <- '~/Dropbox/coati/processed/' #directory where all data is stored
   if(group == 'galaxy'){
     groupdir <- '~/Dropbox/coati/processed/galaxy/'
-  } else if(group=='presendente'){
+  } else if(group=='presedente'){
     groupdir <- '~/Dropbox/coati/processed/presedente/'
   }
 } else{

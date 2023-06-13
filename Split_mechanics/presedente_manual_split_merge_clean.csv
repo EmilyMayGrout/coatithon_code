@@ -1,97 +1,97 @@
 date;event_type;fission_time;fusion_time;focus_group;group_A;group_B;group_C;direction;comments
 2023-01-19;fission;12:24;;subgroup (5);Zelenskyy, Truss, Meir;Gillard, Torrijos;;A <- B;
 2023-01-19;fusion;;12:33;subgroup (5);Zelenskyy, Truss, Meir;Gillard, Torrijos;;B -> A;
-2023-01-20;fusion;;12:29;full group (16);Ardern, Cleopatra, Mujica, Obama, Gandhi;Moscoso, Zelenskyy, Peron, Truss, Castro, Merkel, Meir, Ghengis Khan, Gillard, May, Torrijos; ;A -> B;
-2023-01-20;fission;12:51;;full group (16);Zelenskyy, Truss, Meir, Peron, Castro, May, Torrijos;Moscoso, Ardern, Merkel, Mujica, Gillard, Obama, Gandhi, Ghengis Khan, Cleopatra; ;A <=> B;
-2023-01-20;fusion;;13:04;full group (16);Zelenskyy, Truss, Meir, Peron, Castro, May, Torrijos;Moscoso, Ardern, Merkel, Mujica, Gillard, Obama, Gandhi, Ghengis Khan, Cleopatra; ;A -> B;
-2023-01-20;fission;13:22;;full group (16);Merkel, Ardern, Zelenskyy, Gandhi, Mujica, Obama, Cleopatra;Moscoso, Truss, Meir, Torrijos, Gillard, Ghengis Khan, Peron; ;B <- A;
-2023-01-20;fusion;;13:31;full group (16);Merkel, Ardern, Zelenskyy, Gandhi, Mujica, Obama, Cleopatra;Moscoso, Truss, Meir, Torrijos, Gillard, Ghengis Khan, Peron; ;A -> B;
-2023-01-21;fission;11:42;;subgroup (11);Cleopatra, Ardern, Merkel, Moscoso, Ghengis Khan;May, Castro, Gandhi, Obama, Meir, Mujica; ;A <- B;
-2023-01-21;fusion;;11:57;subgroup (11);Cleopatra, Ardern, Merkel, Moscoso, Ghengis Khan;May, Castro, Gandhi, Obama, Meir, Mujica; ;B -> A;
-2023-01-21;fission;12:30;;subgroup (11);Merkel, May, Ghengis Khan, Moscoso, Castro;Meir, Mujica, Obama, Gandhi, Ardern, Cleopatra; ;B <- A;
-2023-01-21;fusion;;12:46;subgroup (11);Merkel, May, Ghengis Khan, Moscoso, Castro;Meir, Mujica, Obama, Gandhi, Ardern, Cleopatra; ;A -> B;
-2023-01-21;fusion;;13:00;full group (15 -no Peron);Torrijos, Truss, Zelenskyy, Gillard;Castro, Ghengis Khan, Obama, May, Mujca, Ardern, Moscoso, Merkel, Cleopatra, Gandhi, Meir; ;A -> B;
+2023-01-20;fusion;;12:29;full group (16);Ardern, Cleopatra, Mujica, Obama, Gandhi;Moscoso, Zelenskyy, Peron, Truss, Castro, Merkel, Meir, Khan, Gillard, May, Torrijos; ;A -> B;
+2023-01-20;fission;12:51;;full group (16);Zelenskyy, Truss, Meir, Peron, Castro, May, Torrijos;Moscoso, Ardern, Merkel, Mujica, Gillard, Obama, Gandhi, Khan, Cleopatra; ;A <=> B;
+2023-01-20;fusion;;13:04;full group (16);Zelenskyy, Truss, Meir, Peron, Castro, May, Torrijos;Moscoso, Ardern, Merkel, Mujica, Gillard, Obama, Gandhi, Khan, Cleopatra; ;A -> B;
+2023-01-20;fission;13:22;;full group (16);Merkel, Ardern, Zelenskyy, Gandhi, Mujica, Obama, Cleopatra;Moscoso, Truss, Meir, Torrijos, Gillard, Khan, Peron; ;B <- A;
+2023-01-20;fusion;;13:31;full group (16);Merkel, Ardern, Zelenskyy, Gandhi, Mujica, Obama, Cleopatra;Moscoso, Truss, Meir, Torrijos, Gillard, Khan, Peron; ;A -> B;
+2023-01-21;fission;11:42;;subgroup (11);Cleopatra, Ardern, Merkel, Moscoso, Khan;May, Castro, Gandhi, Obama, Meir, Mujica; ;A <- B;
+2023-01-21;fusion;;11:57;subgroup (11);Cleopatra, Ardern, Merkel, Moscoso, Khan;May, Castro, Gandhi, Obama, Meir, Mujica; ;B -> A;
+2023-01-21;fission;12:30;;subgroup (11);Merkel, May, Khan, Moscoso, Castro;Meir, Mujica, Obama, Gandhi, Ardern, Cleopatra; ;B <- A;
+2023-01-21;fusion;;12:46;subgroup (11);Merkel, May, Khan, Moscoso, Castro;Meir, Mujica, Obama, Gandhi, Ardern, Cleopatra; ;A -> B;
+2023-01-21;fusion;;13:00;full group (15 -no Peron);Torrijos, Truss, Zelenskyy, Gillard;Castro, Khan, Obama, May, Mujca, Ardern, Moscoso, Merkel, Cleopatra, Gandhi, Meir; ;A -> B;
 2023-01-22;fission;11:25;;sub group (6);Meir, Castro, Torrijos, Mujica, Gillard, Truss;Lula;;B <- A;
 2023-01-22;fusion;;11:37;sub group (6);Meir, Castro, Torrijos, Mujica, Gillard, Truss;Sam;;A -> B;
 2023-01-22;fission;12:06;;sub group (6);Meir, Castro, Torrijos, Mujica, Gillard, Truss;Sam;;B <- A;Sam could have been displaced
-2023-01-22;almost fission; ;13:00;sub group (9);Moscoso, May, Gandhi, Ardern, Cleopatra, Merkel, Zelenskyy, Ghengis Khan, Obama;Lula;;B -> A;Lula could have been displaced so went away from the group
-2023-01-23;fission;11:26;;full group (15 -no Peron);Meir, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Gillard;Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan; ;A <- B;
+2023-01-22;almost fission; ;13:00;sub group (9);Moscoso, May, Gandhi, Ardern, Cleopatra, Merkel, Zelenskyy, Khan, Obama;Lula;;B -> A;Lula could have been displaced so went away from the group
+2023-01-23;fission;11:26;;full group (15 -no Peron);Meir, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Gillard;Castro, Gandhi, Moscoso, May, Merkel, Khan; ;A <- B;
 2023-01-23;fusion;;11:33;sub group (9);Meir, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Gillard;Sam;;A -> B;Sam not moving
-2023-01-23;fusion;;11:41;full group (15 -no Peron);Meir, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Gillard, Sam;Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan; ;B -> A;followig same route - likely smell trail
-2023-01-23;fission;12:11;;full group (15 -no Peron);Meir, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan;Sam;;B <- A;
-2023-01-23;fission;12:25;;full group (15 -no Peron);Meir, Torrijos, Obama, Zelenskyy, Truss, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan;Ardern;;A <- B;Ardern around 40 m from group 
-2023-01-23;fusion;;12:40;full group (15 -no Peron);Meir, Torrijos, Obama, Zelenskyy, Truss, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan;Ardern;;B -> A;
-2023-01-23;fusion;;12:50;full group (15 -no Peron);Meir, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan;Mandela;;B -> A;Mandela staying at periphery of group
-2023-01-23;fission;13:01;;full group (15 -no Peron); Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Gillard, Gandhi, Moscoso, May, Genghis Khan;Castro, Meir, Mandela, Merkel, Cleopatra; ;A <=> B;
-2023-01-23;fusion;;13:09;full group (15 -no Peron); Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Gillard, Gandhi, Moscoso, May, Genghis Khan;Castro, Meir, Mandela, Merkel, Cleopatra; ;A == B;
-2023-01-23;fission;13:12;;full group (15 -no Peron);Moscoso, Meir, Zelenskyy, Truss, Ghengis Khan, Obama, Gillard, Ardern, Torrijos;Castro, Mandela, May, Gandhi, Merkel, Mujica, Cleopatra; ;A <=> B;
+2023-01-23;fusion;;11:41;full group (15 -no Peron);Meir, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Gillard, Sam;Castro, Gandhi, Moscoso, May, Merkel, Khan; ;B -> A;followig same route - likely smell trail
+2023-01-23;fission;12:11;;full group (15 -no Peron);Meir, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Khan;Sam;;B <- A;
+2023-01-23;fission;12:25;;full group (15 -no Peron);Meir, Torrijos, Obama, Zelenskyy, Truss, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Khan;Ardern;;A <- B;Ardern around 40 m from group 
+2023-01-23;fusion;;12:40;full group (15 -no Peron);Meir, Torrijos, Obama, Zelenskyy, Truss, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Khan;Ardern;;B -> A;
+2023-01-23;fusion;;12:50;full group (15 -no Peron);Meir, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Khan;Mandela;;B -> A;Mandela staying at periphery of group
+2023-01-23;fission;13:01;;full group (15 -no Peron); Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Gillard, Gandhi, Moscoso, May, Khan;Castro, Meir, Mandela, Merkel, Cleopatra; ;A <=> B;
+2023-01-23;fusion;;13:09;full group (15 -no Peron); Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Gillard, Gandhi, Moscoso, May, Khan;Castro, Meir, Mandela, Merkel, Cleopatra; ;A == B;
+2023-01-23;fission;13:12;;full group (15 -no Peron);Moscoso, Meir, Zelenskyy, Truss, Khan, Obama, Gillard, Ardern, Torrijos;Castro, Mandela, May, Gandhi, Merkel, Mujica, Cleopatra; ;A <=> B;
 2023-01-23;fission;13:23;;sub group (6);Castro, May, Gandhi, Merkel, Mujica, Cleopatra;Mandela; ;B <- A;
-2023-01-23;fusion;;13:25;sub group (9);Moscoso, Meir, Zelenskyy, Truss, Ghengis Khan, Obama, Gillard, Ardern, Torrijos;Mandela;;B -> A;
-2023-01-23;fusion;;13:37;full group (15 -no Peron);Moscoso, Meir, Zelenskyy, Truss, Ghengis Khan, Obama, Gillard, Ardern, Torrijos, Mandela;Castro, May, Gandhi, Merkel, Mujica, Cleopatra; ;B -> A;
-2023-01-24;fission;12:31;;full group (15 -no Peron);Meir, Torrijos, Obama, Ardern, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan;Zelenskyy, Truss;;A <- B;In general Truss was at the back of the group for most of the moving
-2023-01-24;fusion;;12:49;full group (15 -no Peron);Meir, Torrijos, Obama, Ardern, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan;Zelenskyy, Truss;;B -> A;
-2023-01-25;fission;11:54;;full group (15 -no Peron); Ardern, Truss, Torrijos, Gillard;May, Meir, Castro, Zelenskyy, Ghengis Khan, Obama, Moscoso, Cleopatra, Gandhi, Mandela, Mujica, Merkel; ;A <- B;
-2023-01-25;fission;12:10;;sub group (11);May, Meir, Castro, Zelenskyy, Ghengis Khan, Obama, Moscoso, Cleopatra, Gandhi, Mujica, Merkel;Mandela;;B <- A;
+2023-01-23;fusion;;13:25;sub group (9);Moscoso, Meir, Zelenskyy, Truss, Khan, Obama, Gillard, Ardern, Torrijos;Mandela;;B -> A;
+2023-01-23;fusion;;13:37;full group (15 -no Peron);Moscoso, Meir, Zelenskyy, Truss, Khan, Obama, Gillard, Ardern, Torrijos, Mandela;Castro, May, Gandhi, Merkel, Mujica, Cleopatra; ;B -> A;
+2023-01-24;fission;12:31;;full group (15 -no Peron);Meir, Torrijos, Obama, Ardern, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Khan;Zelenskyy, Truss;;A <- B;In general Truss was at the back of the group for most of the moving
+2023-01-24;fusion;;12:49;full group (15 -no Peron);Meir, Torrijos, Obama, Ardern, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Khan;Zelenskyy, Truss;;B -> A;
+2023-01-25;fission;11:54;;full group (15 -no Peron); Ardern, Truss, Torrijos, Gillard;May, Meir, Castro, Zelenskyy, Khan, Obama, Moscoso, Cleopatra, Gandhi, Mandela, Mujica, Merkel; ;A <- B;
+2023-01-25;fission;12:10;;sub group (11);May, Meir, Castro, Zelenskyy, Khan, Obama, Moscoso, Cleopatra, Gandhi, Mujica, Merkel;Mandela;;B <- A;
 2023-01-25;fusion;;12:15;sub group (4);Mandela; Ardern, Truss, Torrijos, Gillard;;A -> B;
 2023-01-25;fission;12:26;;sub group (4);Mandela; Ardern, Truss, Torrijos, Gillard;;B <- A;
-2023-01-25;fusion;;12:26;full group (15 -no Peron); Ardern, Truss, Torrijos, Gillard, Mandela;May, Meir, Castro, Zelenskyy, Ghengis Khan, Obama, Moscoso, Cleopatra, Gandhi, Mujica, Merkel; ;A -> B;
-2023-01-25;fission;12:59;;full group (15 -no Peron);Ardern, Merkel, Gandhi, Cleopatra, Mujica;May, Torrijos, Gillard, Zelenskyy, Moscoso, Zelenskyy, Castro, Meir, Ghengis Khan, Obama; ;A <=> B;
-2023-01-25;fusion;;13:06;full group (15 -no Peron);Ardern, Merkel, Gandhi, Cleopatra, Mujica;May, Torrijos, Gillard, Zelenskyy, Moscoso, Zelenskyy, Castro, Meir, Ghengis Khan, Obama; ;B -> A;
-2023-01-25;fission;13:24;;full group (15 -no Peron);Ardern, May, Gandhi, Merkel, Castro, Truss, Gillard, Torrijos, Mujica;Meir, Zelenskyy, Obama, Cleopatra, Moscoso, Ghengis Khan; ;A <- B;
-2023-01-25;fusion;;13:30;full group (15 -no Peron);Ardern, May, Gandhi, Merkel, Castro, Truss, Gillard, Torrijos, Mujica;Meir, Zelenskyy, Obama, Cleopatra, Moscoso, Ghengis Khan; ;B -> A;
-2023-01-25;fission;before start;;full group (15 -no Peron);Moscoso, Zelenskyy, Merkel, Cleopatra, Mujica, Gandhi, Meir, Ardern, Obama, Genghis Khan, May;Gillard, Torrijos, Truss, Peron;;;
+2023-01-25;fusion;;12:26;full group (15 -no Peron); Ardern, Truss, Torrijos, Gillard, Mandela;May, Meir, Castro, Zelenskyy, Khan, Obama, Moscoso, Cleopatra, Gandhi, Mujica, Merkel; ;A -> B;
+2023-01-25;fission;12:59;;full group (15 -no Peron);Ardern, Merkel, Gandhi, Cleopatra, Mujica;May, Torrijos, Gillard, Zelenskyy, Moscoso, Zelenskyy, Castro, Meir, Khan, Obama; ;A <=> B;
+2023-01-25;fusion;;13:06;full group (15 -no Peron);Ardern, Merkel, Gandhi, Cleopatra, Mujica;May, Torrijos, Gillard, Zelenskyy, Moscoso, Zelenskyy, Castro, Meir, Khan, Obama; ;B -> A;
+2023-01-25;fission;13:24;;full group (15 -no Peron);Ardern, May, Gandhi, Merkel, Castro, Truss, Gillard, Torrijos, Mujica;Meir, Zelenskyy, Obama, Cleopatra, Moscoso, Khan; ;A <- B;
+2023-01-25;fusion;;13:30;full group (15 -no Peron);Ardern, May, Gandhi, Merkel, Castro, Truss, Gillard, Torrijos, Mujica;Meir, Zelenskyy, Obama, Cleopatra, Moscoso, Khan; ;B -> A;
+2023-01-25;fission;before start;;full group (15 -no Peron);Moscoso, Zelenskyy, Merkel, Cleopatra, Mujica, Gandhi, Meir, Ardern, Obama, Khan, May;Gillard, Torrijos, Truss, Peron;;;
 2023-01-26;fusion;;12:16;sub group (4);Gillard, Torrijos, Truss, Peron;Mandela;;B -> A;
 2023-01-26;fission;12:24;;sub group (4);Gillard, Torrijos, Truss, Peron;Mandela;;A <- B;
-2023-01-26;fission;12:27;;sub group (11);Obama, Ardern, Cleopatra, Merkel, Mujica;Zelenskyy, Meir, Genghis Khan, Moscoso, Castro, May; ;A <=> B;
-2023-01-26;fusion;;12:46;sub group (11);Obama, Ardern, Cleopatra, Merkel, Mujica;Zelenskyy, Meir, Genghis Khan, Moscoso, Castro, May; ;A == B;
-2023-01-27;fusion;;11:55;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan;Kenyatta;;A -> B;
-2023-01-27;fission;12:02;;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan;Kenyatta;;B <- A;
-2023-01-28;fission;before start;;full group (16);Gillard, Kenyatta, Torrijos, Truss;Moscoso, Zelenskyy, Merkel, Cleopatra, Mujica, Gandhi, Meir, Ardern, Obama, Genghis Khan, May, Peron, Castro; ; ;
+2023-01-26;fission;12:27;;sub group (11);Obama, Ardern, Cleopatra, Merkel, Mujica;Zelenskyy, Meir, Khan, Moscoso, Castro, May; ;A <=> B;
+2023-01-26;fusion;;12:46;sub group (11);Obama, Ardern, Cleopatra, Merkel, Mujica;Zelenskyy, Meir, Khan, Moscoso, Castro, May; ;A == B;
+2023-01-27;fusion;;11:55;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Khan;Kenyatta;;A -> B;
+2023-01-27;fission;12:02;;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Khan;Kenyatta;;B <- A;
+2023-01-28;fission;before start;;full group (16);Gillard, Kenyatta, Torrijos, Truss;Moscoso, Zelenskyy, Merkel, Cleopatra, Mujica, Gandhi, Meir, Ardern, Obama, Khan, May, Peron, Castro; ; ;
 2023-01-28;fusion;;11:19;sub group (3);Gillard, Kenyatta, Torrijos, Truss;Lula;;B -> A;
 2023-01-28;fission;11:37;;sub group (3);Gillard, Torrijos, Truss, Lula;Kenyatta;;B <- A;
 2023-01-28;fission;12:14;;sub group (3);Gillard, Torrijos, Truss;Lula;;B <- A;
-2023-01-28;fission;12:44;;sub group (13);Ardern, Gandhi, Mujica, Obama, Castro;Ghengis Khan, Merkel, Meir, Zelenskyy, Peron, Cleopatra, May, Moscoso; ;B <- A;
+2023-01-28;fission;12:44;;sub group (13);Ardern, Gandhi, Mujica, Obama, Castro;Khan, Merkel, Meir, Zelenskyy, Peron, Cleopatra, May, Moscoso; ;B <- A;
 2023-01-28;fusion;;12:47;sub group (3);Gillard, Torrijos, Truss;Lula;;B -> A;
 2023-01-28;fission;12:50;;sub group (5);Castro;Ardern, Gandhi, Mujica, Obama;;A <- B;
-2023-01-28;fusion;;12:52;sub group (8);Ghengis Khan, Merkel, Meir, Zelenskyy, Peron, Cleopatra, May, Moscoso;Castro;;B -> A;
+2023-01-28;fusion;;12:52;sub group (8);Khan, Merkel, Meir, Zelenskyy, Peron, Cleopatra, May, Moscoso;Castro;;B -> A;
 2023-01-28;fusion;;12:56;sub group (3);Gillard, Torrijos, Truss, Lula;Mandela;;B -> A;
-2023-01-28;fusion;;12:57;sub group (13);Ardern, Gandhi, Mujica, Obama;Ghengis Khan, Merkel, Meir, Zelenskyy, Peron, Cleopatra, May, Castro, Moscoso; ;A -> B;
+2023-01-28;fusion;;12:57;sub group (13);Ardern, Gandhi, Mujica, Obama;Khan, Merkel, Meir, Zelenskyy, Peron, Cleopatra, May, Castro, Moscoso; ;A -> B;
 2023-01-28;fission;13:15;;sub group (3);Gillard, Torrijos, Truss;Lula, Mandela;;B <- A;Lula and Mandela didn't leave with each other
 2023-01-28;fusion;;13:32;sub group (3);Gillard, Torrijos, Truss, Lula;Mandela;;B -> A;
 2023-01-28;fission;13:36;;sub group (3);Gillard, Torrijos, Truss, Lula;Mandela;;B <- A;
-2023-01-28;fusion;;13:50;sub group (13);Moscoso, Zelenskyy, Merkel, Cleopatra, Mujica, Gandhi, Meir, Ardern, Obama, Genghis Khan, May, Peron, Castro;Kenyatta;;A -> B;
-2023-01-29;fusion;;11:14;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan;Lula;;B -> A;
-2023-01-29;fusion;;11:27;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan, Lula;Mandela;;B -> A;
-2023-01-29;fission;11:36; ;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan, Lula;Mandela;;B <- A;
-2023-01-29;fission;11:43;;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan, Lula;Lula;;B <- A;
-2023-01-29;fusion;;11:48;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan;Mandela;;B -> A;
-2023-01-29;fission;11:52;;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan, Gillard;Mandela;;A <- B;Gillard GPS wonky, so doesn't move with the group - back to normal at 13:19 ish
-2023-01-29;fission;12:02;;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan, Gillard;Merkel, Kenyatta;;B <- A;Kenyatta GPS started when Merkel joined
-2023-01-29;fission;12:23;;sub group (15);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan, Gillard;Ardern;;A <- B;Ardern still foraging at same place
-2023-01-29;fusion;;12:27;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Mujica, Cleopatra, Castro, Gandhi, Moscoso, May, Genghis Khan, Gillard;Merkel, Kenyatta;;A -> B;
-2023-01-29;fission;;12:39;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Mujica, Cleopatra, Castro, Gandhi, Moscoso, May, Genghis Khan, Gillard, Merkel, Kenyatta;Ardern;;B -> A;
-2023-01-29;fission;12:40;;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Mujica, Cleopatra, Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan, Gillard, Ardern;Kenyatta;;B <- A;
-2023-01-30;fission;before start;;full group (16); Peron, Obama, Mujica, Cleopatra, Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan, Ardern;Truss, Zelenskyy, Meir, Torrijos, Gillard; ;A <=> B;
-2023-01-30;fission;11:52;;sub group (11); Peron, Obama, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Genghis Khan, Ardern;Gandhi;;A <- B;
-2023-01-30;fusion;;12:03;sub group (15); Peron, Obama, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Genghis Khan, Ardern;Truss, Zelenskyy, Meir, Torrijos, Gillard; ;A -> B;
-2023-01-30;fission;12:08;;sub group (15);Peron, Obama, Zelenskyy, Truss, Mujica, Cleopatra, Castro, Moscoso, May, Genghis Khan, Gillard, Merkel, Ardern;Torrijos, Meir;;A <=> B;
-2023-01-30;fusion;;12:12;sub group (15);Peron, Obama, Zelenskyy, Truss, Mujica, Cleopatra, Castro, Moscoso, May, Genghis Khan, Gillard, Merkel, Ardern;Torrijos, Meir;;B -> A;
-2023-01-30;fusion;;12:17;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Genghis Khan, Gillard, Ardern;Gandhi;;B -> A;
-2023-01-30;fission;12:26;;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Genghis Khan, Gillard, Gandhi;Ardern;;A <- B;
-2023-01-30;fission;12:34;;sub group (15);Meir, Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Genghis Khan, Gillard, Gandhi;Torrijos, Truss;;A <- B;
-2023-01-30;fusion;;12:38;sub group (14);Meir, Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Genghis Khan, Gillard, Gandhi;Ardern;;B -> A;
-2023-01-30;fusion;;12:42;sub group (15);Meir, Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Genghis Khan, Gillard, Gandhi, Ardern;Torrijos;;B -> A;
-2023-01-30;fusion;;12:46;full group (16);Meir, Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Genghis Khan, Gillard, Gandhi, Ardern, Torrijos;Truss;;B -> A;
-2023-01-30;fission;12:55;;full group (16);Ardern, Gillard, Truss, Cleopatra, Obama, Torrijos, Meir, Gandhi;Moscoso, Zelenskyy, May, Ghengis Khan, Merkel, Mujica, Castro, Peron; ;A <=> B;
-2023-01-30;fission;12:59;;sub group (8);Moscoso, Zelenskyy, May, Ghengis Khan, Merkel, Castro, Peron;Mujica;;B <- A;
+2023-01-28;fusion;;13:50;sub group (13);Moscoso, Zelenskyy, Merkel, Cleopatra, Mujica, Gandhi, Meir, Ardern, Obama, Khan, May, Peron, Castro;Kenyatta;;A -> B;
+2023-01-29;fusion;;11:14;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Khan;Lula;;B -> A;
+2023-01-29;fusion;;11:27;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Khan, Lula;Mandela;;B -> A;
+2023-01-29;fission;11:36; ;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Khan, Lula;Mandela;;B <- A;
+2023-01-29;fission;11:43;;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Khan, Lula;Lula;;B <- A;
+2023-01-29;fusion;;11:48;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Gillard,Castro, Gandhi, Moscoso, May, Merkel, Khan;Mandela;;B -> A;
+2023-01-29;fission;11:52;;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Castro, Gandhi, Moscoso, May, Merkel, Khan, Gillard;Mandela;;A <- B;Gillard GPS wonky, so doesn't move with the group - back to normal at 13:19 ish
+2023-01-29;fission;12:02;;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Castro, Gandhi, Moscoso, May, Merkel, Khan, Gillard;Merkel, Kenyatta;;B <- A;Kenyatta GPS started when Merkel joined
+2023-01-29;fission;12:23;;sub group (15);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Ardern, Mujica, Cleopatra, Castro, Gandhi, Moscoso, May, Merkel, Khan, Gillard;Ardern;;A <- B;Ardern still foraging at same place
+2023-01-29;fusion;;12:27;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Mujica, Cleopatra, Castro, Gandhi, Moscoso, May, Khan, Gillard;Merkel, Kenyatta;;A -> B;
+2023-01-29;fission;12:39;;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Mujica, Cleopatra, Castro, Gandhi, Moscoso, May, Khan, Gillard, Merkel, Kenyatta;Ardern;;B -> A;
+2023-01-29;fission;12:40;;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Mujica, Cleopatra, Castro, Gandhi, Moscoso, May, Merkel, Khan, Gillard, Ardern;Kenyatta;;B <- A;
+2023-01-30;fission;before start;;full group (16); Peron, Obama, Mujica, Cleopatra, Castro, Gandhi, Moscoso, May, Merkel, Khan, Ardern;Truss, Zelenskyy, Meir, Torrijos, Gillard; ;A <=> B;
+2023-01-30;fission;11:52;;sub group (11); Peron, Obama, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Khan, Ardern;Gandhi;;A <- B;
+2023-01-30;fusion;;12:03;sub group (15); Peron, Obama, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Khan, Ardern;Truss, Zelenskyy, Meir, Torrijos, Gillard; ;A -> B;
+2023-01-30;fission;12:08;;sub group (15);Peron, Obama, Zelenskyy, Truss, Mujica, Cleopatra, Castro, Moscoso, May, Khan, Gillard, Merkel, Ardern;Torrijos, Meir;;A <=> B;
+2023-01-30;fusion;;12:12;sub group (15);Peron, Obama, Zelenskyy, Truss, Mujica, Cleopatra, Castro, Moscoso, May, Khan, Gillard, Merkel, Ardern;Torrijos, Meir;;B -> A;
+2023-01-30;fusion;;12:17;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Khan, Gillard, Ardern;Gandhi;;B -> A;
+2023-01-30;fission;12:26;;full group (16);Meir, Peron, Torrijos, Obama, Zelenskyy, Truss, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Khan, Gillard, Gandhi;Ardern;;A <- B;
+2023-01-30;fission;12:34;;sub group (15);Meir, Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Khan, Gillard, Gandhi;Torrijos, Truss;;A <- B;
+2023-01-30;fusion;;12:38;sub group (14);Meir, Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Khan, Gillard, Gandhi;Ardern;;B -> A;
+2023-01-30;fusion;;12:42;sub group (15);Meir, Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Khan, Gillard, Gandhi, Ardern;Torrijos;;B -> A;
+2023-01-30;fusion;;12:46;full group (16);Meir, Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Khan, Gillard, Gandhi, Ardern, Torrijos;Truss;;B -> A;
+2023-01-30;fission;12:55;;full group (16);Ardern, Gillard, Truss, Cleopatra, Obama, Torrijos, Meir, Gandhi;Moscoso, Zelenskyy, May, Khan, Merkel, Mujica, Castro, Peron; ;A <=> B;
+2023-01-30;fission;12:59;;sub group (8);Moscoso, Zelenskyy, May, Khan, Merkel, Castro, Peron;Mujica;;B <- A;
 2023-01-30;fusion;;13:00;sub group (8);Mujica;Ardern, Gillard, Truss, Cleopatra, Obama, Torrijos, Meir, Gandhi; ;A -> B;
-2023-01-30;fission;13:04;;sub group (7);Moscoso, May, Ghengis Khan, Merkel, Castro, Peron;Zelenskyy;;B <- A;
+2023-01-30;fission;13:04;;sub group (7);Moscoso, May, Khan, Merkel, Castro, Peron;Zelenskyy;;B <- A;
 2023-01-30;fusion;;13:07;sub group (9);Ardern, Gillard, Truss, Cleopatra, Obama, Torrijos, Meir, Gandhi, Mujica;Zelenskyy;;B -> A;
 2023-01-30;fission;13:10;;sub group (10);Mujica, Meir, Truss, Gillard, Torrijos, Obama;Zelenskyy, Cleopatra, Ardern, Gandhi; ;A <- B;sub groups are quite close together - maybe 30m
-2023-01-30;fusion;;13:14;full group (16);Moscoso, May, Ghengis Khan, Merkel, Castro, Peron;Mujica, Meir, Truss, Gillard, Torrijos, Obama;Zelenskyy, Cleopatra, Ardern, Gandhi;A == B==C;
-2023-01-31;fission;before start;;full group (16);Gandhi, Mujica, Cleopatra, Ardern, Obama;Torrijos, Gillard, Zelenskyy, May, Ghengis Khan, Meir, Truss;Merkel, Castro, Peron, Moscoso; ;
-2023-01-31;fusion;;12:16;sub group (11);Merkel, Castro, Peron, Moscoso;Torrijos, Gillard, Zelenskyy, May, Ghengis Khan, Meir, Truss; ;A -> B;
-2023-01-31;fission;12:19;;sub group (11);Merkel, Castro, Peron, Moscoso;Torrijos, Gillard, Zelenskyy, May, Ghengis Khan, Meir, Truss; ;A <=> B;
+2023-01-30;fusion;;13:14;full group (16);Moscoso, May, Khan, Merkel, Castro, Peron;Mujica, Meir, Truss, Gillard, Torrijos, Obama;Zelenskyy, Cleopatra, Ardern, Gandhi;A == B==C;
+2023-01-31;fission;before start;;full group (16);Gandhi, Mujica, Cleopatra, Ardern, Obama;Torrijos, Gillard, Zelenskyy, May, Khan, Meir, Truss;Merkel, Castro, Peron, Moscoso; ;
+2023-01-31;fusion;;12:16;sub group (11);Merkel, Castro, Peron, Moscoso;Torrijos, Gillard, Zelenskyy, May, Khan, Meir, Truss; ;A -> B;
+2023-01-31;fission;12:19;;sub group (11);Merkel, Castro, Peron, Moscoso;Torrijos, Gillard, Zelenskyy, May, Khan, Meir, Truss; ;A <=> B;
 2023-01-31;fusion;;12:34;sub group (5);Gandhi, Mujica, Cleopatra, Ardern, Obama;Sam, Kenyatta;;B -> A;
 2023-01-31;fission;12:40;;sub group (6);Kenyatta;Gandhi, Mujica, Cleopatra, Ardern, Obama, Sam; ;A <- B;
 2023-01-31;fusion;;12:44;sub group (4);Kenyatta;Merkel, Castro, Peron, Moscoso;;A -> B;
@@ -101,30 +101,30 @@ date;event_type;fission_time;fusion_time;focus_group;group_A;group_B;group_C;dir
 2023-01-31;fission;13:15;;sub group (9);Gandhi, Mujica, Cleopatra, Ardern, Obama, Merkel, Castro, Peron, Moscoso, Kenyatta;Lula;;B <- A;
 2023-01-31;fission;13:32; ;sub group (9);Gandhi, Mujica, Cleopatra, Ardern, Obama, Merkel, Castro, Peron, Moscoso;Kenyatta;;A <- B;
 2023-01-31;fission;13:42;;sub group (9);Gandhi, Mujica, Cleopatra, Obama, Merkel, Castro, Peron, Moscoso;Ardern;;A <=> B;
-2023-01-31;fusion;;13:59;sub group (7);Torrijos, Gillard, Zelenskyy, May, Ghengis Khan, Meir, Truss;Gendry;;A -> B;
-2023-02-01;fission;before start;;full group (16);Meir, Torrijos, Truss;Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Genghis Khan, Gillard, Gandhi, Ardern, Gendry; ; ;
-2023-02-01;fission;11:42;;sub group (13);Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Genghis Khan, Gillard, Gandhi, Ardern;Gendry;;B <- A;
+2023-01-31;fusion;;13:59;sub group (7);Torrijos, Gillard, Zelenskyy, May, Khan, Meir, Truss;Gendry;;A -> B;
+2023-02-01;fission;before start;;full group (16);Meir, Torrijos, Truss;Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Khan, Gillard, Gandhi, Ardern, Gendry; ; ;
+2023-02-01;fission;11:42;;sub group (13);Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Khan, Gillard, Gandhi, Ardern;Gendry;;B <- A;
 2023-02-01;fusion;;11:18;sub group (3);Meir, Torrijos, Truss;Kenyatta;Sam;A + B -> C;
 2023-02-01;fission;11:24;;sub group (3);Meir, Torrijos, Truss, Sam;Kenyatta;;B <- A;
 2023-02-01;fusion;;11:47;sub group (3);Meir, Torrijos, Truss, Sam;Kenyatta;;B -> A;
 2023-02-01;fission;11:52;;sub group (3);Meir, Torrijos, Truss, Kenyatta;Sam;;B <- A;
 2023-02-01;fission;12:01;;sub group (3);Meir, Torrijos, Truss;Kenyatta;;B <- A;
-2023-02-01;fusion;;12:16;sub group (13);Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Genghis Khan, Gillard, Gandhi, Ardern;Kenyatta, Lula, Sam;;A -> B;
-2023-02-01;fission;12:30;;sub group (13);Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Genghis Khan, Gillard, Gandhi, Ardern, Sam, Lula;Kenyatta;;B <- A;
-2023-02-01;fission;12:35;;sub group (13);Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Genghis Khan, Gillard, Gandhi, Ardern, Sam;Lula;;B <- A;
+2023-02-01;fusion;;12:16;sub group (13);Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Khan, Gillard, Gandhi, Ardern;Kenyatta, Lula, Sam;;A -> B;
+2023-02-01;fission;12:30;;sub group (13);Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Khan, Gillard, Gandhi, Ardern, Sam, Lula;Kenyatta;;B <- A;
+2023-02-01;fission;12:35;;sub group (13);Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Khan, Gillard, Gandhi, Ardern, Sam;Lula;;B <- A;
 2023-02-01;fusion;;13:07;sub group (3);Meir, Torrijos, Truss;Kenyatta;;A -> B;
 2023-02-01;fission;13:10;;sub group (3);Meir, Truss;Torrijos, Kenyatta;;B <- A;
 2023-02-01;fission;13:20;;sub group (2);Torrijos;Kenyatta;;A <=> B;
-2023-02-01;fission;13:20;;sub group (13);Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Genghis Khan, Gillard, Gandhi, Ardern;Sam;;A <- B;
+2023-02-01;fission;13:20;;sub group (13);Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Khan, Gillard, Gandhi, Ardern;Sam;;A <- B;
 2023-02-01;fusion;;13:32;sub group (3);Meir, Truss;Torrijos;;B -> A;
 2023-02-01;fusion;;13:56;sub group (3);Meir, Torrijos, Truss;Gendry;;B -> A;
-2023-02-01;fusion;;13:59;full group (16);Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Genghis Khan, Gillard, Gandhi, Ardern;Meir, Torrijos, Truss, Gendry;;A -> B;
-2023-02-02;fission;11:35;;full group (16);Truss, Gillard, Cleopatra;Meir, Peron, Torrijos, Obama, Zelenskyy, Ardern, Mujica, Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan;;B <- A;
+2023-02-01;fusion;;13:59;full group (16);Peron, Obama, Zelenskyy, Mujica, Cleopatra, Castro, Moscoso, May, Merkel, Khan, Gillard, Gandhi, Ardern;Meir, Torrijos, Truss, Gendry;;A -> B;
+2023-02-02;fission;11:35;;full group (16);Truss, Gillard, Cleopatra;Meir, Peron, Torrijos, Obama, Zelenskyy, Ardern, Mujica, Castro, Gandhi, Moscoso, May, Merkel, Khan;;B <- A;
 2023-02-02;fusion;;11:42;sub group (3);Truss, Gillard, Cleopatra;Lula;;B -> A;
 2023-02-02;fission;11:49;;sub group (3);Truss, Gillard, Lula;Cleopatra;;B <- A;
 2023-02-02;fission;11:50;;sub group (2);Truss, Gillard;Lula;;B <- A;
-2023-02-02;fusion;;11:51;sub group (13);Meir, Peron, Torrijos, Obama, Zelenskyy, Ardern, Mujica, Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan;Cleopatra;;B -> A;
+2023-02-02;fusion;;11:51;sub group (13);Meir, Peron, Torrijos, Obama, Zelenskyy, Ardern, Mujica, Castro, Gandhi, Moscoso, May, Merkel, Khan;Cleopatra;;B -> A;
 2023-02-02;fusion;;12:02;sub group (2);Truss, Gillard;Lula;;A -> B;
 2023-02-02;fission;12:46;;sub group (2);Truss, Gillard;Lula;;A <- B;
-2023-02-02;fusion;;12:59;full group (16);Truss, Gillard;Meir, Peron, Torrijos, Obama, Zelenskyy, Ardern, Mujica, Castro, Gandhi, Moscoso, May, Merkel, Genghis Khan, Cleopatra;;A -> B;
-2023-02-02;fission;13:03;;full group (16);Cleopatra, Truss, Peron, Obama, Gillard, Moscoso, May, Mujica, Meir;Merkel, Ardern, Zelenskyy, Castro, Genghis Khan, Torrijos, Gandhi;;B <- A;
+2023-02-02;fusion;;12:59;full group (16);Truss, Gillard;Meir, Peron, Torrijos, Obama, Zelenskyy, Ardern, Mujica, Castro, Gandhi, Moscoso, May, Merkel, Khan, Cleopatra;;A -> B;
+2023-02-02;fission;13:03;;full group (16);Cleopatra, Truss, Peron, Obama, Gillard, Moscoso, May, Mujica, Meir;Merkel, Ardern, Zelenskyy, Castro, Khan, Torrijos, Gandhi;;B <- A;

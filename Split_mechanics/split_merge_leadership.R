@@ -5,8 +5,8 @@
 #-----PARAMETERS-------
 
 user <- 'ari'
-group <- 'galaxy'
-use_manual_events <- T
+group <- 'presedente'
+use_manual_events <- F
 dist_moved_thresh <- 15 #minimum distance moved by a subgroup to count it as having moved (i.e. left or joined)
 
 if(user=='ari'){
@@ -117,22 +117,30 @@ for(i in 1:nrow(events)){
     n_fissions[group_A] <- n_fissions[group_A] + 1
     n_fissions[group_B] <- n_fissions[group_B] + 1
     
-    if(row$A_moved == T){
-      n_fission_moves[group_A] <- n_fission_moves[group_A] + 1
+    if(!is.na(row$A_moved)){
+      if(row$A_moved == T){
+        n_fission_moves[group_A] <- n_fission_moves[group_A] + 1
+      }
     }
-    if(row$B_moved == T){
-      n_fission_moves[group_B] <- n_fission_moves[group_B] + 1
+    if(!is.na(row$B_moved)){
+      if(row$B_moved == T){
+        n_fission_moves[group_B] <- n_fission_moves[group_B] + 1
+      }
     }
     
   } else if(row$event_type == 'fusion'){
     n_fusions[group_A] <- n_fusions[group_A] + 1
     n_fusions[group_B] <- n_fusions[group_B] + 1
     
-    if(row$A_moved == T){
-      n_fusion_moves[group_A] <- n_fusion_moves[group_A] + 1
+    if(!is.na(row$A_moved)){
+      if(row$A_moved == T){
+        n_fusion_moves[group_A] <- n_fusion_moves[group_A] + 1
+      }
     }
-    if(row$B_moved == T){
-      n_fusion_moves[group_B] <- n_fusion_moves[group_B] + 1
+    if(!is.na(row$B_moved)){
+      if(row$B_moved == T){
+        n_fusion_moves[group_B] <- n_fusion_moves[group_B] + 1
+      }
     }
   }
 }
@@ -144,13 +152,18 @@ fission_move_fracs <- n_fission_moves / n_fissions
 #get error bars (Clopper Pearson intervals 95%)
 fission_CIs <- fusion_CIs <- matrix(NA, nrow = n_inds, ncol = 2)
 for(i in 1:n_inds){
-  test_out <- binom.test(n_fission_moves[i], n_fissions[i])
-  fission_CIs[i,1] <- test_out$conf.int[1]
-  fission_CIs[i,2] <- test_out$conf.int[2]
   
-  test_out <- binom.test(n_fusion_moves[i], n_fusions[i])
-  fusion_CIs[i,1] <- test_out$conf.int[1]
-  fusion_CIs[i,2] <- test_out$conf.int[2]
+  if(n_fissions[i]>0){
+    test_out <- binom.test(n_fission_moves[i], n_fissions[i])
+    fission_CIs[i,1] <- test_out$conf.int[1]
+    fission_CIs[i,2] <- test_out$conf.int[2]
+  }
+  
+  if(n_fusions[i]>0){
+    test_out <- binom.test(n_fusion_moves[i], n_fusions[i])
+    fusion_CIs[i,1] <- test_out$conf.int[1]
+    fusion_CIs[i,2] <- test_out$conf.int[2]
+  }
 }
 
 #plot the % of moving out of all fission and fusion events for each individual w/ confidence intervals
@@ -169,6 +182,7 @@ points(fusion_move_fracs*100, 1:n_inds, pch = 19, cex = 2)
 axis(2, at = 1:n_inds, labels = coati_ids$name, las =1)
 
 #fissions vs fusions
+quartz()
 plot(fusion_move_fracs, fission_move_fracs)
 
 #LEADERSHIP DURING SPLITS
@@ -244,7 +258,13 @@ apply(fission_leaders, 1, sd, na.rm=T)
 rowMeans(fusion_leaders, na.rm=T)
 
 quartz()
-par(mfrow=c(4,5))
+par(mfrow=c(5,5), mar = c(2,2,0,0))
 for(i in 1:n_inds){
   hist(fusion_leaders[i,], breaks= seq(0,1,.2), main = coati_ids$name[i])
+}
+
+quartz()
+par(mfrow=c(5,5), mar = c(2,2,0,0))
+for(i in 1:n_inds){
+  hist(fission_leaders[i,], breaks= seq(0,1,.2), main = coati_ids$name[i])
 }
