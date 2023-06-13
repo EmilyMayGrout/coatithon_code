@@ -4,10 +4,11 @@
 
 #-----PARAMETERS-------
 
-user <- 'emily'
+user <- 'ari'
 group <- 'presedente'
 use_manual_events <- F
 dist_moved_thresh <- 15 #minimum distance moved by a subgroup to count it as having moved (i.e. left or joined)
+make_plots <- F
 
 if(user=='ari'){
   groupdir <- paste0('~/Dropbox/coati/processed/', group)
@@ -58,10 +59,30 @@ ind_disp_along_group_path <- function(moving_inds, xs, ys, t0, tf, tmeas){
   dyi <- yif - yc0
   
   #project individual displacement vectors onto the group displacement vector
-  proj_i <- (dxi*dxc + dyi*dyc) / sqrt(dxc^2 + dyc^2)
+  disp_i <- (dxi*dxc + dyi*dyc) / sqrt(dxc^2 + dyc^2)
   
-  #return ind displacement along group vector
-  return(proj_i) 
+  #get ranks
+  if(sum(is.na(disp_i))==0){
+    ranks <- rank(disp_i)
+  } else{
+    ranks <- rep(NA, length(disp_i))
+  }
+  
+  #get normalized ranks
+  if(length(disp_i)==1){
+    norm_ranks <- c(NA)
+  } else{
+    min_rank <- min(ranks)
+    max_rank <- max(ranks)
+    norm_ranks <- (ranks - min_rank) / (max_rank - min_rank)
+  }
+  
+  #return ind displacement along group vector, ranks, and normalized ranks
+  out <- list()
+  out$disp <- disp_i
+  out$ranks <- ranks
+  out$norm_ranks <- norm_ranks
+  return(out) 
 }
 
 #LOAD EVENTS DATA
@@ -90,11 +111,7 @@ load(file=paste0(group,'_xy_highres_level1.RData'))
 n_inds <- nrow(coati_ids)
 
 
-#Make a histogram of the distances moved by the groups during splits and merges
-#and plot the distance moved threshold on top of it as a sanity check
-quartz()
-hist(c(events$A_during_disp, events$B_during_disp), breaks = 20)
-abline(v = dist_moved_thresh, col = 'red', lwd = 3)
+
 
 #Define whether groups moved or stayed during the split / merge using the dist_moved_thresh threshold
 events$A_moved <- events$A_during_disp > dist_moved_thresh
@@ -166,61 +183,34 @@ for(i in 1:n_inds){
   }
 }
 
-#plot the % of moving out of all fission and fusion events for each individual w/ confidence intervals
-#fissions
-quartz()
-plot(NULL, xlim = c(0,100), ylim = c(0,n_inds), xlab = '% moved', yaxt = 'n', ylab = '', main = 'Fissions')
-arrows(fission_CIs[,1]*100,1:n_inds, fission_CIs[,2]*100, 1:n_inds, length = 0.1, code = 3, angle = 90, lwd = 2)
-points(fission_move_fracs*100, 1:n_inds, pch = 19, cex = 2)
-axis(2, at = 1:n_inds, labels = coati_ids$name, las =1)
-
-#fusions
-quartz()
-plot(NULL, xlim = c(0,100), ylim = c(0,n_inds), xlab = '% moved', yaxt = 'n', ylab = '', main = 'Fusions')
-arrows(fusion_CIs[,1]*100,1:n_inds, fusion_CIs[,2]*100, 1:n_inds, length = 0.1, code = 3, angle = 90, lwd = 2)
-points(fusion_move_fracs*100, 1:n_inds, pch = 19, cex = 2)
-axis(2, at = 1:n_inds, labels = coati_ids$name, las =1)
-
-#fissions vs fusions
-quartz()
-plot(fusion_move_fracs, fission_move_fracs)
-
 #LEADERSHIP DURING SPLITS
-
-#get the displacement of each individual projectd along the subgroup vector, for each subgroup
-events$group_A_lead_disp <- list(c(0,0,0))
-events$group_B_lead_disp <- list(c(0,0,0))
-events$group_A_lead_rank <- list(c(0,0,0))
-events$group_B_lead_rank <- list(c(0,0,0))
+#TODO: add analysis of start vs. middle vs. end leadership
+#get the displacement of each individual project along the subgroup vector, for each subgroup
 for(i in 1:nrow(events)){
-  events$group_A_lead_disp[i] <- list(ind_disp_along_group_path(events$group_A_idxs[i][[1]], xs, ys, events$start_time[i], events$end_time[i], events$end_time[i]))
-  events$group_B_lead_disp[i] <- list(ind_disp_along_group_path(events$group_B_idxs[i][[1]], xs, ys, events$start_time[i], events$end_time[i], events$end_time[i]))
+  #get the leader info for each subgroup for each event
+  lead_info_A_start <- ind_disp_along_group_path(events$group_A_idxs[i][[1]], xs, ys, events$start_time[i], events$end_time[i], events$start_time[i])
+  lead_info_A_mid <- ind_disp_along_group_path(events$group_A_idxs[i][[1]], xs, ys, events$start_time[i], events$end_time[i], floor((events$start_time[i]+events$end_time[i])/2))
+  lead_info_A_end <- ind_disp_along_group_path(events$group_A_idxs[i][[1]], xs, ys, events$start_time[i], events$end_time[i], events$end_time[i])
+  lead_info_B_start <- ind_disp_along_group_path(events$group_B_idxs[i][[1]], xs, ys, events$start_time[i], events$end_time[i], events$start_time[i])
+  lead_info_B_mid <- ind_disp_along_group_path(events$group_B_idxs[i][[1]], xs, ys, events$start_time[i], events$end_time[i], floor((events$start_time[i]+events$end_time[i])/2))
+  lead_info_B_end <- ind_disp_along_group_path(events$group_B_idxs[i][[1]], xs, ys, events$start_time[i], events$end_time[i], events$end_time[i])
+  
+  #save displacement info into events dataframe
+  events$group_A_lead_disp_start[i] <- list(lead_info_A_start$disp)
+  events$group_B_lead_disp_start[i] <- list(lead_info_B_start$disp)
+  events$group_A_lead_disp_mid[i] <- list(lead_info_A_mid$disp)
+  events$group_B_lead_disp_mid[i] <- list(lead_info_B_mid$disp)
+  events$group_A_lead_disp_end[i] <- list(lead_info_A_end$disp)
+  events$group_B_lead_disp_end[i] <- list(lead_info_B_end$disp)
+  events$group_A_lead_norm_rank_start[i] <- list(lead_info_A_start$norm_ranks)
+  events$group_B_lead_norm_rank_start[i] <- list(lead_info_B_start$norm_ranks)
+  events$group_A_lead_norm_rank_mid[i] <- list(lead_info_A_mid$norm_ranks)
+  events$group_B_lead_norm_rank_mid[i] <- list(lead_info_B_mid$norm_ranks)
+  events$group_A_lead_norm_rank_end[i] <- list(lead_info_A_end$norm_ranks)
+  events$group_B_lead_norm_rank_end[i] <- list(lead_info_B_end$norm_ranks)
+
 }
 
-#get ranks (lower values = behind, higher values = in the lead)
-for(i in 1:nrow(events)){
-  
-  #get ranks for group A and B
-  ranks_A <- rank(events$group_A_lead_disp[i][[1]])
-  ranks_B <- rank(events$group_B_lead_disp[i][[1]])
-  
-  #store raw ranks
-  events$group_A_lead_rank[i] <- list(ranks_A)
-  events$group_B_lead_rank[i] <- list(ranks_B)
-  
-  #get normalized ranks
-  min_rank_A <- min(ranks_A)
-  min_rank_B <- min(ranks_B)
-  max_rank_A <- max(ranks_A)
-  max_rank_B <- max(ranks_B)
-  norm_ranks_A <- (ranks_A - min_rank_A) / (max_rank_A - min_rank_A)
-  norm_ranks_B <- (ranks_B - min_rank_B) / (max_rank_B - min_rank_B)
-  
-  #store normalized ranks
-  events$group_A_lead_rank_norm[i] <- list(norm_ranks_A)
-  events$group_B_lead_rank_norm[i] <- list(norm_ranks_B)
-  
-}
 
 #get normalized ranks for individuals during fissions and fusions
 fission_leaders <- fusion_leaders <- matrix(NA, nrow = n_inds, ncol = nrow(events))
@@ -229,7 +219,7 @@ for(i in 1:nrow(events)){
   if(!is.na(events$A_moved[i])){
     if(events$A_moved[i]){
       inds <- events$group_A_idxs[i][[1]]
-      norm_ranks <- events$group_A_lead_rank_norm[i][[1]]
+      norm_ranks <- events$group_A_lead_norm_rank_end[i][[1]]
       if(events$event_type[i] == 'fission'){
         fission_leaders[inds,i] <- norm_ranks
       }
@@ -242,7 +232,7 @@ for(i in 1:nrow(events)){
   if(!is.na(events$B_moved[i])){
     if(events$B_moved[i]){
       inds <- events$group_B_idxs[i][[1]]
-      norm_ranks <- events$group_B_lead_rank_norm[i][[1]]
+      norm_ranks <- events$group_B_lead_norm_rank_end[i][[1]]
       if(events$event_type[i] == 'fission'){
         fission_leaders[inds,i] <- norm_ranks
       }
@@ -253,18 +243,49 @@ for(i in 1:nrow(events)){
   }
 }
 
-rowMeans(fission_leaders, na.rm=T)
-apply(fission_leaders, 1, sd, na.rm=T)
-rowMeans(fusion_leaders, na.rm=T)
+#PLOTTING
 
-quartz()
-par(mfrow=c(5,5), mar = c(2,2,0,0))
-for(i in 1:n_inds){
-  hist(fusion_leaders[i,], breaks= seq(0,1,.2), main = coati_ids$name[i])
+if(make_plots){
+  
+  #Make a histogram of the distances moved by the groups during splits and merges
+  #and plot the distance moved threshold on top of it as a sanity check
+  quartz()
+  hist(c(events$A_during_disp, events$B_during_disp), breaks = 20)
+  abline(v = dist_moved_thresh, col = 'red', lwd = 3)
+  
+  #plot the % of moving out of all fission and fusion events for each individual w/ confidence intervals
+  #fissions
+  quartz()
+  plot(NULL, xlim = c(0,100), ylim = c(0,n_inds), xlab = '% moved', yaxt = 'n', ylab = '', main = 'Fissions')
+  arrows(fission_CIs[,1]*100,1:n_inds, fission_CIs[,2]*100, 1:n_inds, length = 0.1, code = 3, angle = 90, lwd = 2)
+  points(fission_move_fracs*100, 1:n_inds, pch = 19, cex = 2)
+  axis(2, at = 1:n_inds, labels = coati_ids$name, las =1)
+  
+  #fusions
+  quartz()
+  plot(NULL, xlim = c(0,100), ylim = c(0,n_inds), xlab = '% moved', yaxt = 'n', ylab = '', main = 'Fusions')
+  arrows(fusion_CIs[,1]*100,1:n_inds, fusion_CIs[,2]*100, 1:n_inds, length = 0.1, code = 3, angle = 90, lwd = 2)
+  points(fusion_move_fracs*100, 1:n_inds, pch = 19, cex = 2)
+  axis(2, at = 1:n_inds, labels = coati_ids$name, las =1)
+  
+  #fissions vs fusions
+  quartz()
+  plot(fusion_move_fracs, fission_move_fracs)
+  
+  #leadership during fusions
+  quartz()
+  par(mfrow=c(5,5), mar = c(2,2,0,0))
+  for(i in 1:n_inds){
+    hist(fusion_leaders[i,], breaks= seq(0,1,.2), main = coati_ids$name[i])
+  }
+  
+  #leadership during fissions
+  quartz()
+  par(mfrow=c(5,5), mar = c(2,2,0,0))
+  for(i in 1:n_inds){
+    hist(fission_leaders[i,], breaks= seq(0,1,.2), main = coati_ids$name[i])
+  }
+  
 }
 
-quartz()
-par(mfrow=c(5,5), mar = c(2,2,0,0))
-for(i in 1:n_inds){
-  hist(fission_leaders[i,], breaks= seq(0,1,.2), main = coati_ids$name[i])
-}
+
