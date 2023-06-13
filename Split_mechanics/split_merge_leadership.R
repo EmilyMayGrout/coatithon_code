@@ -5,10 +5,11 @@
 #-----PARAMETERS-------
 
 user <- 'ari'
-group <- 'presedente'
+group <- 'galaxy'
 use_manual_events <- F
 dist_moved_thresh <- 15 #minimum distance moved by a subgroup to count it as having moved (i.e. left or joined)
 make_plots <- F
+n_rands <- 100
 
 if(user=='ari'){
   groupdir <- paste0('~/Dropbox/coati/processed/', group)
@@ -84,6 +85,119 @@ ind_disp_along_group_path <- function(moving_inds, xs, ys, t0, tf, tmeas){
   out$norm_ranks <- norm_ranks
   return(out) 
 }
+
+#Compute entropy from a set of measurements
+#histo is a vector of frequencies or probabilities to take the entropy of
+compute_entropy <- function(histo){
+  
+  #don't allow negative values
+  if(sum(histo < 0)>0){
+    stop('negative values found')
+  }
+  
+  #if NAs, return NA
+  if(sum(is.na(histo))>0){
+    return(NA)
+  }
+  
+  #if frequencies rather than probabilities, normalize to add up to 1
+  histo <- histo / sum(histo) 
+  
+  #find nonzero elements
+  nonzero <- which(histo!=0)
+  
+  #get entropy, excluding zero elements
+  entropy <- -sum(histo[nonzero] * log(histo[nonzero], base = 2))
+  
+  return(entropy)
+}
+
+
+#Function to get information about leadership (determined by position) during fissions and fusions
+#INPUTS:
+# events data frame
+# n_inds: number of individuals
+# meas_time: where to measure leadership, at the start, midpoint (mid) or end of the event
+#OUTPUT:
+# out: list containing
+# out$fission_leaders: matrix where rows are events and columns are individuals, giving the normalized leadership ranks for fisisons
+# out$fusion_leaders: same but for fusions
+# out$fission_leadership_entropies: vector of entropies of the normalized rank distributions for fissions for each individual
+# out$fusion_leadership_entropies: same but for fusions
+get_fission_fusion_leadership <- function(events, n_inds, meas_time = 'end'){
+  
+  #check if meas_time is one of the correct options
+  if(!(meas_time %in% c('start','mid','end'))){
+    stop('meas_time not specified as start, mid, or end')
+  }
+  
+  #get normalized ranks for individuals during fissions and fusions
+  fission_leaders <- fusion_leaders <- matrix(NA, nrow = n_inds, ncol = nrow(events))
+  for(i in 1:nrow(events)){
+    
+    if(!is.na(events$A_moved[i])){
+      if(events$A_moved[i]){
+        inds <- events$group_A_idxs[i][[1]]
+        if(meas_time == 'start'){
+          norm_ranks <- events$group_A_lead_norm_rank_start[i][[1]] 
+        } 
+        if(meas_time == 'mid'){
+          norm_ranks <- events$group_A_lead_norm_rank_mid[i][[1]] 
+        }
+        if(meas_time == 'end'){
+          norm_ranks <- events$group_A_lead_norm_rank_end[i][[1]] 
+        }
+        if(events$event_type[i] == 'fission'){
+          fission_leaders[inds,i] <- norm_ranks
+        }
+        if(events$event_type[i] == 'fusion'){
+          fusion_leaders[inds,i] <- norm_ranks
+        }
+      }
+    }
+    
+    if(!is.na(events$B_moved[i])){
+      if(events$B_moved[i]){
+        inds <- events$group_B_idxs[i][[1]]
+        if(meas_time == 'start'){
+          norm_ranks <- events$group_B_lead_norm_rank_start[i][[1]] 
+        } 
+        if(meas_time == 'mid'){
+          norm_ranks <- events$group_B_lead_norm_rank_mid[i][[1]] 
+        }
+        if(meas_time == 'end'){
+          norm_ranks <- events$group_B_lead_norm_rank_end[i][[1]] 
+        }
+        if(events$event_type[i] == 'fission'){
+          fission_leaders[inds,i] <- norm_ranks
+        }
+        if(events$event_type[i] == 'fusion'){
+          fusion_leaders[inds,i] <- norm_ranks
+        }
+      }
+    }
+  }
+  
+  #For each individual get entropy of its leadership normalized rank distribution
+  #for fusions
+  fusion_leadership_entropies <- fission_leadership_entropies <- rep(NA, n_inds)
+  for(i in 1:n_inds){
+    histo_fusion <- hist(fusion_leaders[i,], breaks= seq(0,1,.2), plot = F)$counts
+    fusion_leadership_entropies[i] <- compute_entropy(histo_fusion)
+    histo_fission <- hist(fission_leaders[i,], breaks= seq(0,1,.2), plot = F)$counts
+    fission_leadership_entropies[i] <- compute_entropy(histo_fission)
+  }
+  
+  out <- list()
+  out$fission_leaders <- fission_leaders
+  out$fusion_leaders <- fusion_leaders
+  out$fission_leadership_entropies <- fission_leadership_entropies
+  out$fusion_leadership_entropies <- fusion_leadership_entropies
+  
+  return(out)
+}
+
+#-------------------MAIN-------------------------
 
 #LOAD EVENTS DATA
 setwd(groupdir)
@@ -211,39 +325,56 @@ for(i in 1:nrow(events)){
 
 }
 
+#Compute entropies for real data vs permuted data
 
-#get normalized ranks for individuals during fissions and fusions
-fission_leaders <- fusion_leaders <- matrix(NA, nrow = n_inds, ncol = nrow(events))
-for(i in 1:nrow(events)){
-  
-  if(!is.na(events$A_moved[i])){
-    if(events$A_moved[i]){
-      inds <- events$group_A_idxs[i][[1]]
-      norm_ranks <- events$group_A_lead_norm_rank_end[i][[1]]
-      if(events$event_type[i] == 'fission'){
-        fission_leaders[inds,i] <- norm_ranks
-      }
-      if(events$event_type[i] == 'fusion'){
-        fusion_leaders[inds,i] <- norm_ranks
-      }
-    }
+#real data
+out <- get_fission_fusion_leadership(events, n_inds, meas_time = 'end')
+fission_entropies_data <- out$fission_leadership_entropies
+fusion_entropies_data <- out$fusion_leadership_entropies
+
+#permuted data - swap identities within subgroups
+fusion_entropies_rand <- fission_entropies_rand <- matrix(NA, nrow = n_inds, ncol = n_rands)
+for(n in 1:n_rands){
+  events_rand <- events
+  for(i in 1:nrow(events)){
+    #get group A and gorup B indexes from the original data
+    group_A_idxs <- events$group_A_idxs[i][[1]]
+    group_B_idxs <- events$group_B_idxs[i][[1]]
+    
+    #randomize the order within group A and gruop B separately
+    group_A_idxs_rand <- sample(group_A_idxs)
+    group_B_idxs_rand <- sample(group_B_idxs)
+    
+    #store in the new events dataframe
+    events_rand$group_A_idxs[i] <- list(group_A_idxs_rand)
+    events_rand$group_B_idxs[i] <- list(group_B_idxs_rand)
+    
   }
   
-  if(!is.na(events$B_moved[i])){
-    if(events$B_moved[i]){
-      inds <- events$group_B_idxs[i][[1]]
-      norm_ranks <- events$group_B_lead_norm_rank_end[i][[1]]
-      if(events$event_type[i] == 'fission'){
-        fission_leaders[inds,i] <- norm_ranks
-      }
-      if(events$event_type[i] == 'fusion'){
-        fusion_leaders[inds,i] <- norm_ranks
-      }
-    }
-  }
+  out <- get_fission_fusion_leadership(events_rand, n_inds, meas_time = 'end')
+  fission_entropies_rand[,n] <- out$fission_leadership_entropies
+  fusion_entropies_rand[,n] <- out$fusion_leadership_entropies
+  
 }
 
-#PLOTTING
+#compare entropy between real and permuted data
+#test statistic = mean entropy
+quartz()
+fission_means_rand <- colMeans(fission_entropies_rand)
+fission_mean_data <- mean(fission_entropies_data)
+hist(fission_means_rand, breaks=20,main = 'Fission', xlab = 'Mean entropy')
+abline(v=fission_mean_data,col='red',lwd=2)
+p_fission <- sum((fission_means_rand < fission_mean_data))/n_rands
+
+quartz()
+fusion_means_rand <- colMeans(fusion_entropies_rand)
+fusion_mean_data <- mean(fusion_entropies_data)
+hist(fusion_means_rand, breaks=20, main = 'Fusion', xlab = 'Mean entropy')
+abline(v=fusion_mean_data,col='red',lwd=2)
+p_fusion <- sum((fusion_means_rand < fusion_mean_data))/n_rands
+
+
+#----------PLOTTING-------
 
 if(make_plots){
   
