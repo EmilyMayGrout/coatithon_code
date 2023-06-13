@@ -8,8 +8,14 @@ user <- 'ari'
 group <- 'galaxy'
 use_manual_events <- F
 dist_moved_thresh <- 15 #minimum distance moved by a subgroup to count it as having moved (i.e. left or joined)
-make_plots <- F
-n_rands <- 100
+make_plots <- T
+dist_frac_thresh <- 0.5
+n_rands <- 1000
+
+#bins for the normalized ranks in the entropy computation
+#default is seq(0,1,.2) which is 5 bins of size 0.2
+#if you want to look at front vs non-front, can set bins to c(0,.99,1) - this will give 2 bins, one running from 0 to .99 and the other giving only those with value 1
+norm_rank_bins <- c(0,.99,1)
 
 if(user=='ari'){
   groupdir <- paste0('~/Dropbox/coati/processed/', group)
@@ -86,6 +92,108 @@ ind_disp_along_group_path <- function(moving_inds, xs, ys, t0, tf, tmeas){
   return(out) 
 }
 
+#Function to compute the order at which individuals cross a threshold distance along the fission/fusion direction
+#INPUTS:
+#moving_inds: indexes of the individuals in the moving subgroup
+#xs, ys: matrices of positions
+#t0: start time index of event 
+#tf: end time index of event - used for computing group direction of movement
+#dist_frac_thresh: threshold fractional distance along group trajectory from start point to compute passing time for each individual
+ind_crossing_thresh_times_along_group_path <- function(moving_inds, xs, ys, t0, tf, dist_frac_thresh = 0.5){
+  
+  #if times are missing, return NAs for ranks and crossing times
+  if(is.na(t0) | is.na(tf)){
+    out <- list()
+    out$first_crossing_times <- rep(NA, length(moving_inds))
+    out$ranks <- rep(NA, length(moving_inds))
+    out$norm_ranks <- rep(NA, length(moving_inds))
+    return(out)
+  }
+  
+  #get centroid initial location
+  xc0 <- mean(xs[moving_inds,t0], na.rm = T)
+  yc0 <- mean(ys[moving_inds,t0], na.rm = T)
+  
+  #centroid final location
+  xcf <- mean(xs[moving_inds,tf], na.rm = T)
+  ycf <- mean(ys[moving_inds,tf], na.rm = T)
+  
+  #centroid displacement vector
+  dxc <- xcf - xc0
+  dyc <- ycf - yc0
+  
+  #centroid total distance traveled
+  distc <- sqrt(dxc^2 + dyc^2)
+  
+  #if distance moved was zero, return NAs
+  if(distc == 0){
+    out <- list()
+    out$first_crossing_times <- rep(NA, length(moving_inds))
+    out$ranks <- rep(NA, length(moving_inds))
+    out$norm_ranks <- rep(NA, length(moving_inds))
+    return(out)
+  }
+  
+  #get the distance threshold (along group trajectory) used to determine order of crossing
+  dist_thresh <- dist_frac_thresh * distc
+  
+  #get individual end points
+  xi <- xs[moving_inds, t0:ncol(xs)]
+  yi <- ys[moving_inds, t0:ncol(xs)]
+  
+  #get individual displacement vectors (their end point to the group start point)
+  dxi <- xi - xc0
+  dyi <- yi - yc0
+  
+  #project individual displacement vectors onto the group displacement vector
+  disp_i <- (dxi*dxc + dyi*dyc) / sqrt(dxc^2 + dyc^2)
+  
+  #get times of each individual crossing the threshold
+  first_crossing_times <- rep(NA, length(moving_inds))
+  for(ind in 1:length(moving_inds)){
+    
+    if(is.matrix(disp_i)){
+      crossing_times <- which(disp_i[ind,] > dist_thresh)
+    } else{
+      crossing_times <- which(disp_i > dist_thresh)
+    }
+    
+    #if it never crosses, then give infinity for the crossing time and throw a warning
+    if(length(crossing_times)==0){
+      first_crossing_times[ind] <- Inf
+      
+      stop('Individual never crossed the distance threshold - crossing time set to Inf')
+    }else{
+      first_crossing_times[ind] <- min(crossing_times)
+    }
+  }
+  
+  #get ranks
+  if(sum(is.na(first_crossing_times))==0){
+    ranks <- rank(-first_crossing_times) #rank negative value so that higher ranks are higher leadership
+  } else{
+    ranks <- rep(NA, length(first_crossing_times))
+  }
+  
+  #get normalized ranks
+  if(length(first_crossing_times)==1){
+    norm_ranks <- c(NA)
+  } else{
+    min_rank <- min(ranks)
+    max_rank <- max(ranks)
+    norm_ranks <- (ranks - min_rank) / (max_rank - min_rank)
+  }
+  
+  #return ind displacement along group vector, ranks, and normalized ranks
+  out <- list()
+  out$first_crossing_times <- first_crossing_times
+  out$ranks <- ranks
+  out$norm_ranks <- norm_ranks
+  
+  return(out) 
+  
+}
+
 #Compute entropy from a set of measurements
 #histo is a vector of frequencies or probabilities to take the entropy of
 compute_entropy <- function(histo){
@@ -117,6 +225,7 @@ compute_entropy <- function(histo){
 #INPUTS:
 # events data frame
 # n_inds: number of individuals
+# leadership_type: 'position' for using position along group movement vector at a particular time or 'crosstime' for using crossing times
 # meas_time: where to measure leadership, at the start, midpoint (mid) or end of the event
 #OUTPUT:
 # out: list containing
@@ -124,11 +233,15 @@ compute_entropy <- function(histo){
 # out$fusion_leaders: same but for fusions
 # out$fission_leadership_entropies: vector of entropies of the normalized rank distributions for fissions for each individual
 # out$fusion_leadership_entropies: same but for fusions
-get_fission_fusion_leadership <- function(events, n_inds, meas_time = 'end'){
+get_fission_fusion_leadership <- function(events, n_inds, leadership_type = 'position', meas_time = 'end', norm_rank_bins = seq(0,1,.2)){
   
   #check if meas_time is one of the correct options
   if(!(meas_time %in% c('start','mid','end'))){
     stop('meas_time not specified as start, mid, or end')
+  }
+  
+  if(!(leadership_type %in% c('position','crosstime'))){
+    stop('leadership_type not specified as position or crosstime')
   }
   
   #get normalized ranks for individuals during fissions and fusions
@@ -138,14 +251,18 @@ get_fission_fusion_leadership <- function(events, n_inds, meas_time = 'end'){
     if(!is.na(events$A_moved[i])){
       if(events$A_moved[i]){
         inds <- events$group_A_idxs[i][[1]]
-        if(meas_time == 'start'){
-          norm_ranks <- events$group_A_lead_norm_rank_start[i][[1]] 
-        } 
-        if(meas_time == 'mid'){
-          norm_ranks <- events$group_A_lead_norm_rank_mid[i][[1]] 
-        }
-        if(meas_time == 'end'){
-          norm_ranks <- events$group_A_lead_norm_rank_end[i][[1]] 
+        if(leadership_type=='position'){
+          if(meas_time == 'start'){
+            norm_ranks <- events$group_A_lead_norm_rank_start[i][[1]] 
+          } 
+          if(meas_time == 'mid'){
+            norm_ranks <- events$group_A_lead_norm_rank_mid[i][[1]] 
+          }
+          if(meas_time == 'end'){
+            norm_ranks <- events$group_A_lead_norm_rank_end[i][[1]] 
+          }
+        } else if(leadership_type == 'crosstime'){
+          norm_ranks <- events$group_A_lead_crosstime_norm_rank[i][[1]]
         }
         if(events$event_type[i] == 'fission'){
           fission_leaders[inds,i] <- norm_ranks
@@ -159,14 +276,18 @@ get_fission_fusion_leadership <- function(events, n_inds, meas_time = 'end'){
     if(!is.na(events$B_moved[i])){
       if(events$B_moved[i]){
         inds <- events$group_B_idxs[i][[1]]
-        if(meas_time == 'start'){
-          norm_ranks <- events$group_B_lead_norm_rank_start[i][[1]] 
-        } 
-        if(meas_time == 'mid'){
-          norm_ranks <- events$group_B_lead_norm_rank_mid[i][[1]] 
-        }
-        if(meas_time == 'end'){
-          norm_ranks <- events$group_B_lead_norm_rank_end[i][[1]] 
+        if(leadership_type == 'position'){
+          if(meas_time == 'start'){
+            norm_ranks <- events$group_B_lead_norm_rank_start[i][[1]] 
+          } 
+          if(meas_time == 'mid'){
+            norm_ranks <- events$group_B_lead_norm_rank_mid[i][[1]] 
+          }
+          if(meas_time == 'end'){
+            norm_ranks <- events$group_B_lead_norm_rank_end[i][[1]] 
+          }
+        } else if(leadership_type =='crosstime'){
+          norm_ranks <- events$group_B_lead_crosstime_norm_rank[i][[1]]
         }
         if(events$event_type[i] == 'fission'){
           fission_leaders[inds,i] <- norm_ranks
@@ -182,10 +303,14 @@ get_fission_fusion_leadership <- function(events, n_inds, meas_time = 'end'){
   #for fusions
   fusion_leadership_entropies <- fission_leadership_entropies <- rep(NA, n_inds)
   for(i in 1:n_inds){
-    histo_fusion <- hist(fusion_leaders[i,], breaks= seq(0,1,.2), plot = F)$counts
-    fusion_leadership_entropies[i] <- compute_entropy(histo_fusion)
-    histo_fission <- hist(fission_leaders[i,], breaks= seq(0,1,.2), plot = F)$counts
-    fission_leadership_entropies[i] <- compute_entropy(histo_fission)
+    if(sum(!is.na(fusion_leaders[i,]))>0){
+      histo_fusion <- hist(fusion_leaders[i,], breaks= norm_rank_bins, plot = F)$counts
+      fusion_leadership_entropies[i] <- compute_entropy(histo_fusion)
+    }
+    if(sum(!is.na(fission_leaders[i,]))>0){
+      histo_fission <- hist(fission_leaders[i,], breaks= norm_rank_bins, plot = F)$counts
+      fission_leadership_entropies[i] <- compute_entropy(histo_fission)
+    }
   }
   
   out <- list()
@@ -223,9 +348,6 @@ load(file=paste0(group,'_xy_highres_level1.RData'))
 
 #number of individuals
 n_inds <- nrow(coati_ids)
-
-
-
 
 #Define whether groups moved or stayed during the split / merge using the dist_moved_thresh threshold
 events$A_moved <- events$A_during_disp > dist_moved_thresh
@@ -301,36 +423,49 @@ for(i in 1:n_inds){
 #TODO: add analysis of start vs. middle vs. end leadership
 #get the displacement of each individual project along the subgroup vector, for each subgroup
 for(i in 1:nrow(events)){
-  #get the leader info for each subgroup for each event
-  lead_info_A_start <- ind_disp_along_group_path(events$group_A_idxs[i][[1]], xs, ys, events$start_time[i], events$end_time[i], events$start_time[i])
-  lead_info_A_mid <- ind_disp_along_group_path(events$group_A_idxs[i][[1]], xs, ys, events$start_time[i], events$end_time[i], floor((events$start_time[i]+events$end_time[i])/2))
-  lead_info_A_end <- ind_disp_along_group_path(events$group_A_idxs[i][[1]], xs, ys, events$start_time[i], events$end_time[i], events$end_time[i])
-  lead_info_B_start <- ind_disp_along_group_path(events$group_B_idxs[i][[1]], xs, ys, events$start_time[i], events$end_time[i], events$start_time[i])
-  lead_info_B_mid <- ind_disp_along_group_path(events$group_B_idxs[i][[1]], xs, ys, events$start_time[i], events$end_time[i], floor((events$start_time[i]+events$end_time[i])/2))
-  lead_info_B_end <- ind_disp_along_group_path(events$group_B_idxs[i][[1]], xs, ys, events$start_time[i], events$end_time[i], events$end_time[i])
+  
+  #LEADERSIHP BASED ON POSITION ALONG THE GROUP TRAJECTORY AT SPECIFIC TIMES
+  #get the leader info for each subgroup for each event - definition based on order at a sepcific time
+  lead_pos_A_start <- ind_disp_along_group_path(events$group_A_idxs[i][[1]], xs, ys, events$start_time[i], events$end_time[i], events$start_time[i])
+  lead_pos_A_mid <- ind_disp_along_group_path(events$group_A_idxs[i][[1]], xs, ys, events$start_time[i], events$end_time[i], floor((events$start_time[i]+events$end_time[i])/2))
+  lead_pos_A_end <- ind_disp_along_group_path(events$group_A_idxs[i][[1]], xs, ys, events$start_time[i], events$end_time[i], events$end_time[i])
+  lead_pos_B_start <- ind_disp_along_group_path(events$group_B_idxs[i][[1]], xs, ys, events$start_time[i], events$end_time[i], events$start_time[i])
+  lead_pos_B_mid <- ind_disp_along_group_path(events$group_B_idxs[i][[1]], xs, ys, events$start_time[i], events$end_time[i], floor((events$start_time[i]+events$end_time[i])/2))
+  lead_pos_B_end <- ind_disp_along_group_path(events$group_B_idxs[i][[1]], xs, ys, events$start_time[i], events$end_time[i], events$end_time[i])
   
   #save displacement info into events dataframe
-  events$group_A_lead_disp_start[i] <- list(lead_info_A_start$disp)
-  events$group_B_lead_disp_start[i] <- list(lead_info_B_start$disp)
-  events$group_A_lead_disp_mid[i] <- list(lead_info_A_mid$disp)
-  events$group_B_lead_disp_mid[i] <- list(lead_info_B_mid$disp)
-  events$group_A_lead_disp_end[i] <- list(lead_info_A_end$disp)
-  events$group_B_lead_disp_end[i] <- list(lead_info_B_end$disp)
-  events$group_A_lead_norm_rank_start[i] <- list(lead_info_A_start$norm_ranks)
-  events$group_B_lead_norm_rank_start[i] <- list(lead_info_B_start$norm_ranks)
-  events$group_A_lead_norm_rank_mid[i] <- list(lead_info_A_mid$norm_ranks)
-  events$group_B_lead_norm_rank_mid[i] <- list(lead_info_B_mid$norm_ranks)
-  events$group_A_lead_norm_rank_end[i] <- list(lead_info_A_end$norm_ranks)
-  events$group_B_lead_norm_rank_end[i] <- list(lead_info_B_end$norm_ranks)
-
+  events$group_A_lead_disp_start[i] <- list(lead_pos_A_start$disp)
+  events$group_B_lead_disp_start[i] <- list(lead_pos_B_start$disp)
+  events$group_A_lead_disp_mid[i] <- list(lead_pos_A_mid$disp)
+  events$group_B_lead_disp_mid[i] <- list(lead_pos_B_mid$disp)
+  events$group_A_lead_disp_end[i] <- list(lead_pos_A_end$disp)
+  events$group_B_lead_disp_end[i] <- list(lead_pos_B_end$disp)
+  events$group_A_lead_pos_norm_rank_start[i] <- list(lead_pos_A_start$norm_ranks)
+  events$group_B_lead_pos_norm_rank_start[i] <- list(lead_pos_B_start$norm_ranks)
+  events$group_A_lead_pos_norm_rank_mid[i] <- list(lead_pos_A_mid$norm_ranks)
+  events$group_B_lead_pos_norm_rank_mid[i] <- list(lead_pos_B_mid$norm_ranks)
+  events$group_A_lead_pos_norm_rank_end[i] <- list(lead_pos_A_end$norm_ranks)
+  events$group_B_lead_pos_norm_rank_end[i] <- list(lead_pos_B_end$norm_ranks)
+  
+  #LEADERSHIP BASED ON TIME OF CROSSING A DEFINED THRESHOLD DISTANCE ALONG GROUP TRAJECTORY
+  #compute 
+  lead_crosstime_A <- ind_crossing_thresh_times_along_group_path(events$group_A_idxs[i][[1]], xs, ys, events$start_time[i], events$end_time[i], dist_frac_thresh = dist_frac_thresh)
+  lead_crosstime_B <- ind_crossing_thresh_times_along_group_path(events$group_B_idxs[i][[1]], xs, ys, events$start_time[i], events$end_time[i], dist_frac_thresh = dist_frac_thresh)
+  
+  #store in the data frame
+  events$group_A_lead_crosstime_norm_rank[i] <- list(lead_crosstime_A$norm_ranks)
+  events$group_B_lead_crosstime_norm_rank[i] <- list(lead_crosstime_B$norm_ranks)
+  
 }
 
 #Compute entropies for real data vs permuted data
 
 #real data
-out <- get_fission_fusion_leadership(events, n_inds, meas_time = 'end')
+out <- get_fission_fusion_leadership(events, n_inds, leadership_type = 'crosstime', meas_time = 'end', norm_rank_bins = norm_rank_bins)
 fission_entropies_data <- out$fission_leadership_entropies
 fusion_entropies_data <- out$fusion_leadership_entropies
+fission_leaders <- out$fission_leaders
+fusion_leaders <- out$fusion_leaders
 
 #permuted data - swap identities within subgroups
 fusion_entropies_rand <- fission_entropies_rand <- matrix(NA, nrow = n_inds, ncol = n_rands)
@@ -351,27 +486,14 @@ for(n in 1:n_rands){
     
   }
   
-  out <- get_fission_fusion_leadership(events_rand, n_inds, meas_time = 'end')
+  out <- get_fission_fusion_leadership(events_rand, n_inds, leadership_type = 'crosstime', meas_time = 'end', norm_rank_bins = norm_rank_bins)
   fission_entropies_rand[,n] <- out$fission_leadership_entropies
   fusion_entropies_rand[,n] <- out$fusion_leadership_entropies
   
 }
 
-#compare entropy between real and permuted data
-#test statistic = mean entropy
-quartz()
-fission_means_rand <- colMeans(fission_entropies_rand)
-fission_mean_data <- mean(fission_entropies_data)
-hist(fission_means_rand, breaks=20,main = 'Fission', xlab = 'Mean entropy')
-abline(v=fission_mean_data,col='red',lwd=2)
-p_fission <- sum((fission_means_rand < fission_mean_data))/n_rands
-
-quartz()
-fusion_means_rand <- colMeans(fusion_entropies_rand)
-fusion_mean_data <- mean(fusion_entropies_data)
-hist(fusion_means_rand, breaks=20, main = 'Fusion', xlab = 'Mean entropy')
-abline(v=fusion_mean_data,col='red',lwd=2)
-p_fusion <- sum((fusion_means_rand < fusion_mean_data))/n_rands
+fission_leaders_rand <- out$fission_leaders
+fusion_leaders_rand <- out$fusion_leaders
 
 
 #----------PLOTTING-------
@@ -416,6 +538,24 @@ if(make_plots){
   for(i in 1:n_inds){
     hist(fission_leaders[i,], breaks= seq(0,1,.2), main = coati_ids$name[i])
   }
+  
+  
+  #compare entropy between real and permuted data
+  #test statistic = mean entropy
+  quartz()
+  fission_means_rand <- colMeans(fission_entropies_rand,na.rm=T)
+  fission_mean_data <- mean(fission_entropies_data,na.rm=T)
+  hist(fission_means_rand, breaks=20,main = 'Fission', xlab = 'Mean entropy')
+  abline(v=fission_mean_data,col='red',lwd=2)
+  p_fission <- sum((fission_means_rand < fission_mean_data),na.rm=T)/n_rands
+  
+  quartz()
+  fusion_means_rand <- colMeans(fusion_entropies_rand, na.rm=T)
+  fusion_mean_data <- mean(fusion_entropies_data, na.rm=T)
+  hist(fusion_means_rand, breaks=20, main = 'Fusion', xlab = 'Mean entropy')
+  abline(v=fusion_mean_data,col='red',lwd=2)
+  p_fusion <- sum((fusion_means_rand < fusion_mean_data),na.rm=T)/n_rands
+  
   
 }
 
