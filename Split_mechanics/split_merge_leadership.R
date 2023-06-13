@@ -4,7 +4,7 @@
 
 #-----PARAMETERS-------
 
-user <- 'ari'
+user <- 'emily'
 group <- 'presedente'
 use_manual_events <- F
 dist_moved_thresh <- 15 #minimum distance moved by a subgroup to count it as having moved (i.e. left or joined)

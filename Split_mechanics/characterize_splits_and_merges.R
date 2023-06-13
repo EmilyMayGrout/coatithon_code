@@ -8,13 +8,13 @@ library(scales)
 #----------PARAMETERS - MODIFY HERE--------------
 
 #which group (galaxy or presedente)
-group <- 'presedente'
+group <- 'galaxy'
 
 #who is using (ari or emily)
-user <- 'ari'
+user <- 'emily'
 
 #whether to identify splits and merges automatically (if F) or use manually identified events (if T)
-use_manual_events <- T
+use_manual_events <- F
 
 #---PARAMETERS (probably don't modify)---
 
