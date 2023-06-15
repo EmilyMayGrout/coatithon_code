@@ -793,12 +793,12 @@ analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 600, thresh_h = 5
     #see diagram
     split_angle <- angle_between_vectors(x1_i = xs_AB['AB','start_time'],
                                          y1_i = ys_AB['AB','start_time'],
-                                         x1_f = xs_AB['A','end_time'],
-                                         y1_f = ys_AB['A', 'end_time'],
+                                         x1_f = xs_AB['A','after_time'], #changed to after_time to look at angle from start of event to after the event (originally was end_time)
+                                         y1_f = ys_AB['A', 'after_time'],
                                          x2_i = xs_AB['AB', 'start_time'],
                                          y2_i = ys_AB['AB', 'start_time'],
-                                         x2_f = xs_AB['B', 'end_time'],
-                                         y2_f = ys_AB['B', 'end_time'])
+                                         x2_f = xs_AB['B', 'after_time'], #originally was end_time
+                                         y2_f = ys_AB['B', 'after_time'])
     turn_angle_A <- angle_between_vectors(x1_i = xs_AB['AB','before_time'],
                                           y1_i = ys_AB['AB','before_time'],
                                           x1_f = xs_AB['AB','start_time'],
