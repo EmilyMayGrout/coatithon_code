@@ -612,7 +612,7 @@ analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 600, thresh_h = 5
   }
  
   if(plot == T){
-    quartz() #open a new plot for mac
+    #quartz() #open a new plot for mac
     par(mfrow=c(2,1))
     plot(ti:tf, dyad_dist[ti:tf],type='l', main = paste(event_type, datetime),xlab='Time (min)',ylab = 'Distance apart (m)')
     abline(v=t_event,col='black', lty = 2)

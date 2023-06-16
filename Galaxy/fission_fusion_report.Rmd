@@ -26,7 +26,7 @@ From the Gamboa field season in 2021-2022, we collared 2 full groups of white-no
 
 ### **1: How to define sub-groups**
 
-To investigate the fission-fusion events in Galaxy group, we need to define when the group has **fissioned**.
+To investigate the fission-fusion events in Galaxy group, we need to define when the group has **fissioned**. 
 Data used for this analysis were from the GPS points every 10 minutes from 6am to 6pm from the 25th December 2021 till the 13th of January 2022. 
 For each timestamp used in the analysis, **all** group members must have had a GPS fix.
 

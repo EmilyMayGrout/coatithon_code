@@ -1,5 +1,5 @@
 #Generating preprocessed data for split and merge events
-#Generates a data frame giving properties of the splits and merges and their involved subgroups
+#Generates a data frame giving properties of the splits and merges and their involved subgroups for manual and automated labels
 
 #LIBRARY
 library(lubridate)
@@ -14,12 +14,12 @@ group <- 'galaxy'
 user <- 'emily'
 
 #whether to identify splits and merges automatically (if F) or use manually identified events (if T)
-use_manual_events <- F
+use_manual_events <- T
 
 #---PARAMETERS (probably don't modify)---
 
 #events filename - where to get the split/merge events for manually labeled events
-events.filename <- paste0('Split_mechanics/',group,'_manual_split_merge_clean.csv') #manual labels
+events.filename <- paste0('Split_mechanics/',group,'_manual_split_merge_clean.csv') 
 
 #radii to use
 R_inner <- 15
@@ -83,7 +83,7 @@ if(use_manual_events){
   events <- events[which(events$event_type %in% c('fission','fusion')),] #only include fission and fusion events (remove 'almost fusion')
 }
 
-#create columns for subgroup idxs (initialize with zeros to convince R to let oyu do this)
+#create columns for subgroup idxs (initialize with zeros to convince R to let you do this)
 events$group_A_idxs <- list(c(0,0,0))
 events$group_B_idxs <- list(c(0,0,0))
 

@@ -1,4 +1,5 @@
 #Exploring fission-fusion mechanics
+#this code is mostly plot making - some code has been copied from charecterize_splits_and_merges
 
 #LIBRARY
 library(lubridate)
@@ -10,7 +11,7 @@ Sys.setenv(TZ='UTC')
 #DIRECTORIES AND PARAMETERS
 #codedir <- '~/Dropbox/code_ari/coatithon_code/'
 #dir <- '~/Dropbox/coati/processed/' #directory where all data is stored
-group <- 'presedente' #subdirectory where the group data is stored
+group <- 'galaxy' #subdirectory where the group data is stored
 
 #get directory to group data
 
@@ -18,10 +19,10 @@ group <- 'presedente' #subdirectory where the group data is stored
 
 #for Emily:
 codedir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-#groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
-#plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
-groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
+groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
+#groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
+#plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
 
 
 #FUNCTIONS
@@ -35,6 +36,10 @@ setwd(codedir)
 
 #read in events
 events <- read.csv(paste0('Split_mechanics/',group,'_manual_split_merge_clean.csv'), sep=';')
+
+#if automated events
+#load('C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/galaxy_auto_ff_events_characterized.RData')
+
 
 #read in coati ids
 setwd(groupdir)
@@ -236,6 +241,13 @@ for (i in 1:nrow(events)){
   }else {print("fail")}
 }
 
+
+#save the events dataframe to be read into markdown
+#save(events, file = paste0('C:/Users/egrout/Dropbox/coatithon/coatithon_code/Split_mechanics/',group,'_manual_events_withinfo.RData'))
+
+save(events, file = paste0('C:/Users/egrout/Dropbox/coatithon/coatithon_code/Split_mechanics/',group,'_auto_events_withinfo.RData'))
+
+
 ### FISSION PLOTTING ###
 fis <- events$event_type == "fission"
 
@@ -339,20 +351,12 @@ points(events$B_during_disp[fis], events$B_subgroup_size[fis], pch = 20, cex = 4
 
 dev.off()
 
-
-
-
-
 #plot distance traveled depending on proportion of adults in subgroup
 plot(events$A_during_disp[fis], events$A_proportion_adults[fis], pch = 20)
 points(events$B_during_disp[fis], events$B_proportion_adults[fis], pch = 20)
 
 
-
-
 # ----------------------------------------------------------------------
-
-
 ### FUSION PLOTTING ###
 
 fus <- events$event_type == "fusion"
@@ -390,9 +394,6 @@ plot(comb_fus$disp, comb_fus$sub_size, pch = 20, ylim = c(0, 10), xlab = "Distan
 
 dev.off()
 
-
-
-
 #for changing the alpha values
 library("scales") 
 
@@ -419,13 +420,8 @@ legend(x = "topright",
        bty = "n")
 dev.off()
 
-
-
-
 #the plot above isn't a good way of looking at the age class and distance traveled 
 #now want to plot distance traveled with the proportion of age calls based on the total number of that age class
-
-
 events$total_n_adults <- events$A_n_adults + events$B_n_adults
 events$total_n_subadults <- events$A_n_subadults + events$B_n_subadults
 events$total_n_juveniles <- events$A_n_juveniles + events$B_n_juveniles
@@ -437,23 +433,10 @@ events_groups <- subset(events, events$A_subgroup_size > 1 & events$B_subgroup_s
 events_groups <- subset(events_groups, events_groups$A_during_disp < 20 | events_groups$B_during_disp  < 20, drop = TRUE)
 
 
-
-
-
 #adults
 plot(events_groups$A_during_disp[fis], (events_groups$A_n_adults[fis]/events_groups$total_n_adults[fis]), xlim = c(0,90))
 points(events_groups$B_during_disp[fis], (events_groups$B_n_adults[fis]/events_groups$total_n_adults[fis]))
 #subadults
 plot(events_groups$A_during_disp[fis], (events_groups$A_n_subadults[fis]/events_groups$total_n_subadults[fis]), xlim = c(0,90))
 points(events_groups$B_during_disp[fis], (events_groups$B_n_subadults[fis]/events_groups$total_n_subadults[fis]))
-
-
-
-
-
-
-
-
-
-
 

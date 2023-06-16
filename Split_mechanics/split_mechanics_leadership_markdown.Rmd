@@ -1,0 +1,551 @@
+---
+title: "split mechanics & leadership"
+author: "Emily"
+date: "6/16/2023"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+Here we document the fission-fusion mechanisms with the 1Hz data for Presidente group and Galaxy group. 
+
+
+### Contents:
+
+* 1: Split characteristics
+* 2: 
+* 3: 
+* 4: 
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+#reading in libraries
+library(lubridate)
+library(scales)
+#read in functions
+source('C:/Users/egrout/Dropbox/coatithon/coatithon_code/coati_function_library.R')
+
+#loading the automated and manual labels for galaxy and presedente
+load("C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/galaxy_auto_ff_events_characterized.RData")
+gal_auto_events <- events
+load("C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/galaxy_manual_ff_events_characterized.RData")
+gal_manual_events <- events
+load("C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/presedente_auto_ff_events_characterized.RData")
+pres_auto_events <- events
+load("C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/presedente_manual_ff_events_characterized.RData")
+pres_manual_events <- events
+
+```
+
+### **Split characteristics**
+
+#### **Number of fission and fusion events:**
+
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+#make table of fissions and fusions counts for both groups for MANUAL
+pres_man_count <- as.data.frame(table(pres_manual_events$event_type))
+colnames(pres_man_count) <- c("Presidente", " ")
+gal_man_count <- as.data.frame(table(gal_manual_events$event_type))
+colnames(gal_man_count) <- c("Galaxy", " ")
+
+knitr::kables(
+  list(
+    # the first kable() to change column names
+    knitr::kable(gal_man_count, row.names = NA,
+  col.names = NA, "simple"),
+    
+  knitr::kable(pres_man_count, row.names = NA,
+  col.names = NA, "simple")
+  ), caption = "Manual events" 
+)
+
+#for AUTO events
+pres_auto_count <- as.data.frame(table(pres_auto_events$event_type))
+colnames(pres_auto_count) <- c("Presidente", " ")
+gal_auto_count <- as.data.frame(table(gal_auto_events$event_type))
+colnames(gal_auto_count) <- c("Galaxy", " ")
+
+knitr::kables(
+  list(
+    # the first kable() to change column names
+    knitr::kable(gal_auto_count, row.names = NA,
+  col.names = NA, "simple"),
+    
+  knitr::kable(pres_auto_count, row.names = NA,
+  col.names = NA, "simple")
+  ), caption = "Automated events" 
+)
+```
+
+
+#### **Distance travelled during fissions**
+
+##### **Galaxy group**
+
+Manual events:
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 7, fig.width = 33, out.width = "100%"}
+par(mfrow=c(1,4), mar = c(6,10,2,2))
+
+#FISSION PLOTTING
+fis <- gal_manual_events$event_type == "fission"
+#combine the A_subgroup_size and B_sub_group_size with A_during_disp and B_during_disp to make abline
+combined_1 <- data.frame(gal_manual_events$A_subgroup_size[fis])
+colnames(combined_1) <- "sub_size"
+disp_1 <- data.frame(gal_manual_events$A_during_disp[fis])
+colnames(disp_1) <- "disp"
+combined_2 <- data.frame(gal_manual_events$B_subgroup_size[fis])
+colnames(combined_2) <- "sub_size"
+disp_2 <- data.frame(gal_manual_events$B_during_disp[fis])
+colnames(disp_2) <- "disp"
+
+combined <- rbind(combined_1,combined_2)
+disp <- rbind(disp_1, disp_2)
+comb <- cbind(combined, disp)
+
+cm <- 2.5 #cex.main
+cl <- 3 #cex.lab
+c <- 5 #cex
+ca <- 3 #cex.axis
+
+#plot 1:
+plot(gal_manual_events$A_during_disp[fis], gal_manual_events$B_during_disp[fis], pch = 20, xlab = "sub-group A", ylab = "sub-group B", main = 'Distance traveled during fission event (m)',col = "aquamarine3", cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, mgp=c(4,1.5,0))
+abline(lm(gal_manual_events$B_during_disp[fis] ~ gal_manual_events$A_during_disp[fis]))
+
+#plot 2:
+#combined the A_subgroup_size and B_sub_group_size with A_during_disp and B_during_disp so I could add the abline
+plot(comb$disp, comb$sub_size, pch = 20, ylim = c(0, 10), xlab = '', main = "Distance traveled during fission event (m)", ylab = "Sub-group size",col = "coral2", cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, mgp=c(4,1.5,0))
+#abline(lm(comb$sub_size ~ comb$disp))
+
+hist(gal_manual_events$AB_before_disp[fis], main = "Distance traveled 10 minutes before displacement (m)", xlab = '', col = "aquamarine3", breaks = 30, cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, mgp=c(4,1.5,0))
+
+#filtering split angle times when distance of full group travelled more that 20m
+gal_manual_events_dist_20 <- gal_manual_events
+gal_manual_events_dist_20 <- gal_manual_events[(gal_manual_events$AB_before_disp > 20),]
+
+hist(gal_manual_events_dist_20$split_angle[gal_manual_events_dist_20$event_type == "fission"],breaks = 30, main = "Split angle between sub-groups after fission", xlab = "Angle (degrees)", cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, col = "coral3", mgp=c(4,1.5,0))
+
+```
+
+Automated events:
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 7, fig.width = 33, out.width = "100%"}
+par(mfrow=c(1,4), mar = c(6,10,2,2))
+
+#FISSION PLOTTING
+fis <- gal_auto_events$event_type == "fission"
+#combine the A_subgroup_size and B_sub_group_size with A_during_disp and B_during_disp to make abline
+combined_1 <- data.frame(gal_auto_events$A_subgroup_size[fis])
+colnames(combined_1) <- "sub_size"
+disp_1 <- data.frame(gal_auto_events$A_during_disp[fis])
+colnames(disp_1) <- "disp"
+combined_2 <- data.frame(gal_auto_events$B_subgroup_size[fis])
+colnames(combined_2) <- "sub_size"
+disp_2 <- data.frame(gal_auto_events$B_during_disp[fis])
+colnames(disp_2) <- "disp"
+
+combined <- rbind(combined_1,combined_2)
+disp <- rbind(disp_1, disp_2)
+comb <- cbind(combined, disp)
+
+cm <- 2.5 #cex.main
+cl <- 3 #cex.lab
+c <- 5 #cex
+ca <- 3 #cex.axis
+
+#plot 1:
+plot(gal_auto_events$A_during_disp[fis], gal_auto_events$B_during_disp[fis], pch = 20, xlab = "sub-group A", ylab = "sub-group B", main = 'Distance traveled during fission event (m)',col = "olivedrab3", cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, mgp=c(4,1.5,0))
+abline(lm(gal_auto_events$B_during_disp[fis] ~ gal_auto_events$A_during_disp[fis]))
+
+#plot 2:
+#combined the A_subgroup_size and B_sub_group_size with A_during_disp and B_during_disp so I could add the abline
+plot(comb$disp, comb$sub_size, pch = 20, ylim = c(0, 10), xlab = '', main = "Distance traveled during fission event (m)", ylab = "Sub-group size",col = "orange2", cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, mgp=c(4,1.5,0))
+#abline(lm(comb$sub_size ~ comb$disp))
+
+hist(gal_auto_events$AB_before_disp[fis], main = "Distance traveled 10 minutes before displacement (m)", xlab = '', col = "olivedrab3", breaks = 30, cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, mgp=c(4,1.5,0))
+
+#filtering split angle times when distance of full group travelled more that 20m
+gal_auto_events_dist_20 <- gal_auto_events
+gal_auto_events_dist_20 <- gal_auto_events[(gal_auto_events$AB_before_disp > 20),]
+
+hist(gal_auto_events_dist_20$split_angle[gal_auto_events_dist_20$event_type == "fission"],breaks = 30, main = "Split angle between sub-groups after fission", xlab = "Angle (degrees)", cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, col = "orange2", mgp=c(4,1.5,0))
+
+```
+
+##### **Presidente group**
+Manual events:
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 7, fig.width = 33, out.width = "100%"}
+par(mfrow=c(1,4), mar = c(6,10,2,2))
+
+#FISSION PLOTTING
+fis <- pres_manual_events$event_type == "fission"
+#combine the A_subgroup_size and B_sub_group_size with A_during_disp and B_during_disp to make abline
+combined_1 <- data.frame(pres_manual_events$A_subgroup_size[fis])
+colnames(combined_1) <- "sub_size"
+disp_1 <- data.frame(pres_manual_events$A_during_disp[fis])
+colnames(disp_1) <- "disp"
+combined_2 <- data.frame(pres_manual_events$B_subgroup_size[fis])
+colnames(combined_2) <- "sub_size"
+disp_2 <- data.frame(pres_manual_events$B_during_disp[fis])
+colnames(disp_2) <- "disp"
+
+combined <- rbind(combined_1,combined_2)
+disp <- rbind(disp_1, disp_2)
+comb <- cbind(combined, disp)
+
+cm <- 2.5 #cex.main
+cl <- 3 #cex.lab
+c <- 5 #cex
+ca <- 3 #cex.axis
+
+#plot 1:
+plot(pres_manual_events$A_during_disp[fis], pres_manual_events$B_during_disp[fis], pch = 20, xlab = "sub-group A", ylab = "sub-group B", main = 'Distance traveled during fission event (m)',col = "aquamarine3", cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, mgp=c(4,1.5,0))
+abline(lm(pres_manual_events$B_during_disp[fis] ~ pres_manual_events$A_during_disp[fis]))
+
+#plot 2:
+#combined the A_subgroup_size and B_sub_group_size with A_during_disp and B_during_disp so I could add the abline
+plot(comb$disp, comb$sub_size, pch = 20, ylim = c(0, 10), xlab = '', main = "Distance traveled during fission event (m)", ylab = "Sub-group size",col = "coral2", cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, mgp=c(4,1.5,0))
+#abline(lm(comb$sub_size ~ comb$disp))
+
+hist(pres_manual_events$AB_before_disp[fis], main = "Distance traveled 10 minutes before displacement (m)", xlab = '', col = "aquamarine3", breaks = 30, cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, mgp=c(4,1.5,0))
+
+#filtering split angle times when distance of full group travelled more that 20m
+pres_manual_events_dist_20 <- pres_manual_events[pres_manual_events$AB_before_disp > 20,]
+hist(pres_manual_events_dist_20$split_angle[pres_manual_events_dist_20$event_type == "fission"], xlab = "Angle (degrees)", breaks = 30, main = "Split angle between sub-groups after fission", cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, col = "coral3", mgp=c(4,1.5,0))
+
+
+```
+
+Automated events:
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 7, fig.width = 33, out.width = "100%"}
+par(mfrow=c(1,4), mar = c(6,10,2,2))
+
+#FISSION PLOTTING
+fis <- pres_auto_events$event_type == "fission"
+#combine the A_subgroup_size and B_sub_group_size with A_during_disp and B_during_disp to make abline
+combined_1 <- data.frame(pres_auto_events$A_subgroup_size[fis])
+colnames(combined_1) <- "sub_size"
+disp_1 <- data.frame(pres_auto_events$A_during_disp[fis])
+colnames(disp_1) <- "disp"
+combined_2 <- data.frame(pres_auto_events$B_subgroup_size[fis])
+colnames(combined_2) <- "sub_size"
+disp_2 <- data.frame(pres_auto_events$B_during_disp[fis])
+colnames(disp_2) <- "disp"
+
+combined <- rbind(combined_1,combined_2)
+disp <- rbind(disp_1, disp_2)
+comb <- cbind(combined, disp)
+
+cm <- 2.5 #cex.main
+cl <- 3 #cex.lab
+c <- 5 #cex
+ca <- 3 #cex.axis
+
+#plot 1:
+plot(pres_auto_events$A_during_disp[fis], pres_auto_events$B_during_disp[fis], pch = 20, xlab = "sub-group A", ylab = "sub-group B", main = 'Distance traveled during fission event (m)',col = "olivedrab3", cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, mgp=c(4,1.5,0))
+abline(lm(pres_auto_events$B_during_disp[fis] ~ pres_auto_events$A_during_disp[fis]))
+
+#plot 2:
+#combined the A_subgroup_size and B_sub_group_size with A_during_disp and B_during_disp so I could add the abline
+plot(comb$disp, comb$sub_size, pch = 20, ylim = c(0, 10), xlab = '', main = "Distance traveled during fission event (m)", ylab = "Sub-group size",col = "orange2", cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, mgp=c(4,1.5,0))
+#abline(lm(comb$sub_size ~ comb$disp))
+
+hist(pres_auto_events$AB_before_disp[fis], main = "Distance traveled 10 minutes before displacement (m)", xlab = '', col = "olivedrab3", breaks = 30, cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, mgp=c(4,1.5,0))
+
+#filtering split angle times when distance of full group travelled more that 20m
+pres_auto_events_dist_20 <- pres_auto_events[pres_auto_events$AB_before_disp > 20,]
+hist(pres_auto_events_dist_20$split_angle[pres_auto_events_dist_20$event_type == "fission"], xlab = "Angle (degrees)", breaks = 30, main = "Split angle between sub-groups after fission", cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, col = "orange2", mgp=c(4,1.5,0))
+
+
+```
+
+#### **Visualising a fission event**
+Here, we extract the start and end of the fission event. We classify the group being together when subsequent subgroup centroids were within 15m of each other, and the end of a fission event is when those centroids are 50m apart from one another. These threshold are illustrated as the green lines. The dotted line is where the manual label defined a fission taking place.
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 18, fig.width = 9, out.width = "70%"}
+
+#read in xs and ys for galaxy
+load('C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/galaxy_xy_highres_level1.RData')
+analyse_ff_event(9, gal_manual_events, xs, ys, ts)
+
+```
+
+#### **Visualising fusion**
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 20, fig.width = 15, out.width = "70%"}
+
+analyse_ff_event(8, gal_manual_events, xs, ys, ts)
+
+```
+
+
+To look at whether specific age/sex classes were more likely to leave, we looked at the proportion of each age/sex class with their distance travelled. We do not see observable differences between age/sex classes:
+
+##### **Galaxy group**
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 10, fig.width = 20, out.width = "70%"}
+
+### PLOTTING EACH AGE CLASS IN ONE GRAPH ###
+#changing the xlim for Galaxy to 60 (Presedente is 80)
+a <- 0.5
+
+fis <- gal_manual_events$event_type == "fission"
+
+par(mfrow=c(1,2), mar = c(10,10,2,2),(mgp=c(3,5,1))) #bottom, left, top, right)
+#combine the 3 plots above into one plot
+plot(gal_manual_events$A_during_disp[fis], gal_manual_events$A_proportion_adults[fis], pch = 19, ylab = "Proportion of age class in sub-group", xlab="Distance traveled during fission event (m)",xlim = c(0, 60), ylim = c(0,1), cex = 4, cex.axis = 2, cex.lab = 2, cex.main = 3, col = alpha("hotpink4",a), mgp=c(5,2,.5), main = "manual labels", font.main = 1)
+points(gal_manual_events$B_during_disp[fis], gal_manual_events$B_proportion_adults[fis], pch = 19,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("hotpink4",a))
+#plot distance traveled depending on proportion of sub-adults in subgroup
+points(gal_manual_events$A_during_disp[fis], gal_manual_events$A_proportion_subadults[fis], pch = 17,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("orange3", a),mgp=c(5,2,.5))
+points(gal_manual_events$B_during_disp[fis], gal_manual_events$B_proportion_subadults[fis], pch = 17,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("orange3", a))
+
+#plot distance traveled depending on proportion of juveniles in subgroup
+points(gal_manual_events$A_during_disp[fis], gal_manual_events$A_proportion_juveniles[fis], pch = 15, ylim = c(0,1), cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("cadetblue3",a), mgp=c(5,2,.5))
+points(gal_manual_events$B_during_disp[fis], gal_manual_events$B_proportion_juveniles[fis], pch = 15,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("cadetblue3", a))
+legend(x = "topright",         
+       legend = c("Adult", "Sub-adult", "Juvenile"),
+       pch = c(19, 17, 15),
+       col = c("hotpink4", "orange3", "cadetblue3"),
+       cex = 2, pt.cex = 2,
+       bty = "n")
+
+#-------------------------------------------------------------------
+fis <- gal_auto_events$event_type == "fission"
+
+#combine the 3 plots above into one plot
+plot(gal_auto_events$A_during_disp[fis], gal_auto_events$A_proportion_adults[fis], pch = 19, ylab = "Proportion of age class in sub-group", xlab="Distance traveled during fission event (m)",xlim = c(0, 60), ylim = c(0,1), cex = 4, cex.axis = 2, cex.lab = 2, cex.main = 3, col = alpha("hotpink4",a), mgp=c(5,2,.5), main = "automated labels", font.main = 1)
+points(gal_auto_events$B_during_disp[fis], gal_auto_events$B_proportion_adults[fis], pch = 19,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("hotpink4",a))
+#plot distance traveled depending on proportion of sub-adults in subgroup
+points(gal_auto_events$A_during_disp[fis], gal_auto_events$A_proportion_subadults[fis], pch = 17,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("orange3", a),mgp=c(5,2,.5))
+points(gal_auto_events$B_during_disp[fis], gal_auto_events$B_proportion_subadults[fis], pch = 17,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("orange3", a))
+
+#plot distance traveled depending on proportion of juveniles in subgroup
+points(gal_auto_events$A_during_disp[fis], gal_auto_events$A_proportion_juveniles[fis], pch = 15, ylim = c(0,1), cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("cadetblue3",a), mgp=c(5,2,.5))
+points(gal_auto_events$B_during_disp[fis], gal_auto_events$B_proportion_juveniles[fis], pch = 15,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("cadetblue3", a))
+legend(x = "topright",         
+       legend = c("Adult", "Sub-adult", "Juvenile"),
+       pch = c(19, 17, 15),
+       col = c("hotpink4", "orange3", "cadetblue3"),
+       cex = 2, pt.cex = 2,
+       bty = "n")
+```
+
+
+##### **Presidente group**
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 10, fig.width = 20, out.width = "70%"}
+
+### PLOTTING EACH AGE CLASS IN ONE GRAPH ###
+#changing the xlim for Galaxy to 60 (Presedente is 80)
+a <- 0.5
+
+fis <- pres_manual_events$event_type == "fission"
+
+par(mfrow=c(1,2), mar = c(10,10,2,2),(mgp=c(3,5,1))) #bottom, left, top, right)
+#combine the 3 plots above into one plot
+plot(pres_manual_events$A_during_disp[fis], pres_manual_events$A_proportion_adults[fis], pch = 19, ylab = "Proportion of age class in sub-group", xlab="Distance traveled during fission event (m)",xlim = c(0, 60), ylim = c(0,1), cex = 4, cex.axis = 2, cex.lab = 2, cex.main = 3, col = alpha("hotpink4",a), mgp=c(5,2,.5), main = "manual labels", font.main = 1)
+points(pres_manual_events$B_during_disp[fis], pres_manual_events$B_proportion_adults[fis], pch = 19,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("hotpink4",a))
+#plot distance traveled depending on proportion of sub-adults in subgroup
+points(pres_manual_events$A_during_disp[fis], pres_manual_events$A_proportion_subadults[fis], pch = 17,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("orange3", a),mgp=c(5,2,.5))
+points(pres_manual_events$B_during_disp[fis], pres_manual_events$B_proportion_subadults[fis], pch = 17,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("orange3", a))
+
+#plot distance traveled depending on proportion of juveniles in subgroup
+points(pres_manual_events$A_during_disp[fis], pres_manual_events$A_proportion_juveniles[fis], pch = 15, ylim = c(0,1), cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("cadetblue3",a), mgp=c(5,2,.5))
+points(pres_manual_events$B_during_disp[fis], pres_manual_events$B_proportion_juveniles[fis], pch = 15,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("cadetblue3", a))
+legend(x = "topright",         
+       legend = c("Adult", "Sub-adult", "Juvenile"),
+       pch = c(19, 17, 15),
+       col = c("hotpink4", "orange3", "cadetblue3"),
+       cex = 2, pt.cex = 2,
+       bty = "n")
+
+#-------------------------------------------------------------------
+fis <- pres_auto_events$event_type == "fission"
+
+#combine the 3 plots above into one plot
+plot(pres_auto_events$A_during_disp[fis], pres_auto_events$A_proportion_adults[fis], pch = 19, ylab = "Proportion of age class in sub-group", xlab="Distance traveled during fission event (m)",xlim = c(0, 60), ylim = c(0,1), cex = 4, cex.axis = 2, cex.lab = 2, cex.main = 3, col = alpha("hotpink4",a), mgp=c(5,2,.5), main = "automated labels", font.main = 1)
+points(pres_auto_events$B_during_disp[fis], pres_auto_events$B_proportion_adults[fis], pch = 19,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("hotpink4",a))
+#plot distance traveled depending on proportion of sub-adults in subgroup
+points(pres_auto_events$A_during_disp[fis], pres_auto_events$A_proportion_subadults[fis], pch = 17,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("orange3", a),mgp=c(5,2,.5))
+points(pres_auto_events$B_during_disp[fis], pres_auto_events$B_proportion_subadults[fis], pch = 17,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("orange3", a))
+
+#plot distance traveled depending on proportion of juveniles in subgroup
+points(pres_auto_events$A_during_disp[fis], pres_auto_events$A_proportion_juveniles[fis], pch = 15, ylim = c(0,1), cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("cadetblue3",a), mgp=c(5,2,.5))
+points(pres_auto_events$B_during_disp[fis], pres_auto_events$B_proportion_juveniles[fis], pch = 15,cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3, col = alpha("cadetblue3", a))
+legend(x = "topright",         
+       legend = c("Adult", "Sub-adult", "Juvenile"),
+       pch = c(19, 17, 15),
+       col = c("hotpink4", "orange3", "cadetblue3"),
+       cex = 2, pt.cex = 2,
+       bty = "n")
+
+```
+
+
+
+#### **Distance travelled during fusions**
+
+##### **Galaxy group**
+
+Manual events:
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "left", fig.height = 7, fig.width = 26, out.width = "80%"}
+par(mfrow=c(1,3), mar = c(6,10,2,2))
+
+#FISSION PLOTTING
+fus <- gal_manual_events$event_type == "fusion"
+#combine the A_subgroup_size and B_sub_group_size with A_during_disp and B_during_disp to make abline
+combined_1 <- data.frame(gal_manual_events$A_subgroup_size[fus])
+colnames(combined_1) <- "sub_size"
+disp_1 <- data.frame(gal_manual_events$A_during_disp[fus])
+colnames(disp_1) <- "disp"
+combined_2 <- data.frame(gal_manual_events$B_subgroup_size[fus])
+colnames(combined_2) <- "sub_size"
+disp_2 <- data.frame(gal_manual_events$B_during_disp[fus])
+colnames(disp_2) <- "disp"
+
+combined <- rbind(combined_1,combined_2)
+disp <- rbind(disp_1, disp_2)
+comb <- cbind(combined, disp)
+
+cm <- 2.5 #cex.main
+cl <- 3 #cex.lab
+c <- 5 #cex
+ca <- 3 #cex.axis
+
+#plot 1:
+plot(gal_manual_events$A_during_disp[fus], gal_manual_events$B_during_disp[fus], pch = 20, xlab = "sub-group A", ylab = "sub-group B", main = 'Distance traveled during fusion event (m)',col = "skyblue", cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, mgp=c(4,1.5,0))
+abline(lm(gal_manual_events$B_during_disp[fus] ~ gal_manual_events$A_during_disp[fus]))
+
+#plot 2:
+#combined the A_subgroup_size and B_sub_group_size with A_during_disp and B_during_disp so I could add the abline
+plot(comb$disp, comb$sub_size, pch = 20, ylim = c(0, 10), xlab = '', main = "Distance traveled during fusion event (m)", ylab = "Sub-group size",col = "hotpink2", cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, mgp=c(4,1.5,0))
+#abline(lm(comb$sub_size ~ comb$disp))
+
+hist(gal_manual_events$AB_before_disp[fus], main = "Distance traveled 10 minutes before fusion (m)", xlab = '', col = "skyblue", breaks = 30, cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, mgp=c(4,1.5,0))
+
+```
+
+Automated events:
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "left", fig.height = 7, fig.width = 26, out.width = "80%"}
+par(mfrow=c(1,3), mar = c(6,10,2,2))
+
+#FISSION PLOTTING
+fus <- gal_auto_events$event_type == "fusion"
+#combine the A_subgroup_size and B_sub_group_size with A_during_disp and B_during_disp to make abline
+combined_1 <- data.frame(gal_auto_events$A_subgroup_size[fus])
+colnames(combined_1) <- "sub_size"
+disp_1 <- data.frame(gal_auto_events$A_during_disp[fus])
+colnames(disp_1) <- "disp"
+combined_2 <- data.frame(gal_auto_events$B_subgroup_size[fus])
+colnames(combined_2) <- "sub_size"
+disp_2 <- data.frame(gal_auto_events$B_during_disp[fus])
+colnames(disp_2) <- "disp"
+
+combined <- rbind(combined_1,combined_2)
+disp <- rbind(disp_1, disp_2)
+comb <- cbind(combined, disp)
+
+cm <- 2.5 #cex.main
+cl <- 3 #cex.lab
+c <- 5 #cex
+ca <- 3 #cex.axis
+
+#plot 1:
+plot(gal_auto_events$A_during_disp[fus], gal_auto_events$B_during_disp[fus], pch = 20, xlab = "sub-group A", ylab = "sub-group B", main = 'Distance traveled during fusion event (m)',col = "skyblue3", cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, mgp=c(4,1.5,0))
+abline(lm(gal_auto_events$B_during_disp[fus] ~ gal_auto_events$A_during_disp[fus]))
+
+#plot 2:
+#combined the A_subgroup_size and B_sub_group_size with A_during_disp and B_during_disp so I could add the abline
+plot(comb$disp, comb$sub_size, pch = 20, ylim = c(0, 10), xlab = '', main = "Distance traveled during fusion event (m)", ylab = "Sub-group size",col = "coral3", cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, mgp=c(4,1.5,0))
+#abline(lm(comb$sub_size ~ comb$disp))
+
+hist(gal_auto_events$AB_before_disp[fus], main = "Distance traveled 10 minutes before fusion (m)", xlab = '', col = "skyblue3", breaks = 30, cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, mgp=c(4,1.5,0))
+
+```
+
+
+##### **Presidente group**
+
+Manual events:
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "left", fig.height = 7, fig.width = 26, out.width = "80%"}
+par(mfrow=c(1,3), mar = c(6,10,2,2))
+
+#FUSION PLOTTING
+fus <- pres_manual_events$event_type == "fusion"
+#combine the A_subgroup_size and B_sub_group_size with A_during_disp and B_during_disp to make abline
+combined_1 <- data.frame(pres_manual_events$A_subgroup_size[fus])
+colnames(combined_1) <- "sub_size"
+disp_1 <- data.frame(pres_manual_events$A_during_disp[fus])
+colnames(disp_1) <- "disp"
+combined_2 <- data.frame(pres_manual_events$B_subgroup_size[fus])
+colnames(combined_2) <- "sub_size"
+disp_2 <- data.frame(pres_manual_events$B_during_disp[fus])
+colnames(disp_2) <- "disp"
+
+combined <- rbind(combined_1,combined_2)
+disp <- rbind(disp_1, disp_2)
+comb <- cbind(combined, disp)
+
+cm <- 2.5 #cex.main
+cl <- 3 #cex.lab
+c <- 5 #cex
+ca <- 3 #cex.axis
+
+#plot 1:
+plot(pres_manual_events$A_during_disp[fus], pres_manual_events$B_during_disp[fus], pch = 20, xlab = "sub-group A", ylab = "sub-group B", main = 'Distance traveled during fusion event (m)',col = "skyblue", cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, mgp=c(4,1.5,0))
+abline(lm(pres_manual_events$B_during_disp[fus] ~ pres_manual_events$A_during_disp[fus]))
+
+#plot 2:
+#combined the A_subgroup_size and B_sub_group_size with A_during_disp and B_during_disp so I could add the abline
+plot(comb$disp, comb$sub_size, pch = 20, ylim = c(0, 10), xlab = '', main = "Distance traveled during fusion event (m)", ylab = "Sub-group size",col = "hotpink2", cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, mgp=c(4,1.5,0))
+#abline(lm(comb$sub_size ~ comb$disp))
+
+hist(pres_manual_events$AB_before_disp[fus], main = "Distance traveled 10 minutes before fusion (m)", xlab = '', col = "skyblue", breaks = 30, cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, mgp=c(4,1.5,0))
+
+```
+
+Automated events:
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "left", fig.height = 7, fig.width = 26, out.width = "80%"}
+par(mfrow=c(1,3), mar = c(6,10,2,2))
+
+#FUSION PLOTTING
+fus <- pres_auto_events$event_type == "fusion"
+#combine the A_subgroup_size and B_sub_group_size with A_during_disp and B_during_disp to make abline
+combined_1 <- data.frame(pres_auto_events$A_subgroup_size[fus])
+colnames(combined_1) <- "sub_size"
+disp_1 <- data.frame(pres_auto_events$A_during_disp[fus])
+colnames(disp_1) <- "disp"
+combined_2 <- data.frame(pres_auto_events$B_subgroup_size[fus])
+colnames(combined_2) <- "sub_size"
+disp_2 <- data.frame(pres_auto_events$B_during_disp[fus])
+colnames(disp_2) <- "disp"
+
+combined <- rbind(combined_1,combined_2)
+disp <- rbind(disp_1, disp_2)
+comb <- cbind(combined, disp)
+
+cm <- 2.5 #cex.main
+cl <- 3 #cex.lab
+c <- 5 #cex
+ca <- 3 #cex.axis
+
+#plot 1:
+plot(pres_auto_events$A_during_disp[fus], pres_auto_events$B_during_disp[fus], pch = 20, xlab = "sub-group A", ylab = "sub-group B", main = 'Distance traveled during fusion event (m)',col = "skyblue3", cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, mgp=c(4,1.5,0))
+abline(lm(pres_auto_events$B_during_disp[fus] ~ pres_auto_events$A_during_disp[fus]))
+
+#plot 2:
+#combined the A_subgroup_size and B_sub_group_size with A_during_disp and B_during_disp so I could add the abline
+plot(comb$disp, comb$sub_size, pch = 20, ylim = c(0, 10), xlab = '', main = "Distance traveled during fusion event (m)", ylab = "Sub-group size",col = "coral3", cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, mgp=c(4,1.5,0))
+#abline(lm(comb$sub_size ~ comb$disp))
+
+hist(pres_auto_events$AB_before_disp[fus], main = "Distance traveled 10 minutes before fusion (m)", xlab = '', col = "skyblue3", breaks = 30, cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, mgp=c(4,1.5,0))
+
+```
+
+#### **Visualising fusion**
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 20, fig.width = 15, out.width = "70%"}
+
+analyse_ff_event(8, gal_manual_events, xs, ys, ts)
+
+```
+
+
+
