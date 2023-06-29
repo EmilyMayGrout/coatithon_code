@@ -1,0 +1,149 @@
+---
+title: "Flica_example_Coati_fission"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+#this script is getting the influence of each group member during a fission event and extracting the individuals who have the highest influence
+#want to do this for all fission and fusion events to see if there are consistencies over time
+
+
+## Load data
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(mFLICA)
+library(R.matlab)
+library(raster)
+library(plotly)
+
+#ID file
+load("C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/galaxy_coati_ids.RData")
+#GPS file
+load("C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/galaxy_xy_highres_level1.RData")
+
+#making data into an array
+dat <- array(NA, dim = c(nrow(xs), ncol(xs), 2))
+dat[,,1] <- xs
+dat[,,2] <- ys
+
+```
+
+
+#filter to fission time for Roi - chosen 27.12.21 12:10:00 - 12:40:00
+```{r setup, include=FALSE}
+#27.12.21 12:10:00
+#ts[36601]
+#27.12.21 12:40:00
+#ts[38401]
+
+fissiontime <- ts[36601:38401]
+#load("C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/galaxy_xy_highres_fissiontimes_flica.RData") 
+fission_event <- dat[,36601:38401,]
+#load("C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/galaxy_xy_highres_fissionarray_flica.RData") 
+
+dat <- fission_event
+
+```
+
+
+## Run Flica
+```{r flica, echo = FALSE}
+
+#length(fissiontime)
+sample_vals = 1:1000
+
+#replace NAs with 0 
+dat[is.na(dat)] <- 0
+
+## function from raster - not working
+## sampling individuals that are within dist_thres
+dist_thres <- 100 # removing individuals that do not travel with the group based on median over the all period
+dst <- pointDistance(cbind(c(apply(dat[,,1],c(1),median)), 
+ c(apply(dat[,,2],c(1),median))),
+ c(median(dat[,,1], na.rm = TRUE), 
+ median(dat[,,2], na.rm = TRUE)),lonlat = FALSE)
+focal_tags <- dst < dist_thres
+
+# run flica code
+#with tags that are in the group
+#better to have a smaller time shift for more accurate results - 10 is good, but the smaller the number the longer it takes to run
+#sigma = 0.75
+#timeWindow = 240 #usually 1/10th of duration
+obj1 <- mFLICA(TS=dat[focal_tags,sample_vals,],timeWindow=240,timeShift=10,sigma=0.75)
+
+#obj1 <- mFLICA(TS=dat[,sample_vals,],timeWindow=240,timeShift=1,sigma=0.75)
+#chai's
+#obj1<-mFLICA(TS=mFLICA::TS,timeWindow=60,timeShift=100,sigma=0.5)
+
+```
+
+## Plotting
+
+```{r flica, echo = FALSE}
+
+# Plot time series of faction size ratios of all leaders
+
+plotMultipleTimeSeries(TS=obj1$dyNetOut$dyNetBinDensityVec, strTitle="Network Density")
+
+plotMultipleTimeSeries(TS=obj1$factionSizeRatioTimeSeries, strTitle="Faction Size Ratios",TSnames = coati_ids$name[focal_tags]) + scale_color_brewer(palette="Paired")
+
+#plotting all inds except number 3 as they're all NA's
+dat_filt <- dat[focal_tags,,]
+
+plotMultipleTimeSeries(TS=dat[focal_tags,,1],strTitle="x axis", TSnames = coati_ids$name[focal_tags])
+plotMultipleTimeSeries(TS=dat[focal_tags,,2],strTitle="y axis", TSnames = coati_ids$name[focal_tags])
+
+
+## This is how I make the 3d plot - you just need to use the initial data.frame and add the network density column 
+
+df_all = data.frame(tag=character(),
+                    time=as.POSIXct(character()),
+                    x=numeric(),
+                    y=numeric())
+fissiontime <- format(fissiontime, "%Y-%m-%d %H:%M:%OS3")
+fissiontime_sec <- as.numeric(as.POSIXct(fissiontime)) -   as.numeric(as.POSIXct(fissiontime[1]))
+
+df_res <- data.frame(time=fissiontime_sec[sample_vals],
+                     net_dens=as.numeric(obj1$dyNetOut$dyNetBinDensityVec),
+                     x = apply(dat[,sample_vals,1],c(2),median),
+                     y = apply(dat[,sample_vals,2],c(2),median))
+
+## plot net dens with time of the centroid of the group  
+fig <- plot_ly(df_res, x = ~x, y = ~y, z = ~time, 
+                       marker = list(color = ~net_dens, 
+                       colorscale = c('#FFE1A1', '#683531'),   
+                       showscale = TRUE))
+fig <- fig %>% add_markers()
+fig
+
+
+```
+
+
+# finding indivual at each time step with the greatest influence (highest faction size ratio)
+```{r flica, echo = FALSE}
+d <- obj1$factionSizeRatioTimeSeries
+#plotting one individuals influence
+plot(d[5, 1:1000])
+
+df <- data.frame(matrix(nrow = length(d[1,]), ncol = 2))
+
+#for loop for getting the individual with the greatest influence for that event and putting it in dataframe over time
+for (i in 1:ncol(d)){
+  
+  col <- d[,i]
+  id <- which.max(col)
+  df[i,1] <-  id
+  df[i,2] <- coati_ids$name[id]
+
+}
+
+tabl <- table(df$X2)
+
+pie(tabl)
+
+```
+
+
+

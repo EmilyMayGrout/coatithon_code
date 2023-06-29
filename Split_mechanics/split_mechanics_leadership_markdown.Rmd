@@ -2,7 +2,7 @@
 title: "split mechanics & leadership"
 author: "Emily"
 date: "6/16/2023"
-editor_options: 
+editor_options:
   chunk_output_type: console
 ---
 
@@ -11,15 +11,16 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```
 
-Here we document the fission-fusion mechanisms with the 1Hz data for Presidente group and Galaxy group. 
+This document outlines initial analysis of fission-fusion dynamics using the 1Hz data for Presidente group and Galaxy group. 
 
 
 ### Contents:
 
-* 1: Split characteristics
-* 2: 
-* 3: 
-* 4: 
+* 1: Frequency of fission and fusion events
+* 2: Fission characteristics
+* 3: Fusion characteristics
+* 4: Leadership analysis
+  
 
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE}
@@ -38,12 +39,18 @@ load("C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/presedente_aut
 pres_auto_events <- events
 load("C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/presedente_manual_ff_events_characterized.RData")
 pres_manual_events <- events
+load("C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/coati_ids.RData")
+gal_coati_ids <- coati_ids
+#modify coati ids to only include first 3 letters
+gal_coati_ids$name_short <- sapply(gal_coati_ids$name, function(x){return(substr(x,1,3))})
+load("C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/coati_ids.RData")
+pres_coati_ids <- coati_ids
+pres_coati_ids$name_short <- sapply(pres_coati_ids$name, function(x){return(substr(x,1,3))})
 
 ```
 
-### **Split characteristics**
-
-#### **Number of fission and fusion events:**
+### **1: Frequency of fission and fusion events:**
+Manual events were detected based on visually determining when a fission or a fusion occurred by watching videos of the full groups movements for each day. Automated events were detected using an algorithm from Della Libera et al. which has been submitted. These events are only from the 1Hz period.
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE}
 #make table of fissions and fusions counts for both groups for MANUAL
@@ -81,10 +88,12 @@ knitr::kables(
 )
 ```
 
+### **2: Fission characteristics**
 
-#### **Distance travelled during fissions**
+##### Distance travelled during fissions
 
 ##### **Galaxy group**
+For manual and automated events, we can see that in Galaxy group there tends to be one group moving and one group staying in the same place during fissions. There is also a slight negative correlation with sub-group size and distance travelled, suggesting that smaller subgroups are more likely to move compared to larger subgroups.
 
 Manual events:
 ```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 7, fig.width = 33, out.width = "100%"}
@@ -174,7 +183,9 @@ hist(gal_auto_events_dist_20$split_angle[gal_auto_events_dist_20$event_type == "
 
 ```
 
-##### **Presidente group**
+##### Presidente group
+We see a similar pattern in Presidente group, where one subgroup tends to move and the other subgroup stays in the same place. However, there isn't a strong relationship between subgroup size and distance travelled. 
+
 Manual events:
 ```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 7, fig.width = 33, out.width = "100%"}
 par(mfrow=c(1,4), mar = c(6,10,2,2))
@@ -261,9 +272,9 @@ hist(pres_auto_events_dist_20$split_angle[pres_auto_events_dist_20$event_type ==
 
 ```
 
-#### **Visualising a fission event**
+##### **Visualising a fission event**
 Here, we extract the start and end of the fission event. We classify the group being together when subsequent subgroup centroids were within 15m of each other, and the end of a fission event is when those centroids are 50m apart from one another. These threshold are illustrated as the green lines. The dotted line is where the manual label defined a fission taking place.
-```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 18, fig.width = 9, out.width = "70%"}
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 15, fig.width = 9, out.width = "70%"}
 
 #read in xs and ys for galaxy
 load('C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/galaxy_xy_highres_level1.RData')
@@ -271,17 +282,10 @@ analyse_ff_event(9, gal_manual_events, xs, ys, ts)
 
 ```
 
-#### **Visualising fusion**
-```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 20, fig.width = 15, out.width = "70%"}
-
-analyse_ff_event(8, gal_manual_events, xs, ys, ts)
-
-```
-
 
 To look at whether specific age/sex classes were more likely to leave, we looked at the proportion of each age/sex class with their distance travelled. We do not see observable differences between age/sex classes:
 
-##### **Galaxy group**
+##### Galaxy group
 ```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 10, fig.width = 20, out.width = "70%"}
 
 ### PLOTTING EACH AGE CLASS IN ONE GRAPH ###
@@ -330,7 +334,7 @@ legend(x = "topright",
 ```
 
 
-##### **Presidente group**
+##### Presidente group
 ```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 10, fig.width = 20, out.width = "70%"}
 
 ### PLOTTING EACH AGE CLASS IN ONE GRAPH ###
@@ -379,11 +383,12 @@ legend(x = "topright",
 
 ```
 
+### **3: Fusion characteristics**
 
-
-#### **Distance travelled during fusions**
+##### Distance travelled during fusions
 
 ##### **Galaxy group**
+Similarly to fissions, during fusions events, one subgroup leaves and the other subgroup stays in the same place. For the majority of fission, the initial full group moved less than 30m. There is a slight negative correlation with subgroup size and distance travelled during a fusion.
 
 Manual events:
 ```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "left", fig.height = 7, fig.width = 26, out.width = "80%"}
@@ -462,7 +467,8 @@ hist(gal_auto_events$AB_before_disp[fus], main = "Distance traveled 10 minutes b
 ```
 
 
-##### **Presidente group**
+##### Presidente group
+As with Galaxy group, most fissions in Presidente group were caused by one subgroup leaving a stationary subgroup. There is a slight negative correlation is subgroup size and distance travelled during a fission event. The distance travelled of the full group prior to the split was most commonly less than 40m for the manual events and less than 50m for the automated events.
 
 Manual events:
 ```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "left", fig.height = 7, fig.width = 26, out.width = "80%"}
@@ -540,12 +546,800 @@ hist(pres_auto_events$AB_before_disp[fus], main = "Distance traveled 10 minutes 
 
 ```
 
-#### **Visualising fusion**
-```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 20, fig.width = 15, out.width = "70%"}
+
+##### **Visualising a fusion event**
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 15, fig.width = 9, out.width = "70%"}
 
 analyse_ff_event(8, gal_manual_events, xs, ys, ts)
 
 ```
 
 
+
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+#reading in functions from the split_merge_leadership script
+
+#FUNCTION
+#Measure the displacement of each individual in a subgroup along that subgroup's movement path during a split / merge
+#INPUTS:
+#moving_inds: indexes of the individuals in the moving subgroup
+#xs, ys: matrices of positions
+#t0: start time index of event 
+#tf: end time index of event - used for computing group direction of movement
+#tmeas: time index at which you measure the individual relative to the group's heading (normally this would also be tf)
+#OUTPUTS:
+#proj_i: [vector] displacement of each individual along the group direction of motion (projection)
+ind_disp_along_group_path <- function(moving_inds, xs, ys, t0, tf, tmeas){
+  
+  #get centroid initial location
+  xc0 <- mean(xs[moving_inds,t0], na.rm = T)
+  yc0 <- mean(ys[moving_inds,t0], na.rm = T)
+  
+  #centroid final location
+  xcf <- mean(xs[moving_inds,tf], na.rm = T)
+  ycf <- mean(ys[moving_inds,tf], na.rm = T)
+  
+  #centroid displacement vector
+  dxc <- xcf - xc0
+  dyc <- ycf - yc0
+  
+  #get individual end points
+  xif <- xs[moving_inds, tmeas]
+  yif <- ys[moving_inds, tmeas]
+  
+  #get individual displacement vectors (their end point to the group start point)
+  dxi <- xif - xc0
+  dyi <- yif - yc0
+  
+  #project individual displacement vectors onto the group displacement vector
+  disp_i <- (dxi*dxc + dyi*dyc) / sqrt(dxc^2 + dyc^2)
+  
+  #get ranks
+  if(sum(is.na(disp_i))==0){
+    ranks <- rank(disp_i)
+  } else{
+    ranks <- rep(NA, length(disp_i))
+  }
+  
+  #get normalized ranks
+  if(length(disp_i)==1){
+    norm_ranks <- c(NA)
+  } else{
+    min_rank <- min(ranks)
+    max_rank <- max(ranks)
+    norm_ranks <- (ranks - min_rank) / (max_rank - min_rank)
+  }
+  
+  #return ind displacement along group vector, ranks, and normalized ranks
+  out <- list()
+  out$disp <- disp_i
+  out$ranks <- ranks
+  out$norm_ranks <- norm_ranks
+  return(out) 
+}
+
+#Function to compute the order at which individuals cross a threshold distance along the fission/fusion direction
+#INPUTS:
+#moving_inds: indexes of the individuals in the moving subgroup
+#xs, ys: matrices of positions
+#t0: start time index of event 
+#tf: end time index of event - used for computing group direction of movement
+#dist_frac_thresh: threshold fractional distance along group trajectory from start point to compute passing time for each individual
+ind_crossing_thresh_times_along_group_path <- function(moving_inds, xs, ys, t0, tf, dist_frac_thresh = 0.5){
+  
+  #if times are missing, return NAs for ranks and crossing times
+  if(is.na(t0) | is.na(tf)){
+    out <- list()
+    out$first_crossing_times <- rep(NA, length(moving_inds))
+    out$ranks <- rep(NA, length(moving_inds))
+    out$norm_ranks <- rep(NA, length(moving_inds))
+    return(out)
+  }
+  
+  #get centroid initial location
+  xc0 <- mean(xs[moving_inds,t0], na.rm = T)
+  yc0 <- mean(ys[moving_inds,t0], na.rm = T)
+  
+  #centroid final location
+  xcf <- mean(xs[moving_inds,tf], na.rm = T)
+  ycf <- mean(ys[moving_inds,tf], na.rm = T)
+  
+  #centroid displacement vector
+  dxc <- xcf - xc0
+  dyc <- ycf - yc0
+  
+  #centroid total distance traveled
+  distc <- sqrt(dxc^2 + dyc^2)
+  
+  #if distance moved was zero, return NAs
+  if(distc == 0){
+    out <- list()
+    out$first_crossing_times <- rep(NA, length(moving_inds))
+    out$ranks <- rep(NA, length(moving_inds))
+    out$norm_ranks <- rep(NA, length(moving_inds))
+    return(out)
+  }
+  
+  #get the distance threshold (along group trajectory) used to determine order of crossing
+  dist_thresh <- dist_frac_thresh * distc
+  
+  #get individual end points
+  xi <- xs[moving_inds, t0:ncol(xs)]
+  yi <- ys[moving_inds, t0:ncol(xs)]
+  
+  #get individual displacement vectors (their end point to the group start point)
+  dxi <- xi - xc0
+  dyi <- yi - yc0
+  
+  #project individual displacement vectors onto the group displacement vector
+  disp_i <- (dxi*dxc + dyi*dyc) / sqrt(dxc^2 + dyc^2)
+  
+  #get times of each individual crossing the threshold
+  first_crossing_times <- rep(NA, length(moving_inds))
+  for(ind in 1:length(moving_inds)){
+    
+    if(is.matrix(disp_i)){
+      crossing_times <- which(disp_i[ind,] > dist_thresh)
+    } else{
+      crossing_times <- which(disp_i > dist_thresh)
+    }
+    
+    #if it never crosses, then give infinity for the crossing time and throw a warning
+    if(length(crossing_times)==0){
+      first_crossing_times[ind] <- Inf
+      
+      stop('Individual never crossed the distance threshold - crossing time set to Inf')
+    }else{
+      first_crossing_times[ind] <- min(crossing_times)
+    }
+  }
+  
+  #get ranks
+  if(sum(is.na(first_crossing_times))==0){
+    ranks <- rank(-first_crossing_times) #rank negative value so that higher ranks are higher leadership
+  } else{
+    ranks <- rep(NA, length(first_crossing_times))
+  }
+  
+  #get normalized ranks
+  if(length(first_crossing_times)==1){
+    norm_ranks <- c(NA)
+  } else{
+    min_rank <- min(ranks)
+    max_rank <- max(ranks)
+    norm_ranks <- (ranks - min_rank) / (max_rank - min_rank)
+  }
+  
+  #return ind displacement along group vector, ranks, and normalized ranks
+  out <- list()
+  out$first_crossing_times <- first_crossing_times
+  out$ranks <- ranks
+  out$norm_ranks <- norm_ranks
+  
+  return(out) 
+  
+}
+
+#Compute entropy from a set of measurements
+#histo is a vector of frequencies or probabilities to take the entropy of
+compute_entropy <- function(histo){
+  
+  #don't allow negative values
+  if(sum(histo < 0)>0){
+    stop('negative values found')
+  }
+  
+  #if NAs, return NA
+  if(sum(is.na(histo))>0){
+    return(NA)
+  }
+  
+  #if frequencies rather than probabilities, normalize to add up to 1
+  histo <- histo / sum(histo) 
+  
+  #find nonzero elements
+  nonzero <- which(histo!=0)
+  
+  #get entropy, excluding zero elements
+  entropy <- -sum(histo[nonzero] * log(histo[nonzero], base = 2))
+  
+  return(entropy)
+}
+
+
+#Function to get information about leadership (determined by position) during fissions and fusions
+#INPUTS:
+# events data frame
+# n_inds: number of individuals
+# leadership_type: 'position' for using position along group movement vector at a particular time or 'crosstime' for using crossing times
+# meas_time: where to measure leadership, at the start, midpoint (mid) or end of the event
+#OUTPUT:
+# out: list containing
+# out$fission_leaders: matrix where rows are events and columns are individuals, giving the normalized leadership ranks for fisisons
+# out$fusion_leaders: same but for fusions
+# out$fission_leadership_entropies: vector of entropies of the normalized rank distributions for fissions for each individual
+# out$fusion_leadership_entropies: same but for fusions
+get_fission_fusion_leadership <- function(events, n_inds, leadership_type = 'position', meas_time = 'end', norm_rank_bins = seq(0,1,.2)){
+  
+  #check if meas_time is one of the correct options
+  if(!(meas_time %in% c('start','mid','end'))){
+    stop('meas_time not specified as start, mid, or end')
+  }
+  
+  if(!(leadership_type %in% c('position','crosstime'))){
+    stop('leadership_type not specified as position or crosstime')
+  }
+  
+  #get normalized ranks for individuals during fissions and fusions
+  fission_leaders <- fusion_leaders <- matrix(NA, nrow = n_inds, ncol = nrow(events))
+  for(i in 1:nrow(events)){
+    
+    if(!is.na(events$A_moved[i])){
+      if(events$A_moved[i]){
+        inds <- events$group_A_idxs[i][[1]]
+        if(leadership_type=='position'){
+          if(meas_time == 'start'){
+            norm_ranks <- events$group_A_lead_norm_rank_start[i][[1]] 
+          } 
+          if(meas_time == 'mid'){
+            norm_ranks <- events$group_A_lead_norm_rank_mid[i][[1]] 
+          }
+          if(meas_time == 'end'){
+            norm_ranks <- events$group_A_lead_norm_rank_end[i][[1]] 
+          }
+        } else if(leadership_type == 'crosstime'){
+          norm_ranks <- events$group_A_lead_crosstime_norm_rank[i][[1]]
+        }
+        if(events$event_type[i] == 'fission'){
+          fission_leaders[inds,i] <- norm_ranks
+        }
+        if(events$event_type[i] == 'fusion'){
+          fusion_leaders[inds,i] <- norm_ranks
+        }
+      }
+    }
+    
+    if(!is.na(events$B_moved[i])){
+      if(events$B_moved[i]){
+        inds <- events$group_B_idxs[i][[1]]
+        if(leadership_type == 'position'){
+          if(meas_time == 'start'){
+            norm_ranks <- events$group_B_lead_norm_rank_start[i][[1]] 
+          } 
+          if(meas_time == 'mid'){
+            norm_ranks <- events$group_B_lead_norm_rank_mid[i][[1]] 
+          }
+          if(meas_time == 'end'){
+            norm_ranks <- events$group_B_lead_norm_rank_end[i][[1]] 
+          }
+        } else if(leadership_type =='crosstime'){
+          norm_ranks <- events$group_B_lead_crosstime_norm_rank[i][[1]]
+        }
+        if(events$event_type[i] == 'fission'){
+          fission_leaders[inds,i] <- norm_ranks
+        }
+        if(events$event_type[i] == 'fusion'){
+          fusion_leaders[inds,i] <- norm_ranks
+        }
+      }
+    }
+  }
+  
+  #For each individual get entropy of its leadership normalized rank distribution
+  #for fusions
+  fusion_leadership_entropies <- fission_leadership_entropies <- rep(NA, n_inds)
+  for(i in 1:n_inds){
+    if(sum(!is.na(fusion_leaders[i,]))>0){
+      histo_fusion <- hist(fusion_leaders[i,], breaks= norm_rank_bins, plot = F)$counts
+      fusion_leadership_entropies[i] <- compute_entropy(histo_fusion)
+    }
+    if(sum(!is.na(fission_leaders[i,]))>0){
+      histo_fission <- hist(fission_leaders[i,], breaks= norm_rank_bins, plot = F)$counts
+      fission_leadership_entropies[i] <- compute_entropy(histo_fission)
+    }
+  }
+  
+  out <- list()
+  out$fission_leaders <- fission_leaders
+  out$fusion_leaders <- fusion_leaders
+  out$fission_leadership_entropies <- fission_leadership_entropies
+  out$fusion_leadership_entropies <- fusion_leadership_entropies
+  
+  return(out)
+}
+```
+
+### **4: Leadership**
+For this analysis, we wanted to determine which individuals in the group are leaders and followers and are these positions consistent across events. For this, we subsetted the data to subgroups which moved more than 15m. If both subgroups moved, leadership analysis would be done on both of the subgroups seperately.
+We defined leadership using two methodologies:
+
+1. Spatial rank: this is based on their position along the groups movement vector at a particular time, with the individual furthest in the direction of the groups end trajectory being the leader. Group members are ranked along this trajectory from 1 (leader - individual closest to t2) to 0 (last individual along trajectory). The diagram below is the full group at t1 splitting into two subgroups at t2, with the ranks defined as the distance each individual is from the start location (average location of subgroup at t1).
+
+![](F:/PhD/Chapters/ff high res/ff_image.png){ width="450" height="300" }
+
+
+2. Crossing rank: This is defining a threshold which group members cross a defined trajectory, and extracting the order of crossing this threshold (ranked the same as method 1), with the first individual crossing over the threshold first being the leader.
+
+![](F:/PhD/Chapters/ff high res/ff_cross.png){ width="500" height="300" }
+
+The results shown in this document are from the second method, with the order of individuals crossing a threshold defining their leadership score. For these results, we chose the threshold as being 50% of the distance from the start of the fission to the end of the fission (basically halfway between the green lines on the "visualising a fission event" plot). We also ran these analyses on method 1 which gave similar results. We also found there to be no clear differences in the results for manual vs the automated events, except for the quantity of events captured. Therefore, all further results are from the automated events, due to sample size.
+
+
+#### **Galaxy group**
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 15, fig.width = 9, out.width = "70%"}
+
+#this script is copied from the split_merge_leadership script
+
+#-----PARAMETERS-------
+group <- 'galaxy'
+dist_moved_thresh <- 15 #minimum distance moved by a subgroup to count it as having moved (i.e. left or joined)
+dist_frac_thresh <- 0.5
+n_rands <- 1000
+
+#bins for the normalized ranks in the entropy computation
+#default is seq(0,1,.2) which is 5 bins of size 0.2
+#if you want to look at front vs non-front, can set bins to c(0,.99,1) - this will give 2 bins, one running from 0 to .99 and the other giving only those with value 1
+norm_rank_bins <- c(0,.99,1)
+
+#read in xs, ys, ts for galaxy
+load('C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/galaxy_xy_highres_level1.RData')
+
+#number of individuals
+n_inds <- nrow(gal_coati_ids)
+
+#Define whether groups moved or stayed during the split / merge using the dist_moved_thresh threshold
+gal_auto_events$A_moved <- gal_auto_events$A_during_disp > dist_moved_thresh
+gal_auto_events$B_moved <- gal_auto_events$B_during_disp > dist_moved_thresh
+
+#For each individual compute the number of times they moved vs didn't move, for fissions and fusions separately
+n_fission_moves <- n_fissions <- n_fusion_moves <- n_fusions <- rep(0, n_inds)
+for(i in 1:nrow(gal_auto_events)){
+  
+  #get the info associated with that event
+  row <- gal_auto_events[i,]
+  
+  #get the individuals in each subgroup
+  group_A <- row$group_A_idxs[[1]]
+  group_B <- row$group_B_idxs[[1]]
+  
+  if(row$event_type=='fission'){
+    
+    #add 1 to the elements associated with individuals in each group, for the total number of fission gal_auto_events
+    n_fissions[group_A] <- n_fissions[group_A] + 1
+    n_fissions[group_B] <- n_fissions[group_B] + 1
+    
+    if(!is.na(row$A_moved)){
+      if(row$A_moved == T){
+        n_fission_moves[group_A] <- n_fission_moves[group_A] + 1
+      }
+    }
+    if(!is.na(row$B_moved)){
+      if(row$B_moved == T){
+        n_fission_moves[group_B] <- n_fission_moves[group_B] + 1
+      }
+    }
+    
+  } else if(row$event_type == 'fusion'){
+    n_fusions[group_A] <- n_fusions[group_A] + 1
+    n_fusions[group_B] <- n_fusions[group_B] + 1
+    
+    if(!is.na(row$A_moved)){
+      if(row$A_moved == T){
+        n_fusion_moves[group_A] <- n_fusion_moves[group_A] + 1
+      }
+    }
+    if(!is.na(row$B_moved)){
+      if(row$B_moved == T){
+        n_fusion_moves[group_B] <- n_fusion_moves[group_B] + 1
+      }
+    }
+  }
+}
+
+#Get the fraction of time each individual moved during a fission and fusion
+fusion_move_fracs <- n_fusion_moves / n_fusions
+fission_move_fracs <- n_fission_moves / n_fissions
+
+#get error bars (Clopper Pearson intervals 95%)
+fission_CIs <- fusion_CIs <- matrix(NA, nrow = n_inds, ncol = 2)
+for(i in 1:n_inds){
+  
+  if(n_fissions[i]>0){
+    test_out <- binom.test(n_fission_moves[i], n_fissions[i])
+    fission_CIs[i,1] <- test_out$conf.int[1]
+    fission_CIs[i,2] <- test_out$conf.int[2]
+  }
+  
+  if(n_fusions[i]>0){
+    test_out <- binom.test(n_fusion_moves[i], n_fusions[i])
+    fusion_CIs[i,1] <- test_out$conf.int[1]
+    fusion_CIs[i,2] <- test_out$conf.int[2]
+  }
+}
+
+#LEADERSHIP DURING SPLITS
+#TODO: add analysis of start vs. middle vs. end leadership
+#get the displacement of each individual project along the subgroup vector, for each subgroup
+for(i in 1:nrow(gal_auto_events)){
+  
+  #LEADERSIHP BASED ON POSITION ALONG THE GROUP TRAJECTORY AT SPECIFIC TIMES
+  #get the leader info for each subgroup for each event - definition based on order at a sepcific time
+  lead_pos_A_start <- ind_disp_along_group_path(gal_auto_events$group_A_idxs[i][[1]], xs, ys, gal_auto_events$start_time[i], gal_auto_events$end_time[i], gal_auto_events$start_time[i])
+  lead_pos_A_mid <- ind_disp_along_group_path(gal_auto_events$group_A_idxs[i][[1]], xs, ys, gal_auto_events$start_time[i], gal_auto_events$end_time[i], floor((gal_auto_events$start_time[i]+gal_auto_events$end_time[i])/2))
+  lead_pos_A_end <- ind_disp_along_group_path(gal_auto_events$group_A_idxs[i][[1]], xs, ys, gal_auto_events$start_time[i], gal_auto_events$end_time[i], gal_auto_events$end_time[i])
+  lead_pos_B_start <- ind_disp_along_group_path(gal_auto_events$group_B_idxs[i][[1]], xs, ys, gal_auto_events$start_time[i], gal_auto_events$end_time[i], gal_auto_events$start_time[i])
+  lead_pos_B_mid <- ind_disp_along_group_path(gal_auto_events$group_B_idxs[i][[1]], xs, ys, gal_auto_events$start_time[i], gal_auto_events$end_time[i], floor((gal_auto_events$start_time[i]+gal_auto_events$end_time[i])/2))
+  lead_pos_B_end <- ind_disp_along_group_path(gal_auto_events$group_B_idxs[i][[1]], xs, ys, gal_auto_events$start_time[i], gal_auto_events$end_time[i], gal_auto_events$end_time[i])
+  
+  #save displacement info into gal_auto_events dataframe
+  gal_auto_events$group_A_lead_disp_start[i] <- list(lead_pos_A_start$disp)
+  gal_auto_events$group_B_lead_disp_start[i] <- list(lead_pos_B_start$disp)
+  gal_auto_events$group_A_lead_disp_mid[i] <- list(lead_pos_A_mid$disp)
+  gal_auto_events$group_B_lead_disp_mid[i] <- list(lead_pos_B_mid$disp)
+  gal_auto_events$group_A_lead_disp_end[i] <- list(lead_pos_A_end$disp)
+  gal_auto_events$group_B_lead_disp_end[i] <- list(lead_pos_B_end$disp)
+  gal_auto_events$group_A_lead_pos_norm_rank_start[i] <- list(lead_pos_A_start$norm_ranks)
+  gal_auto_events$group_B_lead_pos_norm_rank_start[i] <- list(lead_pos_B_start$norm_ranks)
+  gal_auto_events$group_A_lead_pos_norm_rank_mid[i] <- list(lead_pos_A_mid$norm_ranks)
+  gal_auto_events$group_B_lead_pos_norm_rank_mid[i] <- list(lead_pos_B_mid$norm_ranks)
+  gal_auto_events$group_A_lead_pos_norm_rank_end[i] <- list(lead_pos_A_end$norm_ranks)
+  gal_auto_events$group_B_lead_pos_norm_rank_end[i] <- list(lead_pos_B_end$norm_ranks)
+  
+  #LEADERSHIP BASED ON TIME OF CROSSING A DEFINED THRESHOLD DISTANCE ALONG GROUP TRAJECTORY
+  #compute 
+  lead_crosstime_A <- ind_crossing_thresh_times_along_group_path(gal_auto_events$group_A_idxs[i][[1]], xs, ys, gal_auto_events$start_time[i], gal_auto_events$end_time[i], dist_frac_thresh = dist_frac_thresh)
+  lead_crosstime_B <- ind_crossing_thresh_times_along_group_path(gal_auto_events$group_B_idxs[i][[1]], xs, ys, gal_auto_events$start_time[i], gal_auto_events$end_time[i], dist_frac_thresh = dist_frac_thresh)
+  
+  #store in the data frame
+  gal_auto_events$group_A_lead_crosstime_norm_rank[i] <- list(lead_crosstime_A$norm_ranks)
+  gal_auto_events$group_B_lead_crosstime_norm_rank[i] <- list(lead_crosstime_B$norm_ranks)
+  
+}
+
+#Compute entropies for real data vs permuted data
+
+#real data
+out <- get_fission_fusion_leadership(gal_auto_events, n_inds, leadership_type = 'crosstime', meas_time = 'end', norm_rank_bins = norm_rank_bins)
+fission_entropies_data <- out$fission_leadership_entropies
+fusion_entropies_data <- out$fusion_leadership_entropies
+fission_leaders <- out$fission_leaders
+fusion_leaders <- out$fusion_leaders
+
+#permuted data - swap identities within subgroups
+fusion_entropies_rand <- fission_entropies_rand <- matrix(NA, nrow = n_inds, ncol = n_rands)
+for(n in 1:n_rands){
+  gal_auto_events_rand <- gal_auto_events
+  for(i in 1:nrow(gal_auto_events)){
+    #get group A and gorup B indexes from the original data
+    group_A_idxs <- gal_auto_events$group_A_idxs[i][[1]]
+    group_B_idxs <- gal_auto_events$group_B_idxs[i][[1]]
+    
+    #randomize the order within group A and gruop B separately
+    group_A_idxs_rand <- sample(group_A_idxs)
+    group_B_idxs_rand <- sample(group_B_idxs)
+    
+    #store in the new gal_auto_events dataframe
+    gal_auto_events_rand$group_A_idxs[i] <- list(group_A_idxs_rand)
+    gal_auto_events_rand$group_B_idxs[i] <- list(group_B_idxs_rand)
+    
+  }
+  
+  out <- get_fission_fusion_leadership(gal_auto_events_rand, n_inds, leadership_type = 'crosstime', meas_time = 'end', norm_rank_bins = norm_rank_bins)
+  fission_entropies_rand[,n] <- out$fission_leadership_entropies
+  fusion_entropies_rand[,n] <- out$fusion_leadership_entropies
+  
+}
+
+fission_leaders_rand <- out$fission_leaders
+fusion_leaders_rand <- out$fusion_leaders
+
+
+```
+For each fission and fusion event, each individual was assigned as a "mover" if they travelled more than 15m during the event, from this, we calculated the percentage moved for each individual. We can see that Gus (single adult male in the group) moved more during fissions and fusions, however there are no clear differences between group members on which individuals were more likely to leave during a fission event and move towards the group during a fusion event.
+
+##### Percentage each individual moved for events with 95% Clopper Pearson interval:
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 10, fig.width = 20, out.width = "70%"}
+
+#plot the % of moving out of all fission and fusion events for each individual w/ confidence intervals
+m = 2
+par(mfrow=c(1,2), mai = c(m, m, m, m))
+  #fissions
+  plot(NULL, xlim = c(0,100), ylim = c(0,n_inds), xlab = '% moved', yaxt = 'n', ylab = '', main = 'Fissions', cex.lab = 2, cex.axis = 2, cex.main = 2.5)
+  arrows(fission_CIs[,1]*100,1:n_inds, fission_CIs[,2]*100, 1:n_inds, length = 0.1, code = 3, angle = 90, lwd = 2)
+  points(fission_move_fracs*100, 1:n_inds, pch = 19, cex = 2)
+  axis(2, at = 1:n_inds, labels = gal_coati_ids$name, las =1, cex.axis = 2)
+  
+  #fusions
+  plot(NULL, xlim = c(0,100), ylim = c(0,n_inds), xlab = '% moved', yaxt = 'n', ylab = '', main = 'Fusions', cex.lab = 2, cex.axis = 2, cex.main = 2.5)
+  arrows(fusion_CIs[,1]*100,1:n_inds, fusion_CIs[,2]*100, 1:n_inds, length = 0.1, code = 3, angle = 90, lwd = 2)
+  points(fusion_move_fracs*100, 1:n_inds, pch = 19, cex = 2)
+  axis(2, at = 1:n_inds, labels = gal_coati_ids$name, las =1, cex.axis = 2)
+
+```
+
+##### **Leadership during fissions**
+
+This is the frequency distribution of each group member of Galaxy group being a leader (at position 1) to being a follower (at position 0) during a fission event. We can see some variation between group members, but take note that the number of events is low, which may drive inaccurate conclusions on which individuals consistently lead. 
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 30, fig.width = 40, out.width = "60%"}
+cm <- 5.5 #cex.main
+cl <- 4.5 #cex.lab
+c <- 5 #cex
+ca <- 5 #cex.axis
+m <- 1.5
+
+par(mfrow=c(3,4), mai = c(m, m, m, m))
+  for(i in 1:n_inds){
+    hist(fission_leaders[i,], breaks= seq(0,1,.2), main = gal_coati_ids$name[i], col = "turquoise3", cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, xlab = " ", mgp=c(8,3,0))
+  }
+```
+
+##### **Leadership during fusions**
+This is the frequency distribution of each group member of Galaxy group being a leader (at position 1) to being a follower (at position 0) during a fusion event. Again, the number events is relatively small.
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 30, fig.width = 40, out.width = "60%"}
+par(mfrow=c(3,4), mai = c(m, m, m, m))
+  for(i in 1:n_inds){
+    hist(fusion_leaders[i,], breaks= seq(0,1,.2), main = gal_coati_ids$name[i], col = "skyblue2", cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, xlab = " ", mgp=c(8,3,0))
+  }
+```
+
+##### **Comparing entropy between real and permuted data**
+To characterize individual consistent in rank position of subgroup members for fissions and fusions, we took the entropy of each individual's distribution of leadership ranks across all events where they were in the leaving/joining group, then took the mean across individuals as our test statistic. If there was high consistency in rank position (for example, if one individual was consistently the leader), then their entropy value would be low. We compared the groups test statistic with simulated data.
+Simulated data were the random allocations of each group members rank for each event. If there was consistency in individual position, the groups entropy value (red line) would not be in the distribution of the simulated data. As the red line is within the distribution of the simulated data, these results shows that Galaxy group do not have consistent positions during fission and fusion events. 
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 10, fig.width = 20, out.width = "80%"}
+m=2
+par(mfrow=c(1,2), mai = c(m, m, m, m))
+#compare entropy between real and permuted data
+  #test statistic = mean entropy
+  fission_means_rand <- colMeans(fission_entropies_rand,na.rm=T)
+  fission_mean_data <- mean(fission_entropies_data,na.rm=T)
+  hist(fission_means_rand, breaks=20,main = 'Fission', xlab = 'Mean entropy', col = "turquoise3", cex.lab = 2, cex.main = 3, cex.axis = 2, font.main = 1)
+  abline(v=fission_mean_data,col='red',lwd=2)
+  p_fission <- sum((fission_means_rand < fission_mean_data),na.rm=T)/n_rands
+  
+  fusion_means_rand <- colMeans(fusion_entropies_rand, na.rm=T)
+  fusion_mean_data <- mean(fusion_entropies_data, na.rm=T)
+  hist(fusion_means_rand, breaks=20, main = 'Fusion', xlab = 'Mean entropy', col = "skyblue2", cex.lab = 2, cex.main = 3, cex.axis = 2, font.main = 1)
+  abline(v=fusion_mean_data,col='red',lwd=2)
+  p_fusion <- sum((fusion_means_rand < fusion_mean_data),na.rm=T)/n_rands
+  
+```
+
+
+#### **Presidente group**
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 8, fig.width = 16, out.width = "70%"}
+
+#this script is copied from the split_merge_leadership script
+
+#-----PARAMETERS-------
+group <- 'presedente'
+dist_moved_thresh <- 15 #minimum distance moved by a subgroup to count it as having moved (i.e. left or joined)
+dist_frac_thresh <- 0.5
+n_rands <- 1000
+
+#bins for the normalized ranks in the entropy computation
+#default is seq(0,1,.2) which is 5 bins of size 0.2
+#if you want to look at front vs non-front, can set bins to c(0,.99,1) - this will give 2 bins, one running from 0 to .99 and the other giving only those with value 1
+norm_rank_bins <- c(0,.99,1)
+
+#read in xs, ys, ts for galaxy
+load('C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/presedente_xy_highres_level1.RData')
+
+#number of individuals
+n_inds <- nrow(pres_coati_ids)
+
+#Define whether groups moved or stayed during the split / merge using the dist_moved_thresh threshold
+pres_auto_events$A_moved <- pres_auto_events$A_during_disp > dist_moved_thresh
+pres_auto_events$B_moved <- pres_auto_events$B_during_disp > dist_moved_thresh
+
+#For each individual compute the number of times they moved vs didn't move, for fissions and fusions separately
+n_fission_moves <- n_fissions <- n_fusion_moves <- n_fusions <- rep(0, n_inds)
+for(i in 1:nrow(pres_auto_events)){
+  
+  #get the info associated with that event
+  row <- pres_auto_events[i,]
+  
+  #get the individuals in each subgroup
+  group_A <- row$group_A_idxs[[1]]
+  group_B <- row$group_B_idxs[[1]]
+  
+  if(row$event_type=='fission'){
+    
+    #add 1 to the elements associated with individuals in each group, for the total number of fission pres_auto_events
+    n_fissions[group_A] <- n_fissions[group_A] + 1
+    n_fissions[group_B] <- n_fissions[group_B] + 1
+    
+    if(!is.na(row$A_moved)){
+      if(row$A_moved == T){
+        n_fission_moves[group_A] <- n_fission_moves[group_A] + 1
+      }
+    }
+    if(!is.na(row$B_moved)){
+      if(row$B_moved == T){
+        n_fission_moves[group_B] <- n_fission_moves[group_B] + 1
+      }
+    }
+    
+  } else if(row$event_type == 'fusion'){
+    n_fusions[group_A] <- n_fusions[group_A] + 1
+    n_fusions[group_B] <- n_fusions[group_B] + 1
+    
+    if(!is.na(row$A_moved)){
+      if(row$A_moved == T){
+        n_fusion_moves[group_A] <- n_fusion_moves[group_A] + 1
+      }
+    }
+    if(!is.na(row$B_moved)){
+      if(row$B_moved == T){
+        n_fusion_moves[group_B] <- n_fusion_moves[group_B] + 1
+      }
+    }
+  }
+}
+
+#Get the fraction of time each individual moved during a fission and fusion
+fusion_move_fracs <- n_fusion_moves / n_fusions
+fission_move_fracs <- n_fission_moves / n_fissions
+
+#get error bars (Clopper Pearson intervals 95%)
+fission_CIs <- fusion_CIs <- matrix(NA, nrow = n_inds, ncol = 2)
+for(i in 1:n_inds){
+  
+  if(n_fissions[i]>0){
+    test_out <- binom.test(n_fission_moves[i], n_fissions[i])
+    fission_CIs[i,1] <- test_out$conf.int[1]
+    fission_CIs[i,2] <- test_out$conf.int[2]
+  }
+  
+  if(n_fusions[i]>0){
+    test_out <- binom.test(n_fusion_moves[i], n_fusions[i])
+    fusion_CIs[i,1] <- test_out$conf.int[1]
+    fusion_CIs[i,2] <- test_out$conf.int[2]
+  }
+}
+
+#LEADERSHIP DURING SPLITS
+#TODO: add analysis of start vs. middle vs. end leadership
+#get the displacement of each individual project along the subgroup vector, for each subgroup
+for(i in 1:nrow(pres_auto_events)){
+  
+  #LEADERSIHP BASED ON POSITION ALONG THE GROUP TRAJECTORY AT SPECIFIC TIMES
+  #get the leader info for each subgroup for each event - definition based on order at a sepcific time
+  lead_pos_A_start <- ind_disp_along_group_path(pres_auto_events$group_A_idxs[i][[1]], xs, ys, pres_auto_events$start_time[i], pres_auto_events$end_time[i], pres_auto_events$start_time[i])
+  lead_pos_A_mid <- ind_disp_along_group_path(pres_auto_events$group_A_idxs[i][[1]], xs, ys, pres_auto_events$start_time[i], pres_auto_events$end_time[i], floor((pres_auto_events$start_time[i]+pres_auto_events$end_time[i])/2))
+  lead_pos_A_end <- ind_disp_along_group_path(pres_auto_events$group_A_idxs[i][[1]], xs, ys, pres_auto_events$start_time[i], pres_auto_events$end_time[i], pres_auto_events$end_time[i])
+  lead_pos_B_start <- ind_disp_along_group_path(pres_auto_events$group_B_idxs[i][[1]], xs, ys, pres_auto_events$start_time[i], pres_auto_events$end_time[i], pres_auto_events$start_time[i])
+  lead_pos_B_mid <- ind_disp_along_group_path(pres_auto_events$group_B_idxs[i][[1]], xs, ys, pres_auto_events$start_time[i], pres_auto_events$end_time[i], floor((pres_auto_events$start_time[i]+pres_auto_events$end_time[i])/2))
+  lead_pos_B_end <- ind_disp_along_group_path(pres_auto_events$group_B_idxs[i][[1]], xs, ys, pres_auto_events$start_time[i], pres_auto_events$end_time[i], pres_auto_events$end_time[i])
+  
+  #save displacement info into pres_auto_events dataframe
+  pres_auto_events$group_A_lead_disp_start[i] <- list(lead_pos_A_start$disp)
+  pres_auto_events$group_B_lead_disp_start[i] <- list(lead_pos_B_start$disp)
+  pres_auto_events$group_A_lead_disp_mid[i] <- list(lead_pos_A_mid$disp)
+  pres_auto_events$group_B_lead_disp_mid[i] <- list(lead_pos_B_mid$disp)
+  pres_auto_events$group_A_lead_disp_end[i] <- list(lead_pos_A_end$disp)
+  pres_auto_events$group_B_lead_disp_end[i] <- list(lead_pos_B_end$disp)
+  pres_auto_events$group_A_lead_pos_norm_rank_start[i] <- list(lead_pos_A_start$norm_ranks)
+  pres_auto_events$group_B_lead_pos_norm_rank_start[i] <- list(lead_pos_B_start$norm_ranks)
+  pres_auto_events$group_A_lead_pos_norm_rank_mid[i] <- list(lead_pos_A_mid$norm_ranks)
+  pres_auto_events$group_B_lead_pos_norm_rank_mid[i] <- list(lead_pos_B_mid$norm_ranks)
+  pres_auto_events$group_A_lead_pos_norm_rank_end[i] <- list(lead_pos_A_end$norm_ranks)
+  pres_auto_events$group_B_lead_pos_norm_rank_end[i] <- list(lead_pos_B_end$norm_ranks)
+  
+  #LEADERSHIP BASED ON TIME OF CROSSING A DEFINED THRESHOLD DISTANCE ALONG GROUP TRAJECTORY
+  #compute 
+  lead_crosstime_A <- ind_crossing_thresh_times_along_group_path(pres_auto_events$group_A_idxs[i][[1]], xs, ys, pres_auto_events$start_time[i], pres_auto_events$end_time[i], dist_frac_thresh = dist_frac_thresh)
+  lead_crosstime_B <- ind_crossing_thresh_times_along_group_path(pres_auto_events$group_B_idxs[i][[1]], xs, ys, pres_auto_events$start_time[i], pres_auto_events$end_time[i], dist_frac_thresh = dist_frac_thresh)
+  
+  #store in the data frame
+  pres_auto_events$group_A_lead_crosstime_norm_rank[i] <- list(lead_crosstime_A$norm_ranks)
+  pres_auto_events$group_B_lead_crosstime_norm_rank[i] <- list(lead_crosstime_B$norm_ranks)
+  
+}
+
+#Compute entropies for real data vs permuted data
+
+#real data
+out <- get_fission_fusion_leadership(pres_auto_events, n_inds, leadership_type = 'crosstime', meas_time = 'end', norm_rank_bins = norm_rank_bins)
+fission_entropies_data <- out$fission_leadership_entropies
+fusion_entropies_data <- out$fusion_leadership_entropies
+fission_leaders <- out$fission_leaders
+fusion_leaders <- out$fusion_leaders
+
+#permuted data - swap identities within subgroups
+fusion_entropies_rand <- fission_entropies_rand <- matrix(NA, nrow = n_inds, ncol = n_rands)
+for(n in 1:n_rands){
+  pres_auto_events_rand <- pres_auto_events
+  for(i in 1:nrow(pres_auto_events)){
+    #get group A and gorup B indexes from the original data
+    group_A_idxs <- pres_auto_events$group_A_idxs[i][[1]]
+    group_B_idxs <- pres_auto_events$group_B_idxs[i][[1]]
+    
+    #randomize the order within group A and gruop B separately
+    group_A_idxs_rand <- sample(group_A_idxs)
+    group_B_idxs_rand <- sample(group_B_idxs)
+    
+    #store in the new pres_auto_events dataframe
+    pres_auto_events_rand$group_A_idxs[i] <- list(group_A_idxs_rand)
+    pres_auto_events_rand$group_B_idxs[i] <- list(group_B_idxs_rand)
+    
+  }
+  
+  out <- get_fission_fusion_leadership(pres_auto_events_rand, n_inds, leadership_type = 'crosstime', meas_time = 'end', norm_rank_bins = norm_rank_bins)
+  fission_entropies_rand[,n] <- out$fission_leadership_entropies
+  fusion_entropies_rand[,n] <- out$fusion_leadership_entropies
+  
+}
+
+fission_leaders_rand <- out$fission_leaders
+fusion_leaders_rand <- out$fusion_leaders
+
+
+```
+
+For each fission and fusion event, each individual was assigned as a "mover" if they travelled more than 15m during the event, from this, we calculated the percentage of time each individual moved. 
+Bear in mind, Wildflower was not in Presidente group, so did not partake in fission or fusion events.
+
+##### Percentage each individual moved for all events with 95% Clopper Pearson interval:
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 10, fig.width = 20, out.width = "70%"}
+
+#plot the % of moving out of all fission and fusion events for each individual w/ confidence intervals
+m = 2
+par(mfrow=c(1,2), mai = c(m, m, m, m))
+  #fissions
+  plot(NULL, xlim = c(0,100), ylim = c(0,n_inds), xlab = '% moved', yaxt = 'n', ylab = '', main = 'Fissions', cex.lab = 2, cex.axis = 2, cex.main = 2.5)
+  arrows(fission_CIs[,1]*100,1:n_inds, fission_CIs[,2]*100, 1:n_inds, length = 0.1, code = 3, angle = 90, lwd = 2)
+  points(fission_move_fracs*100, 1:n_inds, pch = 19, cex = 2)
+  axis(2, at = 1:n_inds, labels = pres_coati_ids$name, las =1, cex.axis = 2)
+  
+  #fusions
+  plot(NULL, xlim = c(0,100), ylim = c(0,n_inds), xlab = '% moved', yaxt = 'n', ylab = '', main = 'Fusions', cex.lab = 2, cex.axis = 2, cex.main = 2.5)
+  arrows(fusion_CIs[,1]*100,1:n_inds, fusion_CIs[,2]*100, 1:n_inds, length = 0.1, code = 3, angle = 90, lwd = 2)
+  points(fusion_move_fracs*100, 1:n_inds, pch = 19, cex = 2)
+  axis(2, at = 1:n_inds, labels = pres_coati_ids$name, las =1, cex.axis = 2)
+```
+
+##### **Leadership during fissions**
+This is the frequency distribution of each group member of Presidente group being a leader (at position 1) to being a follower (at position 0) during a fission event.
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height =45, fig.width = 55, out.width = "80%"}
+
+#png("C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/test.png")
+par(mfrow=c(4,6), mai = c(m, m, m, m))
+  for(i in 1:n_inds){
+    hist(fission_leaders[i,], breaks= seq(0,1,.2), main = pres_coati_ids$name[i], col = "turquoise3", cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca, xlab = " ", mgp=c(8,3,0))
+  }
+#dev.off()
+```
+
+##### **Leadership during fusions**
+This is the frequency distribution of each group member of Presidente group being a leader (at position 1) to being a follower (at position 0) during a fusion event.
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 45, fig.width = 55, out.width = "80%"}
+par(mfrow=c(4,6), mai = c(m, m, m, m))
+  for(i in 1:n_inds){
+    hist(fusion_leaders[i,], breaks= seq(0,1,.2), main = pres_coati_ids$name[i], col = "skyblue2",cex.main = cm, font.main = 1, cex.lab = cl, cex = c, cex.axis = ca,xlab = " ", mgp=c(8,3,0))
+  }
+```
+
+##### **Comparing entropy between real and permuted data**
+As with Galaxy group, Presidente group also show no consistent positions in fission and fusion events.
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center", fig.height = 10, fig.width = 20, out.width = "80%"}
+m = 2
+par(mfrow=c(1,2),mai = c(m, m, m, m))
+#compare entropy between real and permuted data
+  #test statistic = mean entropy
+  fission_means_rand <- colMeans(fission_entropies_rand,na.rm=T)
+  fission_mean_data <- mean(fission_entropies_data,na.rm=T)
+  hist(fission_means_rand, breaks=20,main = 'Fission', xlab = 'Mean entropy', col = "turquoise3", cex.lab = 2, cex.main = 3, cex.axis = 2, font.main = 1)
+  abline(v=fission_mean_data,col='red',lwd=2)
+  p_fission <- sum((fission_means_rand < fission_mean_data),na.rm=T)/n_rands
+  
+  fusion_means_rand <- colMeans(fusion_entropies_rand, na.rm=T)
+  fusion_mean_data <- mean(fusion_entropies_data, na.rm=T)
+  hist(fusion_means_rand, breaks=20, main = 'Fusion', xlab = 'Mean entropy', col ="skyblue2", cex.lab = 2, cex.main = 3, cex.axis = 2, font.main = 1)
+  abline(v=fusion_mean_data,col='red',lwd=2)
+  p_fusion <- sum((fusion_means_rand < fusion_mean_data),na.rm=T)/n_rands
+  
+```
 

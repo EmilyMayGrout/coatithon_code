@@ -22,7 +22,7 @@ minhr <- 11
 maxhr <- 23
 ts <- ts[which((hour(ts) <= maxhr) & (hour(ts) >= minhr))]
 
-#making a list of all individuals in galaxy
+#making a list of all individuals in trago
 all_files <- sort(list.files())
 
 lats <- lons <- xs <- ys <- matrix(NA, nrow = length(all_files), ncol = length(ts))

@@ -8,7 +8,7 @@ user <- 'emily'
 group <- 'galaxy'
 use_manual_events <- F
 dist_moved_thresh <- 15 #minimum distance moved by a subgroup to count it as having moved (i.e. left or joined)
-make_plots <- T
+make_plots <- F
 dist_frac_thresh <- 0.5
 n_rands <- 1000
 
