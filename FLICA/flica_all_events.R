@@ -18,6 +18,16 @@ dat <- array(NA, dim = c(nrow(xs), ncol(xs), 2))
 dat[,,1] <- xs
 dat[,,2] <- ys
 
+
+diff_x <- apply(xs, 1, diff)
+diff_y <- apply(ys, 1, diff)
+spd <- sqrt(diff_x^2 + diff_y^2)
+spd <- t(spd)
+spd_a <- array(NA, dim = c(nrow(xs), 1))
+spd <- cbind(spd, spd_a)
+
+dat[,,3] <- spd
+
 #need to remove events that are less that 10 minutes after 11am for each day
 gal_events_detected$time <- format(gal_events_detected$datetime, format="%H:%M:%S")
 gal_events_detected <- subset(gal_events_detected, time > "11:10:00") 
@@ -53,16 +63,18 @@ focal_tags <- dst < dist_thres
 
 # run flica code with tags that are in the group
 #better to have a smaller time shift for more accurate results - 10 is good, but the smaller the number the longer it takes to run
-#sigma = 0.75
+#sigma = 0.75 #lower sigma is lower number of factions
 #timeWindow = 240 #usually 1/10th of duration
 obj1 <- mFLICA(TS=event_dat[focal_tags,sample_vals,],timeWindow=60,timeShift=1,sigma=0.75)
+
 
 
 #------------------------------------------------------------------------------------------
 #PUTTING ALL FLICA RESULTS INTO A LIST for each event
 max_time <- 300
 
-all_events =list()
+all_events_speed = list()
+all_events_loc = list()
 for (i in 1:nrow(gal_events_detected)){
   #get first time indx and last time indx to extract the fission and fusion time
   ti <- gal_events_detected$tidx[i] - max_time
@@ -80,21 +92,36 @@ for (i in 1:nrow(gal_events_detected)){
  groupA <-  gal_events_detected$group_A_idxs[i][[1]]
  groupB <-  gal_events_detected$group_B_idxs[i][[1]]
  both_groups <-  c(groupA, groupB)
+ 
 
  name <- paste("event_", i, "_indx", gal_events_detected$tidx[i], "_", gal_events_detected$event_type[i], sep="")
- all_events[[name]] <- mFLICA(TS=event_dat[both_groups,sample_vals,],timeWindow=60,timeShift=10,sigma=0.75)
+ #for location
+ all_events_loc[[name]] <- mFLICA(TS=event_dat[both_groups,sample_vals,],timeWindow=60,timeShift=10,sigma=0.75)
+ 
+ #for speed
+ all_events_speed[[name]] <- mFLICA(TS=spd[both_groups,sample_vals ],timeWindow=60,timeShift=10,sigma=0.45)
+ 
   
 }
 
-#saved all_events with max_time = 300 and timeShift = 10
-#save(all_events, file = "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/all_events_list.Rdata")
-#load("C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/all_events_list.Rdata")
+#saved all_events with max_time = 300 and timeShift = 10 #sigma is 0.75 for events_loc and 0.45 for events_speed
+#save(all_events_loc, file = "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/all_events_loc.Rdata")
+#save(all_events_speed, file = "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/all_events_speed.Rdata")
+#load("C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/all_events_loc.Rdata")
+#load("C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/all_events_speed.Rdata")
 
 
 #plotting one event:
-plotMultipleTimeSeries(TS=all_events$event_148_indx172154_fusion$dyNetOut$dyNetBinDensityVec, strTitle="Network Density")
+plotMultipleTimeSeries(TS=all_events_loc$event_3_indx2211_fission$dyNetOut$dyNetBinDensityVec, strTitle="Location Network Density")
+plotMultipleTimeSeries(TS=all_events_speed$event_3_indx2211_fission$dyNetOut$dyNetBinDensityVec, strTitle="Speed Network Density")
 
-plotMultipleTimeSeries(TS=all_events$event_148_indx172154_fusion$factionSizeRatioTimeSeries, strTitle="Faction Size Ratios",TSnames = coati_ids$name[both_groups]) + scale_color_brewer(palette="Paired")
+#to look at subgroup (faction) membership - first number is the leader of that subgroup
+all_events_loc$event_3_indx2211_fission$factionMembersTimeSeries[36]
+all_events_speed$event_3_indx2211_fission$factionMembersTimeSeries[36]
+
+plotMultipleTimeSeries(TS=all_events_loc$event_3_indx2211_fission$factionSizeRatioTimeSeries, strTitle="Faction Size Ratios",TSnames = coati_ids$name[both_groups]) + scale_color_brewer(palette="Paired")
+
+plotMultipleTimeSeries(TS=all_events_speed$event_3_indx2211_fission$factionSizeRatioTimeSeries, strTitle="Faction Size Ratios",TSnames = coati_ids$name[both_groups]) + scale_color_brewer(palette="Paired")
 
 #plotting all inds except individuals not in the group
 dat_filt <- event_dat[both_groups,,]
@@ -105,15 +132,23 @@ plotMultipleTimeSeries(TS=event_dat[both_groups,,2],strTitle="y axis", TSnames =
 
 
 #finding the individuals that had most influence for each event
-d <- all_events$event_148_indx172154_fusion$factionSizeRatioTimeSeries
+#faction size ratio is a number of edges that connect between faction-member nodes divided by a number of total nodes within a following network. If a leader has a higher faction-size ratio, then it has more followers than a leader with a lower faction-size ratio. A faction-size ratio has a value between 0 and 1.
+l <- all_events_loc$event_3_indx2211_fission$factionSizeRatioTimeSeries[,]
+s <- all_events_speed$event_3_indx2211_fission$factionSizeRatioTimeSeries[,]
+
+#get the individual
+i = 3
+both_groups <- c(gal_events_detected$group_A_idxs[i][[1]], gal_events_detected$group_B_idxs[i][[1]])
+
+
 #plotting one individuals influence
-plot(d[5, 1:300])
+plot(l[1, 1:300])
 
-df <- data.frame(matrix(nrow = length(d[1,]), ncol = 2))
-
+df <- data.frame(matrix(nrow = length(l[1,]), ncol = 2))
 #for loop for getting the individual with the greatest influence for that event and putting it in dataframe over time
-for (i in 1:ncol(d)){
-  col <- d[,i]
+
+for (i in 1:ncol(l)){
+  col <- l[,i]
   id <- which.max(col)
   df[i,1] <-  id
   df[i,2] <- coati_ids$name[id]
@@ -122,14 +157,28 @@ for (i in 1:ncol(d)){
 tabl <- table(df$X2)
 pie(tabl)
 
+#for one event, extract the leader of the biggest faction during the event (when timestep = 300 if max_time = 300)
+#event_3_indx2211_fission
 
 
 
 
+l <- all_events_loc$event_3_indx2211_fission$factionSizeRatioTimeSeries[,]
+s <- all_events_speed$event_3_indx2211_fission$factionSizeRatioTimeSeries[,]
 
+df_all_events <- data.frame(nrow = 1, ncol = length(all_events_loc))
 
+df_single <- data.frame(matrix(nrow = length(l[1,]), ncol = 2))
 
+#for loop through each event to get the individual who lead before the event and after the event
+#PROBS NEED TO DO A FORLOOP IN A FORLOOP HERE
 
+for (i in 1:ncol(l)){
+  col <- l[,i]
+  id <- which.max(col)
+  df[i,1] <-  id
+  df[i,2] <- coati_ids$name[id]
+}
 
 
 
