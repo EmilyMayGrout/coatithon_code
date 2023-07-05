@@ -72,14 +72,14 @@ for (i in 1:length(Rs)){
   if(i == length(Rs)){
     xlab <- 'Number of subgroups'
   }
-  hist(subgroup_data$n_subgroups[all_tracked_idxs],main = paste(R, "m"), xlab = xlab, col = "darkolivegreen3", breaks = seq(.5,22,1), cex.lab = 2, cex.main = 2, cex.axis=2, freq = FALSE, ylim=c(0,.7))
+  hist(subgroup_data$n_subgroups[all_tracked_idxs],main = paste(R, "m"), xlab = xlab, col = "aquamarine3", breaks = seq(.5,22,1), cex.lab = 2, cex.main = 2, cex.axis=2, freq = FALSE, ylim=c(0,.7), xlim = c(0,16))
   
 }
 dev.off()
 
 
 
-#------plot 2: number of individuals in each sub group when radius is 50m -----------
+#------plot 2: number of individuals in each sub group when radius is 50m 
 
 png(height = 540, width = 270, units = 'px', filename = paste0(plot_dir,'subgroup_size_hists_50m_onlyGroup_level1.png'))
 subgroup_data <- get_subgroup_data(xs, ys, R=50)
@@ -240,6 +240,17 @@ dev.off()
 #plot number of subgroups over time
 
 plot(ts, subgroup_data$n_subgroups, type = 'l')
+
+
+#-------------------------------------------------------------------
+#make plot for the number of GPS points recorded for each individual
+png(height = 600, width = 1400, units = 'px', filename = paste0(plot_dir, "number_tracked.png"))
+par(mfrow=c(1,2), mar = c(10,8,2,1)) #c(bottom, left, top, right)
+sum_tracked <- colSums(!is.na(xs))
+hist(sum_tracked[ !(sum_tracked==0) ], ylim = c(0, 400), main = "", xlab = "Number of individuals tracked", ylab = "Frequency", col = "aquamarine4", cex.lab = 2, cex.axis = 2)
+each_sum <- data.frame(sum = rowSums(!is.na(xs)))
+barplot(each_sum$sum, names.arg = coati_ids$name, las=2, col = "aquamarine3", ylab = "Number of GPS points",  cex.lab = 2, cex.axis = 2, cex.names=2, mgp=c(5,1,0))
+dev.off()
 
 
 

@@ -222,9 +222,13 @@ legend(x = "topright",
        col = c('lightblue4', rgb(0.7,1,1)), lwd = 5, cex=2,  bty = "n")                
 dev.off()
 
+#now calculating the mean duration and range for both groups
+#these values used in low res ff paper
+mean(time_diff_gal$diff_time_hour) #13.21724
+sd(time_diff_gal$diff_time_hour) #14.843
 
-
-
+mean(time_diff_pres$diff_time_hour) #2.3944
+sd(time_diff_pres$diff_time_hour) #2.656
 
 
 

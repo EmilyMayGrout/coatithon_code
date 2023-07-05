@@ -361,6 +361,22 @@ g2 + stat_summary(fun = median,
 plot(ts, subgroup_data$n_subgroups, type = 'l')
 
 
+#---------------------------------------------------------------------
+#make plot for the number of GPS points recorded for each individual
+png(height = 600, width = 1400, units = 'px', filename = paste0(plot_dir, "number_tracked.png"))
+par(mfrow=c(1,2), mar = c(8,8,2,1)) #c(bottom, left, top, right)
+sum_tracked <- colSums(!is.na(xs))
+hist(sum_tracked[ !(sum_tracked==0) ], ylim = c(0, 800), main = "", xlab = "Number of individuals tracked", ylab = "Frequency", col = "darkolivegreen4", cex.lab = 2, cex.axis = 2)
+each_sum <- data.frame(sum = rowSums(!is.na(xs)))
+barplot(each_sum$sum, names.arg = coati_ids$name, las=2, col = "darkolivegreen3", ylab = "Number of GPS points",  cex.lab = 2, cex.axis = 2, cex.names=2, mgp=c(5,1,0))
+dev.off()
+
+
+
+
+
+
+
 
 
 

@@ -1,5 +1,7 @@
 #GALAXY GROUP - this script is for reading in all the times of fission and fusion events, then doing FLICA analysis on each event
 
+##ISSUE that the mFLICA reverts id's back to 1,2,3 once individuals are filtered to the event inds. How is this fixed?
+
 #read in libraries
 library(mFLICA)
 library(R.matlab)
@@ -18,15 +20,10 @@ dat <- array(NA, dim = c(nrow(xs), ncol(xs), 2))
 dat[,,1] <- xs
 dat[,,2] <- ys
 
-
-diff_x <- apply(xs, 1, diff)
-diff_y <- apply(ys, 1, diff)
-spd <- sqrt(diff_x^2 + diff_y^2)
+spd <- sqrt((apply(xs, 1, diff))^2 + (apply(ys, 1, diff))^2)
 spd <- t(spd)
 spd_a <- array(NA, dim = c(nrow(xs), 1))
-spd <- cbind(spd, spd_a)
-
-dat[,,3] <- spd
+spd <- cbind(spd, spd_a) #adding the NA's to the last column so they match
 
 #need to remove events that are less that 10 minutes after 11am for each day
 gal_events_detected$time <- format(gal_events_detected$datetime, format="%H:%M:%S")
@@ -99,7 +96,7 @@ for (i in 1:nrow(gal_events_detected)){
  all_events_loc[[name]] <- mFLICA(TS=event_dat[both_groups,sample_vals,],timeWindow=60,timeShift=10,sigma=0.75)
  
  #for speed
- all_events_speed[[name]] <- mFLICA(TS=spd[both_groups,sample_vals ],timeWindow=60,timeShift=10,sigma=0.45)
+ all_events_speed[[name]] <- mFLICA(TS=spd[both_groups,sample_vals ],timeWindow=60,timeShift=10,sigma=0.75)
  
   
 }
@@ -157,36 +154,52 @@ for (i in 1:ncol(l)){
 tabl <- table(df$X2)
 pie(tabl)
 
-#for one event, extract the leader of the biggest faction during the event (when timestep = 300 if max_time = 300)
-#event_3_indx2211_fission
-
-
-
-
-l <- all_events_loc$event_3_indx2211_fission$factionSizeRatioTimeSeries[,]
-s <- all_events_speed$event_3_indx2211_fission$factionSizeRatioTimeSeries[,]
-
-df_all_events <- data.frame(nrow = 1, ncol = length(all_events_loc))
-
+#------------------------------------------------------------------------------
+#this for loop is getting the overall leader of the event plus the leader before and after the event
+df_all_events <- data.frame(event_id = 1:length(all_events_loc), leader_indx = NA, leader_id = NA)
 df_single <- data.frame(matrix(nrow = length(l[1,]), ncol = 2))
 
-#for loop through each event to get the individual who lead before the event and after the event
-#PROBS NEED TO DO A FORLOOP IN A FORLOOP HERE
+#for loop through each event to get the individual who lead before the event and after the event - save into df_all_events
+#can look at speed influence by changing all_events_loc to all_events_speed
 
-for (i in 1:ncol(l)){
-  col <- l[,i]
-  id <- which.max(col)
-  df[i,1] <-  id
-  df[i,2] <- coati_ids$name[id]
+#something is wrong as Quasar is in the groups where she wasn't involved in that event!!
+#issue is that when the mFLICA is run on the individuals interested, the index of those individuals is lost (goes back to 1,2,3 ect...) Not sure how to fix this??
+
+for (j in 1:length(all_events_loc)){
+
+  l <- all_events_loc[j][[1]] #assign each event to "l"
+  l <- l$factionSizeRatioTimeSeries[,]
+  
+  for (i in 1:ncol(l)){
+    col <- l[,i]
+    id <- which.max(col)
+    df_single[i,1] <-  id
+    df_single[i,2] <- coati_ids$name[id]
+  }
+  
+  before_event <- df_single[1:max_time,]
+  after_event <- df_single[(max_time+1):(max_time*2+1),]
+  #get the coati_indx
+  df_all_events$leader_indx[j] <- tail(names(sort(table(df_single$X1))), 1)
+  #get the coati_name
+  df_all_events$leader_id[j] <- tail(names(sort(table(df_single$X2))), 1)
+  #get the coati_indx before the event
+  df_all_events$before_event[j] <- tail(names(sort(table(before_event$X1))), 1)
+  #get coati_id before event
+  df_all_events$before_event_id[j] <- tail(names(sort(table(before_event$X2))), 1)
+  #get the coati_indx after the event
+  df_all_events$after_event[j] <- tail(names(sort(table(after_event$X1))), 1)
+  #get coati_id after event
+  df_all_events$after_event_id[j] <- tail(names(sort(table(after_event$X2))), 1)
 }
 
 
+hist(as.numeric(df_all_events$leader_indx))
+hist(as.numeric(df_all_events$before_event))
+hist(as.numeric(df_all_events$after_event))
 
-
-
-
-
-
+df_all_events$group_A <- gal_events_detected$group_A
+df_all_events$group_B <- gal_events_detected$group_B
 
 
 
