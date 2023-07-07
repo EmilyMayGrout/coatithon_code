@@ -62,7 +62,7 @@ focal_tags <- dst < dist_thres
 #better to have a smaller time shift for more accurate results - 10 is good, but the smaller the number the longer it takes to run
 #sigma = 0.75 #lower sigma is lower number of factions
 #timeWindow = 240 #usually 1/10th of duration
-obj1 <- mFLICA(TS=event_dat[focal_tags,sample_vals,],timeWindow=60,timeShift=1,sigma=0.75)
+obj1 <- mFLICA(TS=event_dat[focal_tags,sample_vals,],timeWindow=60,timeShift=10,sigma=0.75)
 
 
 
@@ -88,7 +88,7 @@ for (i in 1:nrow(gal_events_detected)){
   #because the group were in 2 subgroups the dst was too high (despite the distance within the group being smaller than 100m), so need to find new way of extracting the indx of the individuals involved in the event. 
  groupA <-  gal_events_detected$group_A_idxs[i][[1]]
  groupB <-  gal_events_detected$group_B_idxs[i][[1]]
- both_groups <-  c(groupA, groupB)
+ both_groups <-  sort(c(groupA, groupB))
  
 
  name <- paste("event_", i, "_indx", gal_events_detected$tidx[i], "_", gal_events_detected$event_type[i], sep="")
@@ -98,6 +98,18 @@ for (i in 1:nrow(gal_events_detected)){
  #for speed
  all_events_speed[[name]] <- mFLICA(TS=spd[both_groups,sample_vals ],timeWindow=60,timeShift=10,sigma=0.75)
  
+ 
+ for (i in 1:length(all_events_loc[[name]]$leadersTimeSeries)){
+   
+   all_events_loc[[name]]$leadersTimeSeries[i] = list(both_groups[unlist(all_events_loc[[name]]$leadersTimeSeries[i])])
+   
+   all_events_loc[[name]]$factionMembersTimeSeries[i] = list(both_groups[unlist(all_events_loc[[name]]$factionMembersTimeSeries[i])])
+   
+   all_events_speed[[name]]$leadersTimeSeries[i] = list(both_groups[unlist(all_events_speed[[name]]$leadersTimeSeries[i])])
+   
+   all_events_speed[[name]]$factionMembersTimeSeries[i] = list(both_groups[unlist(all_events_speed[[name]]$factionMembersTimeSeries[i])])
+   
+ }
   
 }
 
@@ -109,14 +121,14 @@ for (i in 1:nrow(gal_events_detected)){
 
 
 #plotting one event:
-plotMultipleTimeSeries(TS=all_events_loc$event_3_indx2211_fission$dyNetOut$dyNetBinDensityVec, strTitle="Location Network Density")
-plotMultipleTimeSeries(TS=all_events_speed$event_3_indx2211_fission$dyNetOut$dyNetBinDensityVec, strTitle="Speed Network Density")
+plotMultipleTimeSeries(TS=all_events_loc$event_1_indx2132_fission$dyNetOut$dyNetBinDensityVec, strTitle="Location Network Density")
+plotMultipleTimeSeries(TS=all_events_speed$event_1_indx2132_fission$dyNetOut$dyNetBinDensityVec, strTitle="Speed Network Density")
 
 #to look at subgroup (faction) membership - first number is the leader of that subgroup
-all_events_loc$event_3_indx2211_fission$factionMembersTimeSeries[36]
-all_events_speed$event_3_indx2211_fission$factionMembersTimeSeries[36]
+all_events_loc$event_1_indx2132_fission$factionMembersTimeSeries[36]
+all_events_speed$event_1_indx2132_fission$factionMembersTimeSeries[36]
 
-plotMultipleTimeSeries(TS=all_events_loc$event_3_indx2211_fission$factionSizeRatioTimeSeries, strTitle="Faction Size Ratios",TSnames = coati_ids$name[both_groups]) + scale_color_brewer(palette="Paired")
+plotMultipleTimeSeries(TS=all_events_loc$event_1_indx2132_fission$factionSizeRatioTimeSeries, strTitle="Faction Size Ratios",TSnames = coati_ids$name[both_groups]) + scale_color_brewer(palette="Paired")
 
 plotMultipleTimeSeries(TS=all_events_speed$event_3_indx2211_fission$factionSizeRatioTimeSeries, strTitle="Faction Size Ratios",TSnames = coati_ids$name[both_groups]) + scale_color_brewer(palette="Paired")
 
@@ -130,12 +142,12 @@ plotMultipleTimeSeries(TS=event_dat[both_groups,,2],strTitle="y axis", TSnames =
 
 #finding the individuals that had most influence for each event
 #faction size ratio is a number of edges that connect between faction-member nodes divided by a number of total nodes within a following network. If a leader has a higher faction-size ratio, then it has more followers than a leader with a lower faction-size ratio. A faction-size ratio has a value between 0 and 1.
-l <- all_events_loc$event_3_indx2211_fission$factionSizeRatioTimeSeries[,]
-s <- all_events_speed$event_3_indx2211_fission$factionSizeRatioTimeSeries[,]
+l <- all_events_loc$event_1_indx2132_fission$factionSizeRatioTimeSeries[,]
+s <- all_events_speed$event_1_indx2132_fission$factionSizeRatioTimeSeries[,]
 
 #get the individual
 i = 3
-both_groups <- c(gal_events_detected$group_A_idxs[i][[1]], gal_events_detected$group_B_idxs[i][[1]])
+both_groups <- sort(c(gal_events_detected$group_A_idxs[i][[1]], gal_events_detected$group_B_idxs[i][[1]]))
 
 
 #plotting one individuals influence
@@ -148,7 +160,7 @@ for (i in 1:ncol(l)){
   col <- l[,i]
   id <- which.max(col)
   df[i,1] <-  id
-  df[i,2] <- coati_ids$name[id]
+  df[i,2] <- coati_ids$name[both_groups[id]]
 }
 
 tabl <- table(df$X2)
@@ -174,7 +186,7 @@ for (j in 1:length(all_events_loc)){
     col <- l[,i]
     id <- which.max(col)
     df_single[i,1] <-  id
-    df_single[i,2] <- coati_ids$name[id]
+    df_single[i,2] <- coati_ids$name[both_groups[id]]
   }
   
   before_event <- df_single[1:max_time,]

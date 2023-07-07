@@ -8,6 +8,9 @@ source('C:/Users/egrout/Dropbox/coatithon/coatithon_code/coati_function_library.
 firsttime <- as.POSIXct('2023-01-19 11:00', tz = 'UTC')
 lasttime <-  as.POSIXct('2023-02-02 23:00', tz = 'UTC')
 
+#firsttime <- as.POSIXct('2023-01-19 00:00', tz = 'UTC') #to get sleep times for josephine
+#lasttime <-  as.POSIXct('2023-02-02 10:00', tz = 'UTC')
+
 indir <-  "C:/Users/egrout/Dropbox/coatithon/rawdata/2023/presedente/gps/"
 outdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
 metadatadir <-  "C:/Users/egrout/Dropbox/coatithon/rawdata/2023/presedente/metadata/"
@@ -52,6 +55,9 @@ setwd(indir)
 ts <- seq.POSIXt(from = firsttime, to = lasttime,  by = '10 min')
 minhr <- 11
 maxhr <- 23
+#minhr <- 00 #to get sleep times for josephine
+#maxhr <- 10
+
 ts <- ts[which((hour(ts) <= maxhr) & (hour(ts) >= minhr))]
 
 #making a list of all individuals in presedente
@@ -134,6 +140,8 @@ save(list=c('xs','ys','ts'), file = paste0(outdir,'presedente_xy_10min_level0.RD
 save(list=c('lats','lons','ts'), file = paste0(outdir,'presedente_latlon_10min_level0.RData'))  
 
 
+#save(list=c('xs','ys','ts'), file = paste0(outdir,'presedente_xy_10min_level0_sleep.RData'))
+#save(list=c('lats','lons','ts'), file = paste0(outdir,'presedente_latlon_10min_level0_sleep.RData'))
 
 
 
