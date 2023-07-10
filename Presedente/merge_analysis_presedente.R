@@ -226,9 +226,13 @@ dev.off()
 #these values used in low res ff paper
 mean(time_diff_gal$diff_time_hour) #13.21724
 sd(time_diff_gal$diff_time_hour) #14.843
+min(time_diff_gal$diff_time_hour) #13.21724
+max(time_diff_gal$diff_time_hour)
 
 mean(time_diff_pres$diff_time_hour) #2.3944
 sd(time_diff_pres$diff_time_hour) #2.656
+min(time_diff_pres$diff_time_hour) #13.21724
+max(time_diff_pres$diff_time_hour)
 
 
 

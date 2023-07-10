@@ -10,7 +10,7 @@ data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
 gps_file <- "presedente_xy_10min_level1.RData"
-id_file <- 'coati_ids.RData'
+id_file <- 'presedente_coati_ids.RData'
 
 #list of Rs
 Rs <- c(10,20,30,40,50,100)
@@ -209,8 +209,8 @@ n_subs$date <- as.Date(n_subs$ts)
 
 library("vioplot")
 #now plotting mean group size for each hour of the day
-png(height = 500, width = 800, units = 'px', filename = paste0(plot_dir, "mean_group_size_violin_level1.png"))
-vioplot(n_subs$mean_group_size ~ n_subs$panama_time,  xlab = "panama time", ylab = "mean subgroup size", col = "cyan3")
+png(height = 500, width = 700, units = 'px', filename = paste0(plot_dir, "mean_group_size_violin_level1_green.png"))
+vioplot(n_subs$mean_group_size ~ n_subs$panama_time,  xlab = "panama time", ylab = "mean subgroup size",col = "darkolivegreen4", cex.axis = 1.5)
 dev.off()
 
 

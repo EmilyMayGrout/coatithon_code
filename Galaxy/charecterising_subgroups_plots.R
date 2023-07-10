@@ -58,6 +58,14 @@ hist(subgroup_counts[,s3], breaks=seq(0.5,11,1), xlab = 'Subgroup size', main = 
 
 dev.off()
 
+#just for the 2 subgroups plot
+
+png(height = 500, width = 600, units = 'px', filename = paste0(plot_dir,'50m_charecterisations_2groups.png'))
+par( mar = c(6,5,2,1))
+hist(subgroup_counts[,s2], breaks=seq(0.5,11,1), xlab = 'Subgroup size', main = '', col = "red4", cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 11), xaxp = c(1,11, 10))
+dev.off()
+
+
 
 #------------------------------------------------------------------
 #different days for the matrix
