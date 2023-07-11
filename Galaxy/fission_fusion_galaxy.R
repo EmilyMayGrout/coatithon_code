@@ -331,7 +331,7 @@ n_subs$date <- as.Date(n_subs$ts)
 library("vioplot")
 #now plotting mean group size for each hour of the day
 png(height = 500, width = 700, units = 'px', filename = paste0(plot_dir, "mean_group_size_violin_level1_red.png"))
-vioplot(n_subs$mean_group_size ~ n_subs$panama_time,  cex.axis = 1.5, xlab = "panama time", ylab = "mean subgroup size", col = "red4")
+vioplot(n_subs$mean_group_size ~ n_subs$panama_time,  cex.axis = 1.5, xlab = "panama time", ylab = "mean subgroup size", col = "red4", colMed = "black")
 dev.off()
 
 
