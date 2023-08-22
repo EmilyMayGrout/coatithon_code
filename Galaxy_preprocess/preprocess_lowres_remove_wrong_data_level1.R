@@ -22,10 +22,9 @@ load(id_file)
 #want to add NA's for the data we want to exclude from the analysis
 #in Galaxy group this was when Venus responded badly to the collaring and stayed in a tree for 2 days 
 
-#when did Venus leave the tree?
+#finding time when Venus left the tree
 
-
-#venus is xs[3,]
+#Venus is xs[3,]
 
 #checked by plotting everyone for the first day ish to see where Venus (black) was
 plot(xs[1,100:200], ys[1,100:200], type = "l", col = "blue")

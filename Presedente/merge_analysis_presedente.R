@@ -7,7 +7,7 @@ data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/'
 gps_file <- "presedente_xy_10min_level0.RData"
-id_file <- 'coati_ids.RData' 
+id_file <- 'presedente_coati_ids.RData' 
 
 library(fields)
 library(viridis)
@@ -91,14 +91,8 @@ for(t in 1:(n_times-1)){
   
 }
 
-#this seems to work
-
-
-
-
 #make a data frame of merges, with merged group and subgroups
 merge_df <- data.frame(t = merge, merge_group=NA, sub1=NA, sub2=NA, sub3=NA, sub4=NA, sub5=NA)
-
 
 i=5
 for(i in 1:nrow(merge_df)){

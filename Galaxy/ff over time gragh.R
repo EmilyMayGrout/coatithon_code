@@ -246,7 +246,7 @@ ggplot(data = test, aes(x = Panama_time,
   theme(panel.background = element_rect(fill = 'lightsteelblue3'), #changed colour to snow2 for the recursion markdown
         panel.grid.major = element_line(color = 'lightsteelblue3'),  
         panel.grid.minor = element_line(color = 'lightsteelblue3', size = 2))+
-  scale_x_datetime(limits=c(as.POSIXct("2022-01-05 10:00:00"), as.POSIXct("2022-01-06 00:00:00"), tz = "America/Panama"), position = "top", date_breaks="6 hour", expand=c(0,0)) +
+  scale_x_datetime(limits=c(as.POSIXct("2022-01-05 11:00:00"), as.POSIXct("2022-01-06 01:00:00"), tz = "America/Panama"), position = "top", date_breaks="6 hour", expand=c(0,0)) +
   xlab("Panama time") +
   theme(axis.text=element_text(size=20),
         axis.title=element_text(size=25),

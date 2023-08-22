@@ -5,7 +5,7 @@ data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
 gps_file <- "galaxy_xy_10min_level1.RData"
-id_file <- 'coati_ids.RData'
+id_file <- 'galaxy_coati_ids.RData'
 
 #list of Rs
 Rs <- c(10,20,30,40,50,100)

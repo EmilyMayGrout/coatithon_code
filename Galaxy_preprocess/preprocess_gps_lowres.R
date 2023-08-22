@@ -4,6 +4,8 @@ library(lubridate)
 
 #load useful functions
 source('C:/Users/egrout/Dropbox/coatithon/coatithon_code/coati_function_library.R')
+source('C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/coati_function_library_V1.R')
+
 
 firsttime <- as.POSIXct('2021-12-24 11:00', tz = 'UTC')
 lasttime <-  as.POSIXct('2022-01-13 23:00', tz = 'UTC')
