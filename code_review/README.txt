@@ -9,8 +9,7 @@ to be reviewed and the names of the data files for each group where the plots we
 
 install.packages(c("dbscan", "rgdal", "lubridate", "stringr", "fields", "viridis", "tidyverse", "hms", "dplyr", "tidyr", "ggthemes", "vioplot"
 
-data_dir is the file directory where all the data is stored (the coati id file and the associated groups gps file e.g. for Galaxy
-the files are 'galaxy_xy_10min_level1.RData' (a list of 'xs','ys','ts') and 'galaxy_coati_ids.RDS')
+data_dir is the file directory where all the data is stored (the coati id file and the associated groups gps file e.g. for Galaxy the files are 'galaxy_xy_10min_level1.RData' (a list of 'xs','ys','ts') and 'galaxy_coati_ids.RDS')
 code_dir is the file directory where the coati_function_library_V1.R is stored
 plot_dir is the file directory where you want to put the plots - I have a different directory for each group
 gps_file is the filename of the data for the specific group 
@@ -18,10 +17,7 @@ id_file is the filename of the coati ids with their age/sex class
 
 
 #files needed for review:
-Pranav - if you want to run the preprocess code, you will need the raw data from the collars (which I didn't give to you yet as each groups
-data were extracted with different methods). So you can start the code review from the plot code, and once that runs and the split_df files 
-are saved somewhere where you can read them in later, you should be able to run the split duration code (run galaxy's code then presedente's 
-code for this, as the durations for both groups are at the end of merge_analysis_presedente_V1.R script)
+Pranav - if you want to run the preprocess code, you will need the raw data from the collars (which I didn't give to you yet as each groups data were extracted with different methods). So you can start the code review from the plot code, and once that runs and the split_df files are saved somewhere where you can read them in later, you should be able to run the split duration code (run galaxy's code then presedente's code for this, as the durations for both groups are at the end of merge_analysis_presedente_V1.R script)
 
 preprocessing code (5 files): 
                Galaxy -> 'preprocess_gps_lowres.R' and 'preprocess_lowres_remove_wrong_data_level1.R'
@@ -83,7 +79,8 @@ split duration code:
 2. plots:
 
 fission_fusion_galaxy_V1.R - for code review I have put most plot code for galaxy group into the same script
-Figure 1 - ### Visualisation of fission-fusion movements (in diff script)
+I have added here the line number for the plots made more each figure for each script
+Figure 1 - ### Visualisation of fission-fusion movements (in different script)
 Figure 2abc - L54
 Figure 3a - L94
 Figure 3b - L363
@@ -94,10 +91,10 @@ Figure 6a - L124
 *Figure S3a - L165
 *Figure S4ab - L205
 
-fission_fusion_trago_V1
+fission_fusion_trago_V1.R
 *Figure S1 - L80
 
-fission_fusion_presidente_V1
+fission_fusion_presidente_V1.R
 Figure 2def - L72
 Figure 3c - L92
 Figure 3d - L349
