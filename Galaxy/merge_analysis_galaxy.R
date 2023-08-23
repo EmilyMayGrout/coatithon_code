@@ -156,7 +156,8 @@ save(merge_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge
 
 
 #now look at time difference between merges and splits
-#open splits_df
+
+#this dataframe was created in fission_fusion_galaxy_V1.R
 load("C:/Users/egrout/Dropbox/coatithon_notgithub/Galaxy_fission_fusion/splits_df.Rdata")
 
 #luckily the number of merges and split events is 29

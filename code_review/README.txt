@@ -9,7 +9,19 @@ to be reviewed and the names of the data files for each group where the plots we
 
 install.packages(c("dbscan", "rgdal", "lubridate", "stringr", "fields", "viridis", "tidyverse", "hms", "dplyr", "tidyr", "ggthemes", "vioplot"
 
+data_dir is the file directory where all the data is stored (the coati id file and the associated groups gps file e.g. for Galaxy
+the files are 'galaxy_xy_10min_level1.RData' (a list of 'xs','ys','ts') and 'galaxy_coati_ids.RDS')
+code_dir is the file directory where the coati_function_library_V1.R is stored
+plot_dir is the file directory where you want to put the plots - I have a different directory for each group
+gps_file is the filename of the data for the specific group 
+id_file is the filename of the coati ids with their age/sex class
+
+
 #files needed for review:
+Pranav - if you want to run the preprocess code, you will need the raw data from the collars (which I didn't give to you yet as each groups
+data were extracted with different methods). So you can start the code review from the plot code, and once that runs and the split_df files 
+are saved somewhere where you can read them in later, you should be able to run the split duration code (run galaxy's code then presedente's 
+code for this, as the durations for both groups are at the end of merge_analysis_presedente_V1.R script)
 
 preprocessing code (5 files): 
                Galaxy -> 'preprocess_gps_lowres.R' and 'preprocess_lowres_remove_wrong_data_level1.R'
@@ -28,6 +40,10 @@ plot code:
 	     'fission_fusion_galaxy_V1.R'
 	     'fission_fusion_presedente_V1.R'
              'fission_fusion_trago_V1.R'
+
+split duration code:
+	     'merge_analysis_galaxy_V1.R'
+	     'merge_analysis_presedente_V1.R'
 
 1. Preprocess data:
 
@@ -91,11 +107,16 @@ Figure 6b -L127
 *Figure S3b - L162
 *Figure S4cd -L202
 
-To calculate the duration of splits and merges for both groups, the merge_analysis_galaxy_V1.R must be run 
-before the merge_analysis_presedente_V1.R. This is because the calculations for the durations for both groups 
-is in merge_analysis_presedente_V1.R
+* asterix are supplementary plots
+
+3. calculate split durations:
+	-before calculating split durations, the fission_fusion_galaxy_V1.R and fission_fusion_presedente_V1.R code
+	must be run so the splits_df dataframe is saved and can be loaded into the merge_analysis scripts.
+
+	-To calculate the duration of splits and merges for both groups, the merge_analysis_galaxy_V1.R must be run 
+	before the merge_analysis_presedente_V1.R. This is because the calculations for the durations for both groups 
+	is in merge_analysis_presedente_V1.R
 
 #figure 1 visualisation in coatithon_notgithub/Galaxy_fission_fusion/split_visual_gal.R. This code has not been shared 
 because it requires an api.
 
-* asterix are supplementary plots

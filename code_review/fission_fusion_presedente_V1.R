@@ -20,7 +20,7 @@ library(vioplot)
 
 #read in library of functions
 setwd(code_dir)
-source('coati_function_library.R')
+source('coati_function_library_V1.R')
 
 #load data
 setwd(data_dir)
@@ -312,7 +312,8 @@ splits_df$n_sub1 <- sapply(splits_df$sub1, function(x){return(sum(!is.na(x)))})
 splits_df$n_sub2 <- sapply(splits_df$sub2, function(x){return(sum(!is.na(x)))})
 splits_df$n_sub3 <- sapply(splits_df$sub3, function(x){return(sum(!is.na(x)))})
 
-#save(splits_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/splits_on_map/Presedente/splits_df.Rdata")  
+#this dataframe is used in merge_analysis_presedente_V1
+save(splits_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/splits_on_map/Presedente/splits_df.Rdata")  
 
 #DONE WITH DATAFRAME!
 

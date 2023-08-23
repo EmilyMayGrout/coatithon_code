@@ -147,8 +147,7 @@ merge_df$n_sub3 <- sapply(merge_df$sub3, function(x){return(sum(!is.na(x)))})
 save(merge_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Presedente/merge_df.Rdata")  
 
 
-
-
+#this dataframe was created in fission_fusion_presedente_V1.R
 load("C:/Users/egrout/Dropbox/coatithon_notgithub/Presedente_fission_fusion/splits_df.Rdata")
 
 #number of splits and merges is not the same, so should rbind them

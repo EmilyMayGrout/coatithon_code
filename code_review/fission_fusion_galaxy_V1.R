@@ -327,7 +327,8 @@ splits_df$n_sub1 <- sapply(splits_df$sub1, function(x){return(sum(!is.na(x)))})
 splits_df$n_sub2 <- sapply(splits_df$sub2, function(x){return(sum(!is.na(x)))})
 splits_df$n_sub3 <- sapply(splits_df$sub3, function(x){return(sum(!is.na(x)))})
 
-#save(splits_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/splits_on_map/Galaxy/splits_df.Rdata")  
+#should save this dataframe as its needed for the merge_analysis_galaxy 
+save(splits_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/splits_on_map/Galaxy/splits_df.Rdata")  
 
 #DONE WITH DATAFRAME
 
