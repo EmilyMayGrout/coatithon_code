@@ -16,6 +16,7 @@ R <- 50
 library(fields)
 library(viridis)
 library(tidyverse)
+library(vioplot)
 
 #read in library of functions
 setwd(code_dir)
@@ -190,7 +191,6 @@ n_subs$date <- as.Date(n_subs$ts)
 #save n_subs as an RData object
 #save(n_subs, file = "C:/Users/egrout/Dropbox/stats_Franzi/data/n_subs.Rdata")
 
-library("vioplot")
 #now plotting mean group size for each hour of the day
 png(height = 500, width = 700, units = 'px', filename = paste0(plot_dir, "mean_group_size_violin_level1_green.png"))
 vioplot(n_subs$mean_group_size ~ n_subs$panama_time,  xlab = "panama time", ylab = "mean subgroup size",col = "aquamarine3", cex.axis = 1.5, colMed = "black")

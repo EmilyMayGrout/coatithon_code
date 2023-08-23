@@ -22,6 +22,7 @@ library(hms)
 library(dplyr)
 library(tidyr)
 library(ggthemes)
+library(vioplot)
 
 #read in library of functions
 setwd(code_dir)
@@ -193,7 +194,6 @@ n_subs$date <- as.Date(n_subs$ts)
 #save n_subs as an RData object
 #save(n_subs, file = "C:/Users/egrout/Dropbox/stats_Franzi/data/n_subs.Rdata")
 
-library("vioplot")
 #now plotting mean group size for each hour of the day
 png(height = 500, width = 700, units = 'px', filename = paste0(plot_dir, "mean_group_size_violin_level1_red.png"))
 vioplot(n_subs$mean_group_size ~ n_subs$panama_time,  cex.axis = 1.5, cex.lab = 1, xlab = "panama time", ylab = "mean subgroup size", col = "darkolivegreen3", colMed = "black")
