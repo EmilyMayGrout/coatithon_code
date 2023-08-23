@@ -1,9 +1,5 @@
 steps for the data analysis for the low res fission fusion paper
 
-# TODO: clean code for durations of splits is in merge_analysis_presedente
-## DO NOT PUT DATA INTO THIS FOLDER, OTHERWISE IT WILL BE PUBLIC ON GITHUB
-
-
 #this paper has analysis on three coati groups (Presedente, Galaxy, and Trago). Because Trago didn't show fission-fusion
 behaviours, they have less code than Galaxy and Presedente for review. Below is the information for the code that needs
 to be reviewed and the names of the data files for each group where the plots were made from.
@@ -95,7 +91,11 @@ Figure 6b -L127
 *Figure S3b - L162
 *Figure S4cd -L202
 
-#durations of splits is in merge_analysis_presedente.
-#figure 1 visualisation in coatithon_notgithub/Galaxy_fission_fusion/split_visual_gal.R
+To calculate the duration of splits and merges for both groups, the merge_analysis_galaxy_V1.R must be run 
+before the merge_analysis_presedente_V1.R. This is because the calculations for the durations for both groups 
+is in merge_analysis_presedente_V1.R
+
+#figure 1 visualisation in coatithon_notgithub/Galaxy_fission_fusion/split_visual_gal.R. This code has not been shared 
+because it requires an api.
 
 * asterix are supplementary plots

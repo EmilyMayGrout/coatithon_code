@@ -3,16 +3,15 @@
 #NOTE: this code only works for up to 3 subgroups per split
 #TODO: if more than 3 subgroups present, need to generalize
 
-data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
+data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/'
-gps_file <- "presedente_xy_10min_level0.RData"
-id_file <- 'presedente_coati_ids.RData' 
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/'
+gps_file <- "galaxy_xy_10min_level0.RData"
+id_file <- 'coati_ids.RData' 
 
 library(fields)
 library(viridis)
 library(hms)
-library(dplyr)
 
 #read in library of functions
 setwd(code_dir)
@@ -91,8 +90,14 @@ for(t in 1:(n_times-1)){
   
 }
 
+#this seems to work
+
+
+
+
 #make a data frame of merges, with merged group and subgroups
 merge_df <- data.frame(t = merge, merge_group=NA, sub1=NA, sub2=NA, sub3=NA, sub4=NA, sub5=NA)
+
 
 i=5
 for(i in 1:nrow(merge_df)){
@@ -144,89 +149,68 @@ merge_df$n_sub1 <- sapply(merge_df$sub1, function(x){return(sum(!is.na(x)))})
 merge_df$n_sub2 <- sapply(merge_df$sub2, function(x){return(sum(!is.na(x)))})
 merge_df$n_sub3 <- sapply(merge_df$sub3, function(x){return(sum(!is.na(x)))})
 
-save(merge_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Presedente/merge_df.Rdata")  
+save(merge_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Galaxy/merge_df.Rdata")  
 
 
+#DONE WITH DATAFRAME!
 
 
-load("C:/Users/egrout/Dropbox/coatithon_notgithub/Presedente_fission_fusion/splits_df.Rdata")
+#now look at time difference between merges and splits
+#open splits_df
+load("C:/Users/egrout/Dropbox/coatithon_notgithub/Galaxy_fission_fusion/splits_df.Rdata")
 
-#number of splits and merges is not the same, so should rbind them
-
-merge_df$event <- "merge"
-splits_df$event <- "split"
-
-merge_df_subset <- merge_df[,c(1,12)]
-splits_df_subset <- splits_df[,c(1,12)]
-
-time_diff <- rbind(splits_df_subset,merge_df_subset)
-time_diff <- time_diff %>% arrange(-desc(t))
-
-#because the number of splits and merges are different, I'm filtering to times when its a merge then a split (so the duration of a split is from the first split to the next merge)
-i = 1
-time_diff$keep <- NA
-time_diff$keep2 <- NA
-
-for (i in 1:nrow(time_diff)){
-  
-  if (time_diff$event[i] == "merge" & time_diff$event[i+1] == "split"){
-    time_diff$keep[i] <- "1"
-    time_diff$keep2[i+1] <- "1"
-  } else {
-    time_diff$keep[i] <- "0"
-    } 
-  }
-#replace NA's with 0 so I can sum the results 
-time_diff$keep2[is.na(time_diff$keep2)] <- 0 
-time_diff$keep3 <- as.numeric(time_diff$keep) + as.numeric(time_diff$keep2)
-time_diff <- time_diff[time_diff$keep3 == 1,]
-time_diff <- time_diff[,c(1,2)]
-splits_time_diff <- time_diff[time_diff$event == "split",]
-merge_time_diff <- time_diff[time_diff$event == "merge",]
-
-time_diff <- data.frame(splits_t = splits_time_diff$t, merge_t = merge_time_diff$t)
-time_diff$diff <- time_diff$splits_t - time_diff$merge_t
+#luckily the number of merges and split events is 29
+time_diff <- data.frame(splits_t = splits_df$t, merge_t = merge_df$t)
+time_diff$diff <- time_diff$merge - time_diff$splits_t
 time_diff$diff_time_hour <- (time_diff$diff*10)/60
 time_diff$diff_time_hour <-  format(round(time_diff$diff_time_hour, 1), nsmall = 1)
 time_diff$diff_time_hour <- as.numeric(time_diff$diff_time_hour)
 
-#to make a graph with galaxy distributions (running the merge_analysis of galaxy)
-time_diff_pres <- time_diff
+#running to make a graph with presedente (code in merge_analysis_presedente)
+time_diff_gal <- time_diff
 
-#time_diff_gal was made in the merge_analysis script
-hist(time_diff_gal$diff_time_hour, col='green', add=TRUE)
-
-png(file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Presedente/split_duration_hist.png", width = 1000, height = 600, units = "px")
+png(file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Galaxy/split_duration_hist.png", width = 1000, height = 600, units = "px")
 
 par(mar=c(8, 8, 8, 8))
-hist(time_diff_pres$diff_time_hour, breaks = 80, xlab = "Time between splits and merges (hours)", col = "lightblue3", main = "", cex.lab = 2,cex.axis = 1.5)
-#time_diff_gal was made in the merge_analysis script
+hist(time_diff$diff_time_hour, breaks = 80, xlab = "Time between splits and merges (hours)", col = "lightblue3", main = "", cex.lab = 2,cex.axis = 1.5)
 dev.off()
 
+#------------------------------------------------------------------
+#get latlon coords for merge events
+
+#get the index of when there was a split
+merge_indx <- merge_df$t
+
+#find the x and y UTM coords of those splits
+merge_xs <- xs[,merge_indx]
+merge_ys <- ys[,merge_indx]
+
+#make this into a dataframe to reshape it so its not a matrix and that we can join the x and y coords together for the mapping
+merge_xs <- as.data.frame(merge_xs) 
+merge_xs <- reshape(merge_xs, varying=1:ncol(merge_xs), v.names="xs", direction ="long", idvar = "ID")
+
+merge_ys <- as.data.frame(merge_ys)
+merge_ys <- reshape(merge_ys, varying=1:ncol(merge_ys), v.names="xs", direction ="long", idvar = "ID")
+
+merge_xy <- cbind(merge_xs, merge_ys)
+merge_xy <- merge_xy[,-c(3,4)]
+colnames(merge_xy) <- c("event", "xs","ys", "ID")
+
+#quick plot of merge locations 
+plot(merge_xy$xs, merge_xy$ys, col = merge_xy$ID) 
+
+#remove id column
+merge_xy_1 <- merge_xy[,-c(1,4)]
+
+#convert to latlon
+merge_latlon <- as.data.frame(utm.to.latlon(merge_xy_1, utm.zone = '17',southern_hemisphere=FALSE))
+merges_utm_latlon <- cbind(merge_latlon, merge_xy)
+merges_utm_latlon$event <- as.factor(merges_utm_latlon$event)
+
+save(merges_utm_latlon, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Galaxy/merges_utm_latlon.RData") 
 
 
-#making a plot for both galaxy and presedente overlapping (need to run the merge_analysis_galaxy for galaxy for this to work)
-png(file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/split_duration_hist_both1.png", width = 1000, height = 600, units = "px")
-par(mar=c(8, 8, 8, 8))
-hist(time_diff_gal$diff_time_hour, col='lightblue4', breaks = 80, xlab = "Time between splits and merges (hours)", main = "", cex.lab = 2,cex.axis = 1.5, ylim = c(0, 8))
-hist(time_diff_pres$diff_time_hour, breaks = 10 ,col=rgb(0.7,1,1,0.5),add=TRUE, alpha = 0.5)
-legend(x = "topright",
-       legend = c("Galaxy", "Presedente"),  
-       lty = c(1, 1),          
-       col = c('lightblue4', rgb(0.7,1,1)), lwd = 5, cex=2,  bty = "n")                
-dev.off()
 
-#now calculating the mean duration and range for both groups
-#these values used in low res ff paper
-mean(time_diff_gal$diff_time_hour) #13.21724
-sd(time_diff_gal$diff_time_hour) #14.843
-min(time_diff_gal$diff_time_hour) #13.21724
-max(time_diff_gal$diff_time_hour)
-
-mean(time_diff_pres$diff_time_hour) #2.3944
-sd(time_diff_pres$diff_time_hour) #2.656
-min(time_diff_pres$diff_time_hour) #13.21724
-max(time_diff_pres$diff_time_hour)
 
 
 
