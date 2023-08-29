@@ -27,6 +27,9 @@ latlon.to.utm <- function(LonsLats,EastingsCol1 = TRUE,utm.zone='34',southern_he
   non.na.idxs <- which(!is.na(latlons$X) & !is.na(latlons$Y))
   len <- nrow(latlons)
   non.na.latlons <- latlons[non.na.idxs,]
+  # pranav: flagging the below line because ChatGPT, Vlad, *and* I didn't understand the notation with
+  # the tilde ('~'), but we are not used to tidyverse stuff.
+  # Just make sure it's correct on your end.
   coordinates(non.na.latlons) <- ~Y + X
   proj4string(non.na.latlons) <- CRS('+proj=longlat +ellps=WGS84 +datum=WGS84')
   if(southern_hemisphere){
