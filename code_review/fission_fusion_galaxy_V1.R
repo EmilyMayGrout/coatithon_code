@@ -2,9 +2,12 @@
 #fission fusion analysis script for Galaxy group 
 
 #--------PARAMS-------
-data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
-code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/'
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
+# Because of the way the paste function is called below, it is important
+# that all the dirs end in /
+# -pranav
+data_dir <- "/home/pranav/Personal/Temp/emily/Data/"
+code_dir <- '/home/pranav/Personal/Temp/emily/code/code_review/'
+plot_dir <- '/home/pranav/Personal/Temp/emily/Figures/'
 gps_file <- "galaxy_xy_10min_level1.RData" #level0 is when Venus is not removed
 id_file <- 'galaxy_coati_ids.RData'
 
@@ -16,13 +19,14 @@ R <- 50
 
 library(fields)
 library(viridis)
-library(tidyverse)
+#library(tidyverse)
 library(lubridate)
 library(hms)
 library(dplyr)
 library(tidyr)
 library(ggthemes)
 library(vioplot)
+library(ggplot2)
 
 #read in library of functions
 setwd(code_dir)
@@ -328,7 +332,8 @@ splits_df$n_sub2 <- sapply(splits_df$sub2, function(x){return(sum(!is.na(x)))})
 splits_df$n_sub3 <- sapply(splits_df$sub3, function(x){return(sum(!is.na(x)))})
 
 #should save this dataframe as its needed for the merge_analysis_galaxy 
-save(splits_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/splits_on_map/Galaxy/splits_df.Rdata")  
+# pranav: I have edited the below line to be a bit more generalisable.
+save(splits_df, file = paste(data_dir, "splits_df.Rdata"))  
 
 #DONE WITH DATAFRAME
 
