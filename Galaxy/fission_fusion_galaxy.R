@@ -29,7 +29,7 @@ data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
 gps_file <- "galaxy_xy_10min_level1.RData" #level0 is when Venus is not removed
-id_file <- 'coati_ids.RData'
+id_file <- 'galaxy_coati_ids.RData'
 
 #list of Rs
 Rs <- c(10,20,30,40,50,100)
@@ -196,6 +196,9 @@ for(i in 1:n_inds){
 diag(ff_net) <- NA
 new_order <- c(5,1,11,4,10,2, 3,6,7,8,9)
 ffnet_reorder <- ff_net[new_order, new_order]
+#save matrix for mrqap analysis
+write.table(ffnet_reorder,file="C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/gal_matrix_10min_proptimeinsamesubgroup.txt",row.names=FALSE)
+
 
 ### NEED TO MAKE THIS GRAPH BETTER FOR PAPER - MOVE THE AXES LABELS OUTSIDE THE GRAPH
 
