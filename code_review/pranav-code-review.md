@@ -226,3 +226,47 @@ used must always end in "/") to start generating the images.
   those? I feel that would be more informative.
 
 - Figure S4a, b check out
+
+
+## fission_fusion_presedente_V1.R
+
+As this code is largely duplicated from the previous file, most of the comments
+from there apply here as well. 
+
+Unlike the galaxy group, where some images generated on my computer had tiny,
+subtle differences from the images in the manuscript, he presidente images were
+exactly identical.
+
+### Figure 2 d, e, f
+- checked, but commented as Figure 2a, b, c in the code
+- cool how the subgroup size split is way more pronounced here.
+
+### Figure 3c
+- checked
+
+### Figure 3d
+- checked
+
+### Figure 4b
+- checked
+
+### Figure 6b
+- checked
+
+### Figure S2b
+- checked
+
+### Figure S3b
+- checked
+
+### Figure 4c, d
+- checked
+
+
+## fission_fusion_trago_V1.R
+
+Overall, seems to be a variant of the previous two files, so some of the
+comments from there are still applicable here. 
+
+### Figure S1
+- checked

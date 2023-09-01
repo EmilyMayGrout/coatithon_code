@@ -2,9 +2,9 @@
 #first define groups for each time step (each 10 mins)
 
 #--------PARAMS-------
-data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
-code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
+data_dir <- "/home/pranav/Personal/Temp/emily/Data/presedente/"
+code_dir <- '/home/pranav/Personal/Temp/emily/code/code_review/'
+plot_dir <- '/home/pranav/Personal/Temp/emily/Figures/presidente/'
 gps_file <- "presedente_xy_10min_level1.RData"
 id_file <- 'presedente_coati_ids.RData'
 
@@ -15,7 +15,7 @@ R <- 50
 
 library(fields)
 library(viridis)
-library(tidyverse)
+#library(tidyverse)
 library(vioplot)
 
 #read in library of functions
@@ -313,7 +313,7 @@ splits_df$n_sub2 <- sapply(splits_df$sub2, function(x){return(sum(!is.na(x)))})
 splits_df$n_sub3 <- sapply(splits_df$sub3, function(x){return(sum(!is.na(x)))})
 
 #this dataframe is used in merge_analysis_presedente_V1
-save(splits_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/splits_on_map/Presedente/splits_df.Rdata")  
+save(splits_df, file = paste0(data_dir, "splits_df.Rdata"))  
 
 #DONE WITH DATAFRAME!
 

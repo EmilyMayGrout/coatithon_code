@@ -5,7 +5,7 @@
 # Because of the way the paste function is called below, it is important
 # that all the dirs end in /
 # -pranav
-data_dir <- "/home/pranav/Personal/Temp/emily/Data/"
+data_dir <- "/home/pranav/Personal/Temp/emily/Data/galaxy/"
 code_dir <- '/home/pranav/Personal/Temp/emily/code/code_review/'
 plot_dir <- '/home/pranav/Personal/Temp/emily/Figures/'
 gps_file <- "galaxy_xy_10min_level1.RData" #level0 is when Venus is not removed
