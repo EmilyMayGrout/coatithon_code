@@ -7,7 +7,7 @@
 # -pranav
 data_dir <- "/home/pranav/Personal/Temp/emily/Data/galaxy/"
 code_dir <- '/home/pranav/Personal/Temp/emily/code/code_review/'
-plot_dir <- '/home/pranav/Personal/Temp/emily/Figures/'
+plot_dir <- '/home/pranav/Personal/Temp/emily/Figures/galaxy/'
 gps_file <- "galaxy_xy_10min_level1.RData" #level0 is when Venus is not removed
 id_file <- 'galaxy_coati_ids.RData'
 
@@ -333,7 +333,8 @@ splits_df$n_sub3 <- sapply(splits_df$sub3, function(x){return(sum(!is.na(x)))})
 
 #should save this dataframe as its needed for the merge_analysis_galaxy 
 # pranav: I have edited the below line to be a bit more generalisable.
-save(splits_df, file = paste(data_dir, "splits_df.Rdata"))  
+save(splits_df, file = paste0(data_dir, "splits_df.Rdata"))
+
 
 #DONE WITH DATAFRAME
 

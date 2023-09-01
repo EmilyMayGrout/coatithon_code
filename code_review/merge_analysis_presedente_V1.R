@@ -2,11 +2,11 @@
 
 #NOTE: this code only works for up to 3 subgroups per split
 #TODO: if more than 3 subgroups present, need to generalize
+data_dir <- "/home/pranav/Personal/Temp/emily/Data/presedente/"
+code_dir <- '/home/pranav/Personal/Temp/emily/code/code_review/'
+plot_dir <- '/home/pranav/Personal/Temp/emily/Figures/presidente/'
 
-data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
-code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/'
-gps_file <- "presedente_xy_10min_level0.RData"
+gps_file <- "presedente_xy_10min_level1.RData"
 id_file <- 'presedente_coati_ids.RData' 
 
 library(fields)
@@ -16,7 +16,7 @@ library(dplyr)
 
 #read in library of functions
 setwd(code_dir)
-source('coati_function_library.R')
+source('coati_function_library_V1.R')
 
 #load data
 setwd(data_dir)
@@ -144,11 +144,11 @@ merge_df$n_sub1 <- sapply(merge_df$sub1, function(x){return(sum(!is.na(x)))})
 merge_df$n_sub2 <- sapply(merge_df$sub2, function(x){return(sum(!is.na(x)))})
 merge_df$n_sub3 <- sapply(merge_df$sub3, function(x){return(sum(!is.na(x)))})
 
-save(merge_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Presedente/merge_df.Rdata")  
+save(merge_df, file = paste0(data_dir, "merge_df.Rdata"))
 
 
 #this dataframe was created in fission_fusion_presedente_V1.R
-load("C:/Users/egrout/Dropbox/coatithon_notgithub/Presedente_fission_fusion/splits_df.Rdata")
+load(paste0(data_dir, "splits_df.Rdata"))
 
 #number of splits and merges is not the same, so should rbind them
 
@@ -193,9 +193,9 @@ time_diff$diff_time_hour <- as.numeric(time_diff$diff_time_hour)
 time_diff_pres <- time_diff
 
 #time_diff_gal was made in the merge_analysis script
-hist(time_diff_gal$diff_time_hour, col='green', add=TRUE)
+hist(time_diff_pres$diff_time_hour, col='green', add=TRUE)
 
-png(file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Presedente/split_duration_hist.png", width = 1000, height = 600, units = "px")
+png(file = paste0(plot_dir, "split_duration_hist.png"), width = 1000, height = 600, units = "px")
 
 par(mar=c(8, 8, 8, 8))
 hist(time_diff_pres$diff_time_hour, breaks = 80, xlab = "Time between splits and merges (hours)", col = "lightblue3", main = "", cex.lab = 2,cex.axis = 1.5)
@@ -205,7 +205,7 @@ dev.off()
 
 
 #making a plot for both galaxy and presedente overlapping (need to run the merge_analysis_galaxy for galaxy for this to work)
-png(file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/split_duration_hist_both1.png", width = 1000, height = 600, units = "px")
+png(file = paste0(plot_dir, "split_duration_hist_both1.png"), width = 1000, height = 600, units = "px")
 par(mar=c(8, 8, 8, 8))
 hist(time_diff_gal$diff_time_hour, col='lightblue4', breaks = 80, xlab = "Time between splits and merges (hours)", main = "", cex.lab = 2,cex.axis = 1.5, ylim = c(0, 8))
 hist(time_diff_pres$diff_time_hour, breaks = 10 ,col=rgb(0.7,1,1,0.5),add=TRUE, alpha = 0.5)

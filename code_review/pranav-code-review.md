@@ -1,3 +1,9 @@
+---
+title: Code review for _Fission-fusion dynamics in white-nosed coatis_
+author: Pranav Minasandra
+---
+
+
 # Installation
 
 On Pop!\_OS 22.04, which is the same as Ubuntu 22.04:
@@ -28,13 +34,20 @@ Another dependency is ggplot2, which produces the plots but isn't mentioned in
 the dependency list. I have installed ggplot2 (3.4.3) but am faced with a bunch
 of errors with plotting when I try to run the command.
 
-# Functions
+Further, the package `tidyverse` failed to install for me. However everything
+worked well without the above two packages, so I recommend simply eliminating
+calls to load them from the code.
+
+# File-by-file
 
 Below, I have gone through the functions file-by-file.
 Wherever relevant, I have flagged appropriate lines and mentioned the line
 numbers here.
 I have left detailed comments in the files themselves.
 I have also added general comments, if any, over here.
+
+All my suggestions are in the branch `code_review` on GitHub. Please contact me
+if you need help with accessing the branch.
 
 ## coati_function_library_V1.R
 
@@ -51,6 +64,10 @@ I have also added general comments, if any, over here.
 - Same concerns as the argument above, about default argument values. Not
       a bug precisely, but a likely source of potential bugs.
 
+I looked at all calls of the above function, and everything seems safe. It would
+be a good idea to get rid of the default values, however, to make the code
+futureproof.
+
 ### get_subgroup_data(...)
 
 - I want to raise a concern about the NaN policy espoused here. The
@@ -65,6 +82,10 @@ I have also added general comments, if any, over here.
       is missing. If this is not feasible because of a lot of NaNs in some
       individuals, some sensitivity analyses trying out varying values of the
       DBSCAN radius might become necessary.
+
+      You are taking care of this after each time this function is called, when
+      you transfer the NaN values between rows (specifically, for fission and
+      fusion detection). 
 
 ### visualize_network_matrix(...)
 
@@ -100,7 +121,6 @@ I have also added general comments, if any, over here.
 ### randomise_splits(...)
 
 - checked
-- TODO: confirm what n_sub1, n_sub2, and n_sub3 are
 
 ### dist_to_0_or_1(...)
 
@@ -109,7 +129,7 @@ I have also added general comments, if any, over here.
   ```
   return(min(q, 1-q))
   ```
-  :p
+  which is more readable.
 
 ### get_consistency(...)
 
@@ -120,8 +140,7 @@ I have also added general comments, if any, over here.
 
 ### get_p_dyad_together(...)
 
-- once again I need to clarify what sub1, sub2, and sub3 exactly are.
-- otherwise, checked. 
+- checked. 
 - Good that here j loops over (i+1):n_inds_local.
 
 
@@ -162,7 +181,7 @@ used must always end in "/") to start generating the images.
   subgroups together?
 
 - Figure 3b checks out.
-  The symmetrization block seems irrelevant, since this data should be symmetric
+  The symmetrisation block seems irrelevant, since this data should be symmetric
   anyway (and is, looking at the previous figure). 
 
 - Fig 4a, mostly checks out but the orange line is almost on top of 0.3 for me.
@@ -204,7 +223,7 @@ used must always end in "/") to start generating the images.
 
 - Figure 5 checks out.
   However the code here is a bit smelly, since the y-axis values and coati names  are
-  pre-programmed magic numbers in the code. This means this code can't easily
+  pre-programmed magic numbers and strings in the code. This means this code can't easily
   survive if the data is modified, or if we want to run this on another group.
   However, since Figure 5 is only an illustration of fission-fusion, this should
   still be okay.
@@ -270,3 +289,118 @@ comments from there are still applicable here.
 
 ### Figure S1
 - checked
+
+## merge_analysis_galaxy_v1.R
+
+This file had a bunch of errors!
+
+- Changed source(...) to the right file (with the '\_v1.R')
+
+- There is some **very confusing** variable naming here:
+
+  ```
+  #get number of singleton groups now and later
+  singletons_now <- sum(table(merge_group)==1)
+  singletons_later <- sum(table(subgroups_previously)==1)
+  
+  #determine if this time step is a merge
+  #if we have one group that goes to more than one, and there are no singletons subsequently, then it's a split
+  if(n_merge_group==1 
+     & n_subgroups_previously >1
+     & singletons_later==0
+  ){
+    merge <- c(merge, t)
+  }
+  ```
+
+  This is because `singletons_later` should ideally have been called
+  `singletons_previously`. This makes the code a lot less readable.
+
+- I feel there is a small flaw in this code
+
+  ```
+   if(n_merge_group > 1 
+     & (singletons_now + 1) == n_merge_group
+     & n_subgroups_previously > n_merge_group
+     & singletons_now == singletons_later
+  ){
+    merge <- c(merge, t)
+  }
+  ```
+
+  This code block and the one above effectively restrict merging to be defined
+  as (a) when there are no singletons around, the combination of several (2 or
+  more) groups, or (b) when there are singletons around, the combination of 2 or
+  more groups such that the number of singletons doesn't change.
+
+  What is more applicable in the case of merging rather than splitting is, to
+  me, if there was an individual between two merging groups (which I guess is
+  likely to happen if an individual from an approaching group is ahead of the
+  rest), you will have two groups combining, with the singleton not at all
+  considered. 
+
+  One thing I really like about this whole block is that the definitions of
+  fission and fusion are time-direction-invariant, in that changing the
+  direction of time turns splits to merges and merges to splits. I don't think
+  that biologically merges are just backward splits, and I think there are
+  entirely different behavioural processes, and therefore, spatial patterns that
+  will be in play during these group changes. However the time symmetry is
+  pleasing to my order-loving brain.
+
+  A general comment in this file is to please go through all the comments and
+  change them around, since most of them are inherited from
+  fission_fusion_galaxy_v1.R, and still talk about splits.
+
+- Why is there a random `i=5` line in this file?
+
+
+- Another potential bug could arise here:
+  ```
+  merge_ys <- as.data.frame(merge_ys)
+  merge_ys <- reshape(merge_ys, varying=1:ncol(merge_ys), v.names="xs", direction ="long", idvar = "ID")
+  ```
+
+  Shouldn't the `v.names` and `direction` here be "ys" and "lat"? Although,
+  ideally, this gets sort-of fixed later on in the code. Still, better safe than
+  sorry.
+
+- An error arises here:
+  ```
+  > merge_latlon <- as.dlibata.frame(utm.to.latlon(merge_xy_1, utm.zone = '17',southern_hemisphere=FALSE))
+  Error in as.dlibata.frame(utm.to.latlon(merge_xy_1, utm.zone = "17", southern_hemisphere = FALSE)) :
+  could not find function "as.dlibata.frame"
+  ```
+
+
+## merge_analysis_presedente_V1.R
+
+
+The merge_latlon bit didn't work just like in the previous file.
+
+There were some discrepancies in the expected values for the bottom line of
+code.
+
+ ```
+ > mean(time_diff_gal$diff_time_hour) #13.21724
+  [1] 13.21724
+  > sd(time_diff_gal$diff_time_hour) #14.843
+  [1] 14.84383
+  > min(time_diff_gal$diff_time_hour) #13.21724
+  [1] 0.3
+  > max(time_diff_gal$diff_time_hour)
+  [1] 62.8
+  >
+  > mean(time_diff_pres$diff_time_hour) #2.3944
+  [1] 3.205882
+  > sd(time_diff_pres$diff_time_hour) #2.656
+  [1] 3.089998
+  > min(time_diff_pres$diff_time_hour) #13.21724
+  [1] 0.3
+  > max(time_diff_pres$diff_time_hour)
+  [1] 12
+  > 
+ ```
+
+ Further, some plots were not generated because they aren't in the png(...) and
+ dev.off() blocks, and R simply refused to make them and put them in the plots
+ panel for me.
