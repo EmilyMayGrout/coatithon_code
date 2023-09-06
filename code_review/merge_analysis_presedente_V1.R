@@ -1,13 +1,12 @@
 #analyse merge events (opposite to the code for getting split events)
 
-#NOTE: this code only works for up to 3 subgroups per split
-#TODO: if more than 3 subgroups present, need to generalize
-data_dir <- "/home/pranav/Personal/Temp/emily/Data/presedente/"
-code_dir <- '/home/pranav/Personal/Temp/emily/code/code_review/'
-plot_dir <- '/home/pranav/Personal/Temp/emily/Figures/presidente/'
-
+#NOTE: this code only works for up to 3 subgroups per merge
+#--------PARAMS-------
+data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
+code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/'
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
 gps_file <- "presedente_xy_10min_level1.RData"
-id_file <- 'presedente_coati_ids.RData' 
+id_file <- 'presedente_coati_ids.RData'
 
 library(fields)
 library(viridis)
@@ -58,32 +57,32 @@ for(t in 1:(n_times-1)){
     next
   }
   
-  #transfer NAs from now to later and later to now
+  #transfer NAs from now to previous and previous to now
   merge_group[which(is.na(subgroups_previously))] <- NA
   subgroups_previously[which(is.na(merge_group))] <- NA
   
-  #get number of subgroups now and in next time step (later)
+  #get number of subgroups now and in last time step (previous)
   n_merge_group <- length(unique(merge_group[!is.na(merge_group)]))
   n_subgroups_previously <- length(unique(subgroups_previously[!is.na(subgroups_previously)]))
   
-  #get number of singleton groups now and later
+  #get number of singleton groups now and previous
   singletons_now <- sum(table(merge_group)==1)
-  singletons_later <- sum(table(subgroups_previously)==1)
+  singletons_previous <- sum(table(subgroups_previously)==1)
   
   #determine if this time step is a merge
-  #if we have one group that goes to more than one, and there are no singletons subsequently, then it's a split
+  #if we have more than one group (not including singletons) that goes to one group, then its a merge
   if(n_merge_group==1 
      & n_subgroups_previously >1
-     & singletons_later==0
+     & singletons_previous==0
   ){
     merge <- c(merge, t)
   }
   
-  #if we have more than one group, but rest are singletons, and number of singletons doesn't change (so we don't have just one loner moving off), then it's a split
+  #if we have more than one group (not including singletons) that goes to one group, and then number of singletons doesn't change, then its a merge 
   if(n_merge_group > 1 
      & (singletons_now + 1) == n_merge_group
      & n_subgroups_previously > n_merge_group
-     & singletons_now == singletons_later
+     & singletons_now == singletons_previous
   ){
     merge <- c(merge, t)
   }
@@ -100,7 +99,7 @@ for(i in 1:nrow(merge_df)){
   merge_group <- subgroup_data$ind_subgroup_membership[,t]
   subgroups_previously <- subgroup_data$ind_subgroup_membership[,t-1]
   
-  #transfer NAs from now to later and later to now
+  #transfer NAs from now to previous and previous to now
   merge_group[which(is.na(subgroups_previously))] <- NA
   subgroups_previously[which(is.na(merge_group))] <- NA
   
@@ -111,11 +110,11 @@ for(i in 1:nrow(merge_df)){
   #store original group membership in data frame
   merge_df$merge_group[i] <- list(orig_subgroup_members)
   
-  #find the groups where the original members went
-  group_ids_later <- unique(subgroups_previously[orig_subgroup_members])
+  #find the groups where the original members were from previously
+  group_ids_previous <- unique(subgroups_previously[orig_subgroup_members])
   
-  for(j in 1:length(group_ids_later)){
-    group_id <- group_ids_later[j]
+  for(j in 1:length(group_ids_previous)){
+    group_id <- group_ids_previous[j]
     inds_in_group <- which(subgroups_previously==group_id)
     orig_inds_in_group <- intersect(inds_in_group, orig_subgroup_members) #only count the original group members 
     
@@ -219,13 +218,13 @@ dev.off()
 #these values used in low res ff paper
 mean(time_diff_gal$diff_time_hour) #13.21724
 sd(time_diff_gal$diff_time_hour) #14.843
-min(time_diff_gal$diff_time_hour) #13.21724
-max(time_diff_gal$diff_time_hour)
+min(time_diff_gal$diff_time_hour) #0.3
+max(time_diff_gal$diff_time_hour) #62.8
 
-mean(time_diff_pres$diff_time_hour) #2.3944
-sd(time_diff_pres$diff_time_hour) #2.656
-min(time_diff_pres$diff_time_hour) #13.21724
-max(time_diff_pres$diff_time_hour)
+mean(time_diff_pres$diff_time_hour) #3.205882
+sd(time_diff_pres$diff_time_hour) #3.089998
+min(time_diff_pres$diff_time_hour) #0.3
+max(time_diff_pres$diff_time_hour) #12
 
 
 

@@ -29,7 +29,7 @@ data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
 gps_file <- "galaxy_xy_10min_level1.RData" #level0 is when Venus is not removed
-id_file <- 'coati_ids.RData'
+id_file <- 'galaxy_coati_ids.RData'
 
 #list of Rs
 Rs <- c(10,20,30,40,50,100)
@@ -201,7 +201,7 @@ ffnet_reorder <- ff_net[new_order, new_order]
 
 png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'subgroup_network_level1.png'))
 
-visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
+visualize_network_matrix_galaxy(ffnet_reorder, coati_ids[new_order,])
 dev.off()
 
 
@@ -235,7 +235,7 @@ within_group_data <- get_proximity_data(subset_x, subset_y, 10)
 new_order <- c(5,1,11,4,10,2,3,6,7,8,9)
 
 png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'withingroup_network_withgus_level1.png'))
-visualize_network_matrix(within_group_data$proximity_net, coati_ids[new_order,])
+visualize_network_matrix_galaxy(within_group_data$proximity_net, coati_ids[new_order,])
 dev.off()
 
 
@@ -243,7 +243,7 @@ dev.off()
 #png(height = 800, width = 800, units = 'px', filename = paste0(plot_dir,'withingroup_network_withgus_distovertime_2.png'))
 #par(mfrow=c(10,11), mar = c(1,1,1,1))
 #for (i in 145:253){
-#  visualize_network_matrix(within_group_data$dist_over_time[,,i], coati_ids[new_order,])
+#  visualize_network_matrix_galaxy(within_group_data$dist_over_time[,,i], coati_ids[new_order,])
 #the darker the colour, the closer the distance (opposite)
 #  }
 #dev.off()
@@ -283,7 +283,7 @@ within_group_data <- get_proximity_data(subset_x, subset_y, 10)
 new_order <- c(1,10,4,9,2,3,5,6,7,8)
 
 png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'withingroup_network_withoutgus_level1.png'))
-visualize_network_matrix(within_group_data$proximity_net, coati_ids_nogus[new_order,])
+visualize_network_matrix_galaxy(within_group_data$proximity_net, coati_ids_nogus[new_order,])
 dev.off()
 
 #there's an additional 42 data points but the proximity values don't change much
