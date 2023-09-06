@@ -85,7 +85,7 @@ gen_matrix <- all_matrix[gal_inds_neworder, gal_inds_neworder]
 gen_matrix <- as.matrix(gen_matrix) 
 gal_neworder_indx <-  c(5,1,11,4,10,2,3,6,7,8,9) 
 png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'gen_cometaG15C_estrellaG15B_level1.png')) 
-visualize_network_matrix(gen_matrix, coati_ids[gal_neworder_indx,]) 
+visualize_network_matrix_galaxy(gen_matrix, coati_ids[gal_neworder_indx,]) 
 dev.off() 
 
 #---------------------------------------------------------------- 
@@ -152,3 +152,23 @@ t3 <- mrqap.dsp(gal_matrix~age_matrix+sex_matrix+gen_matrix, directed="undirecte
 
 
 #-----------------------------------------------------------------
+
+
+#mixing 2 individuals genetics to see if it affects the results
+
+#gus, quasar, cometa, lucero, luna, estrella, venus, orbita, planeta, saturno, pluto  
+gal_inds_neworder <- c("G10", "G11", "G18", "G15C", "G16", "G3", "G15B","G12", "G13", "G17", "G14") #moved G11 (Saturno to Quasars spot) 
+
+gen_matrix <- all_matrix[gal_inds_neworder, gal_inds_neworder] 
+gen_matrix <- as.matrix(gen_matrix) 
+diag(gen_matrix) <- NA 
+gal_neworder_indx <-  c(5,8,1,11,4,10,2,3,6,7,9) 
+
+#yes it does! genetics no longer has an effect of subgroup membership
+
+
+
+
+
+
+
