@@ -3,17 +3,18 @@
 library(sna) 
 library(asnipe)
 library(abind)
+library(fields)
 
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
 id_file <- 'galaxy_coati_ids.RData'
-gal_gps_matrix <- 'gal_matrix_10min_proptimeinsamesubgroup.txt'
+gal_gps_matrix <- 'gal_matrix_10min_proptimeinsamesubgroup.txt' #saved from plot3 in fission_fusion_galaxy
 all_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/CoatiTrioMLmatrix.csv', header = T)
 
 #I manually made these matrices in excel
-sex_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/sex_matrix.csv', header = T)
-age_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/age_matrix.csv', header = T)
+sex_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/galaxy/sex_matrix.csv', header = T)
+age_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/galaxy/age_matrix.csv', header = T)
 
 #read in library of functions
 setwd(code_dir)
@@ -78,6 +79,8 @@ dev.off()
 #gus, quasar, cometa, lucero, luna, estrella, venus, orbita, planeta, saturno, pluto 
 n_inds <- 11
 gal_inds_neworder <- c("G10", "G18", "G15C", "G16", "G3", "G15B","G12", "G13", "G17", "G11", "G14")
+#gal_inds_neworder <- c("G10", "G18", "G15C", "G15A", "G3", "G15B","G12", "G13", "G17", "G11", "G14") #Lucero is G15A and G16, the results look the same
+
 gen_matrix <- all_matrix[gal_inds_neworder, gal_inds_neworder]
 gen_matrix <- as.matrix(gen_matrix)
 gal_neworder_indx <-  c(5,1,11,4,10,2,3,6,7,8,9)
@@ -132,7 +135,12 @@ age_matrix <- age_matrix[gal_inds_neworder_agesex, gal_inds_neworder_agesex]
 #--------------------------------------------------------------------------
 
 #put all matrices into an array
+
 #array <- abind(gal_matrix, gen_matrix, sex_matrix, age_matrix, along=3)
+#save array
+#setwd(data_dir)
+#saveRDS(array, "array_mrqap.rds")
+
 
 #MRQAP with Double-Semi-Partialing (DSP)
 #trying out different interactions, but want to see whether age/sex/genetics influence the subgroup membership patterns

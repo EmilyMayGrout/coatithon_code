@@ -128,10 +128,12 @@ diag(ff_net) <- NA
 #order 3 - without Wildflower AND males: 
 new_order <- c(1,9,10,3,4,12,2,11,7,5,13,16,8,15,6,14)
 
+ffnet_reorder <- ff_net[new_order, new_order]
+#save matrix for mrqap analysis
+write.table(ffnet_reorder,file="C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/presedente_matrix_10min_proptimeinsamesubgroup.txt",row.names=FALSE)
 
 par(mgp=c(3, 1, 0), mar=c(11,10,4,2))
 
-ffnet_reorder <- ff_net[new_order, new_order]
 png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'subgroup_network_onlyGroup_level1.png'))
 
 visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
