@@ -242,8 +242,8 @@ for(t in 1:(n_times-1)){
   
   #determine if this time step is a split
   #if we have one group that goes to more than one, and there are no singletons subsequently, then it's a split
-  if(n_subgroups_now==1 
-     & n_subgroups_later >1
+  if((n_subgroups_now==1 | n_subgroups_now == 2)
+     & n_subgroups_later >n_subgroups_now
      & singletons_later==0
   ){
     splits <- c(splits, t)
@@ -251,12 +251,13 @@ for(t in 1:(n_times-1)){
   
   #if we have more than one group, but rest are singletons, and number of singletons doesn't change (so we don't have just one loner moving off), then it's a split
   if(n_subgroups_now > 1 
-     & (singletons_now+1) == n_subgroups_now
+     & ((singletons_now+1) == n_subgroups_now | (singletons_now+2) == n_subgroups_now)
      & n_subgroups_later > n_subgroups_now
      & singletons_now == singletons_later
   ){
     splits <- c(splits, t)
   }
+  
   
   
 }
