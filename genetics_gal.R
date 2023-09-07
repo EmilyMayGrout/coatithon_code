@@ -10,6 +10,7 @@ code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/' 
 id_file <- 'galaxy_coati_ids.RData' 
 gal_gps_matrix <- 'gal_matrix_10min_proptimeinsamesubgroup.txt' #saved from plot3 in fission_fusion_galaxy 
+gal_gps_matrix_full <- 'gal_matrix_10min_proptimeinfullgroup.txt' #saved from plot4 in fission_fusion_galaxy
 all_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/CoatiTrioMLmatrix.csv', header = T) 
 
 #I manually made these matrices in excel 
@@ -27,6 +28,12 @@ load(id_file)
 gal_matrix <- read.table(gal_gps_matrix, header = T) 
 #make subgroup membership matrix a matrix 
 gal_matrix <- as.matrix(gal_matrix) 
+
+gal_matrix_full <- read.table(gal_gps_matrix_full, header = T) 
+#make subgroup membership matrix a matrix 
+gal_matrix_full <- as.matrix(gal_matrix_full) 
+
+
 
 #order of group in gal_gps matrix to the coati_ids order: c(5,1,11,4,10,2,3,6,7,8,9) 
 #this order is gus, quasar, cometa, lucero, luna, estrella, venus, orbita, planeta, saturno, pluto 
@@ -70,22 +77,25 @@ diag(gen_matrix) <- NA
 
 n_inds <- 10 
 png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'gen_cometa_G15A_level1.png')) 
-visualize_network_matrix(gen_matrix, coati_ids_cut[gal_neworder_indx,]) 
+visualize_network_matrix_galaxy(gen_matrix, coati_ids_cut[gal_neworder_indx,]) 
 dev.off() 
 
 
 #----------------------------------------------------------------- 
-#trying Estrella as G15A and Cometa as G15B 
+#trying Estrella as G15B and Cometa as G15C
 #gus, quasar, cometa, lucero, luna, estrella, venus, orbita, planeta, saturno, pluto  
-n_inds <- 11 
-gal_inds_neworder <- c("G10", "G18", "G15C", "G16", "G3", "G15B","G12", "G13", "G17", "G11", "G14") 
+n_inds <- 12
+gal_inds_neworder <- c("G10", "G18", "G1", "G15C", "G16", "G3", "G15B","G12", "G13", "G17", "G11", "G14") 
 #gal_inds_neworder <- c("G10", "G18", "G15C", "G15A", "G3", "G15B","G12", "G13", "G17", "G11", "G14") #Lucero is G15A and G16, the results look the same 
 
 gen_matrix <- all_matrix[gal_inds_neworder, gal_inds_neworder] 
 gen_matrix <- as.matrix(gen_matrix) 
-gal_neworder_indx <-  c(5,1,11,4,10,2,3,6,7,8,9) 
-png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'gen_cometaG15C_estrellaG15B_level1.png')) 
-visualize_network_matrix_galaxy(gen_matrix, coati_ids[gal_neworder_indx,]) 
+#adding Sol to coati_ids
+coati_ids_withSOl <- rbind(coati_ids, list('Sol', 'na', 'Adult', 'Female', '#FF0000'))
+
+gal_neworder_indx <-  c(5,1,12,11,4,10,2,3,6,7,8,9) 
+png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'gen_cometaG15C_estrellaG15B_Sol_level1.png')) 
+visualize_network_matrix_galaxy(gen_matrix, coati_ids_withSOl[gal_neworder_indx,]) 
 dev.off() 
 
 #---------------------------------------------------------------- 
@@ -124,13 +134,20 @@ age_matrix <- age_matrix[gal_inds_neworder_agesex, gal_inds_neworder_agesex]
 
 
 # NOW WE HAVE ALL 4 MATRICES WITH THE SAME ORDER OF GROUP MEMBERS!! 
-#  only thing that needs to be checked is the genetics matrix (due to not having Estrella and having 3x Cometa genetic values G15A/B/C) 
 
-#can check the arrays to make sure they're all in the right order: 
-#visualize_network_matrix(gal_matrix, coati_ids[gal_neworder_indx,]) 
-#visualize_network_matrix(age_matrix, coati_ids[gal_neworder_indx,]) 
-#visualize_network_matrix(sex_matrix, coati_ids[gal_neworder_indx,]) 
-#visualize_network_matrix(gen_matrix, coati_ids[gal_neworder_indx,]) 
+#png(height = 900, width = 1400, units = 'px', filename = paste0(plot_dir,'all_matrices.png'))
+par(mfrow=c(2,3))
+visualize_network_matrix_galaxy(gal_matrix, coati_ids[gal_neworder_indx,])
+mtext("1) Proportion of time each dyad was in the same subgroup", cex = 1.2)
+visualize_network_matrix_galaxy(age_matrix, coati_ids[gal_neworder_indx,]) 
+mtext("2) Age homophily", cex = 1.2)
+visualize_network_matrix_galaxy(sex_matrix, coati_ids[gal_neworder_indx,]) 
+mtext("3) Sex homophily", cex = 1.2)
+visualize_network_matrix_galaxy(gen_matrix, coati_ids[gal_neworder_indx,]) 
+mtext("4) Genetics - Triadic Maximum Likelihood method", cex = 1.2)
+visualize_network_matrix_galaxy(gal_matrix_full, coati_ids[gal_neworder_indx,]) 
+mtext('5) Within full group proportion of time within 10m', cex = 1.2)
+#dev.off()
 
 #-------------------------------------------------------------------------- 
 
@@ -150,22 +167,29 @@ t2 <- mrqap.dsp(gal_matrix~gen_matrix+age_matrix, directed="undirected")
 t3 <- mrqap.dsp(gal_matrix~age_matrix+sex_matrix+gen_matrix, directed="undirected", diagonal = F) 
 #not sure how to interpret the results, but from what I can understand age and sex don't influence the subgroup membership but genetics does (if these genetics are correct which is unlikely) 
 
+t4 <- mrqap.dsp(gal_matrix~age_matrix+sex_matrix+gen_matrix +gal_matrix_full, directed="undirected", diagonal = F) 
+#within group associations do not predict subgrouping patterns
+
+#does genetics affect withi- full group location
+t5 <- mrqap.dsp(gal_matrix_full ~ gen_matrix+age_matrix+sex_matrix, directed="undirected", diagonal = F)
 
 #-----------------------------------------------------------------
 
 
-#mixing 2 individuals genetics to see if it affects the results
+#swapped Estrella and Cometa genetics to see if it affects the results
+
+# #gus, quasar, cometa, lucero, luna, estrella, venus, orbita, planeta, saturno, pluto  
+# gal_inds_neworder <- c("G10", "G11", "G18", "G15C", "G16", "G3", "G15B","G12", "G13", "G17", "G14") #moved G11 (Saturno to Quasars spot) 
 
 #gus, quasar, cometa, lucero, luna, estrella, venus, orbita, planeta, saturno, pluto  
-gal_inds_neworder <- c("G10", "G11", "G18", "G15C", "G16", "G3", "G15B","G12", "G13", "G17", "G14") #moved G11 (Saturno to Quasars spot) 
+gal_inds_neworder <- c("G10", "G18", "G15B", "G16", "G3", "G15C","G12", "G13", "G17", "G11", "G14") #same as above  
 
-gen_matrix <- all_matrix[gal_inds_neworder, gal_inds_neworder] 
-gen_matrix <- as.matrix(gen_matrix) 
-diag(gen_matrix) <- NA 
-gal_neworder_indx <-  c(5,8,1,11,4,10,2,3,6,7,9) 
+gen_matrix <- all_matrix[gal_inds_neworder, gal_inds_neworder]
+gen_matrix <- as.matrix(gen_matrix)
+diag(gen_matrix) <- NA
+gal_neworder_indx <-  c(5,8,1,11,4,10,2,3,6,7,9)
 
 #yes it does! genetics no longer has an effect of subgroup membership
-
 
 
 

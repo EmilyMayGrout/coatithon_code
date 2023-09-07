@@ -2,7 +2,7 @@
 
 #--------PARAMS-------
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/trago/"
-code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
+code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/trago_results/'
 gps_file <- "trago_xy_10min_level0.RData"
 id_file <- 'trago_coati_ids.RData'
@@ -106,5 +106,9 @@ par(mfrow=c(1,1), mar = c(6,6,1,1)) #bottom, left, top, and right
 visualize_network_matrix_trago(ffnet_reorder, coati_ids[new_order,])
 dev.off()
 
+
+
+#setwd(data_dir)
+#write.table(ffnet_reorder, "trago_matrix_10min_proptimeinsamesubgroup.txt") 
 
 

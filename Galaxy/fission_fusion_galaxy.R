@@ -194,15 +194,17 @@ for(i in 1:n_inds){
 }
 
 diag(ff_net) <- NA
-new_order <- c(5,1,11,4,10,2, 3,6,7,8,9)
+new_order <- c(5,1,11,4,10,2,3,6,7,8,9)
 ffnet_reorder <- ff_net[new_order, new_order]
-
-### NEED TO MAKE THIS GRAPH BETTER FOR PAPER - MOVE THE AXES LABELS OUTSIDE THE GRAPH
 
 png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'subgroup_network_level1.png'))
 
 visualize_network_matrix_galaxy(ffnet_reorder, coati_ids[new_order,])
 dev.off()
+
+#setwd(data_dir)
+#write.table(ffnet_reorder, "gal_matrix_10min_proptimeinsamesubgroup.txt") 
+
 
 
 #--------------plot 4: within full group individual associations----------------
@@ -237,6 +239,10 @@ new_order <- c(5,1,11,4,10,2,3,6,7,8,9)
 png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'withingroup_network_withgus_level1.png'))
 visualize_network_matrix_galaxy(within_group_data$proximity_net, coati_ids[new_order,])
 dev.off()
+
+#setwd(data_dir)
+#write.table(within_group_data$proximity_net, "gal_matrix_10min_proptimeinfullgroup.txt") 
+
 
 
 #to visualise the absolute dyadic distances for any time 
