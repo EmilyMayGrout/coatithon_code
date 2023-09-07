@@ -1,9 +1,9 @@
 #this script will read in the raw txt files form e-obs collars and
 #output a preprocess r data file for the low res data (1 gps point/10 mins)
 library(lubridate)
-library(sf)
 
 #load useful functions
+source('C:/Users/egrout/Dropbox/coatithon/coatithon_code/coati_function_library.R')
 source('C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/coati_function_library_V1.R')
 
 

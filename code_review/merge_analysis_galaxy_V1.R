@@ -1,14 +1,13 @@
 #analyse merge events (opposite to the code for getting split events)
 
-#NOTE: this code only works for up to 3 subgroups per merge
+#NOTE: this code only works for up to 3 subgroups per split
 #TODO: if more than 3 subgroups present, need to generalize
 
-#--------PARAMS-------
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
-code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/'
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
-gps_file <- "galaxy_xy_10min_level1.RData" #level0 is when Venus is not removed
-id_file <- 'galaxy_coati_ids.RData'
+code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/'
+gps_file <- "galaxy_xy_10min_level0.RData"
+id_file <- 'coati_ids.RData' 
 
 library(fields)
 library(viridis)
@@ -16,7 +15,7 @@ library(hms)
 
 #read in library of functions
 setwd(code_dir)
-source('coati_function_library_V1.R')
+source('coati_function_library.R')
 
 #load data
 setwd(data_dir)
@@ -49,7 +48,7 @@ merge <- c()
 
 for(t in 1:(n_times-1)){
   
-  #get subgroup membership previous and now
+  #get subgroup membership now and previous
   merge_group <- subgroup_data$ind_subgroup_membership[,t]
   subgroups_previously <- subgroup_data$ind_subgroup_membership[,t-1]
   
@@ -58,46 +57,55 @@ for(t in 1:(n_times-1)){
     next
   }
   
-  #transfer NAs from now to previous and previous to now
+  #transfer NAs from now to later and later to now
   merge_group[which(is.na(subgroups_previously))] <- NA
   subgroups_previously[which(is.na(merge_group))] <- NA
   
-  #get number of subgroups now and in last time step (previous)
+  #get number of subgroups now and in next time step (later)
   n_merge_group <- length(unique(merge_group[!is.na(merge_group)]))
   n_subgroups_previously <- length(unique(subgroups_previously[!is.na(subgroups_previously)]))
   
-  #get number of singleton groups now and previous
+  #get number of singleton groups now and later
   singletons_now <- sum(table(merge_group)==1)
-  singletons_previous <- sum(table(subgroups_previously)==1)
+  singletons_later <- sum(table(subgroups_previously)==1)
   
   #determine if this time step is a merge
-  #if we have more than one group (not including singletons) that goes to one group, then its a merge
+  #if we have one group that goes to more than one, and there are no singletons subsequently, then it's a split
   if(n_merge_group==1 
      & n_subgroups_previously >1
-     & singletons_previous==0
+     & singletons_later==0
   ){
     merge <- c(merge, t)
   }
   
-  #if we have more than one group (not including singletons) that goes to one group, and then number of singletons doesn't change, then its a merge 
+  #if we have more than one group, but rest are singletons, and number of singletons doesn't change (so we don't have just one loner moving off), then it's a split
   if(n_merge_group > 1 
      & (singletons_now + 1) == n_merge_group
      & n_subgroups_previously > n_merge_group
-     & singletons_now == singletons_previous
+     & singletons_now == singletons_later
   ){
     merge <- c(merge, t)
   }
+  
+  
 }
+
+#this seems to work
+
+
+
 
 #make a data frame of merges, with merged group and subgroups
 merge_df <- data.frame(t = merge, merge_group=NA, sub1=NA, sub2=NA, sub3=NA, sub4=NA, sub5=NA)
 
+
+i=5
 for(i in 1:nrow(merge_df)){
   t <- merge_df$t[i]
   merge_group <- subgroup_data$ind_subgroup_membership[,t]
   subgroups_previously <- subgroup_data$ind_subgroup_membership[,t-1]
   
-  #transfer NAs from now to previous and previous to now
+  #transfer NAs from now to later and later to now
   merge_group[which(is.na(subgroups_previously))] <- NA
   subgroups_previously[which(is.na(merge_group))] <- NA
   
@@ -108,11 +116,11 @@ for(i in 1:nrow(merge_df)){
   #store original group membership in data frame
   merge_df$merge_group[i] <- list(orig_subgroup_members)
   
-  #find the groups where the original members were from previously
-  group_ids_previous <- unique(subgroups_previously[orig_subgroup_members])
+  #find the groups where the original members went
+  group_ids_later <- unique(subgroups_previously[orig_subgroup_members])
   
-  for(j in 1:length(group_ids_previous)){
-    group_id <- group_ids_previous[j]
+  for(j in 1:length(group_ids_later)){
+    group_id <- group_ids_later[j]
     inds_in_group <- which(subgroups_previously==group_id)
     orig_inds_in_group <- intersect(inds_in_group, orig_subgroup_members) #only count the original group members 
     
@@ -141,7 +149,7 @@ merge_df$n_sub1 <- sapply(merge_df$sub1, function(x){return(sum(!is.na(x)))})
 merge_df$n_sub2 <- sapply(merge_df$sub2, function(x){return(sum(!is.na(x)))})
 merge_df$n_sub3 <- sapply(merge_df$sub3, function(x){return(sum(!is.na(x)))})
 
-save(merge_df, file = paste0(data_dir, "merge_df.Rdata"))
+save(merge_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Galaxy/merge_df.Rdata")  
 
 
 #DONE WITH DATAFRAME!
@@ -149,7 +157,7 @@ save(merge_df, file = paste0(data_dir, "merge_df.Rdata"))
 
 #now look at time difference between merges and splits
 #open splits_df
-load(paste0(data_dir, "splits_df.Rdata"))
+load("C:/Users/egrout/Dropbox/coatithon_notgithub/Galaxy_fission_fusion/splits_df.Rdata")
 
 #luckily the number of merges and split events is 29
 time_diff <- data.frame(splits_t = splits_df$t, merge_t = merge_df$t)
@@ -161,7 +169,7 @@ time_diff$diff_time_hour <- as.numeric(time_diff$diff_time_hour)
 #running to make a graph with presedente (code in merge_analysis_presedente)
 time_diff_gal <- time_diff
 
-png(file = paste0(plot_dir, "split_duration_hist.png"), width = 1000, height = 600, units = "px")
+png(file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Galaxy/split_duration_hist.png", width = 1000, height = 600, units = "px")
 
 par(mar=c(8, 8, 8, 8))
 hist(time_diff$diff_time_hour, breaks = 80, xlab = "Time between splits and merges (hours)", col = "lightblue3", main = "", cex.lab = 2,cex.axis = 1.5)
@@ -170,10 +178,10 @@ dev.off()
 #------------------------------------------------------------------
 #get latlon coords for merge events
 
-#get the index of when there was a merge
+#get the index of when there was a split
 merge_indx <- merge_df$t
 
-#find the x and y UTM coords of those merges
+#find the x and y UTM coords of those splits
 merge_xs <- xs[,merge_indx]
 merge_ys <- ys[,merge_indx]
 
@@ -199,7 +207,7 @@ merge_latlon <- as.data.frame(utm.to.latlon(merge_xy_1, utm.zone = '17',southern
 merges_utm_latlon <- cbind(merge_latlon, merge_xy)
 merges_utm_latlon$event <- as.factor(merges_utm_latlon$event)
 
-save(merges_utm_latlon, file = paste0(data_dir, "merges_utm_latlon.RData")) 
+save(merges_utm_latlon, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Galaxy/merges_utm_latlon.RData") 
 
 
 

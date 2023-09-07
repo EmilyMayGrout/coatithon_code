@@ -1,9 +1,9 @@
 #running the same fission-fusion code with Trago group 
 
 #--------PARAMS-------
-data_dir <- "/home/pranav/Personal/Temp/emily/Data/trago/"
-code_dir <- '/home/pranav/Personal/Temp/emily/code/code_review/'
-plot_dir <- '/home/pranav/Personal/Temp/emily/Figures/trago/'
+data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/trago/"
+code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/trago_results/'
 gps_file <- "trago_xy_10min_level0.RData"
 id_file <- 'trago_coati_ids.RData'
 
@@ -14,7 +14,7 @@ Rs <- c(10,20,30,40,50,100)
 
 library(fields)
 library(viridis)
-#library(tidyverse)
+library(tidyverse)
 
 #read in library of functions
 setwd(code_dir)

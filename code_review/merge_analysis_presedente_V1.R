@@ -1,12 +1,13 @@
 #analyse merge events (opposite to the code for getting split events)
 
-#NOTE: this code only works for up to 3 subgroups per merge
-#--------PARAMS-------
+#NOTE: this code only works for up to 3 subgroups per split
+#TODO: if more than 3 subgroups present, need to generalize
+
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
-code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/'
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
-gps_file <- "presedente_xy_10min_level1.RData"
-id_file <- 'presedente_coati_ids.RData'
+code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/'
+gps_file <- "presedente_xy_10min_level0.RData"
+id_file <- 'presedente_coati_ids.RData' 
 
 library(fields)
 library(viridis)
@@ -15,7 +16,7 @@ library(dplyr)
 
 #read in library of functions
 setwd(code_dir)
-source('coati_function_library_V1.R')
+source('coati_function_library.R')
 
 #load data
 setwd(data_dir)
@@ -57,32 +58,32 @@ for(t in 1:(n_times-1)){
     next
   }
   
-  #transfer NAs from now to previous and previous to now
+  #transfer NAs from now to later and later to now
   merge_group[which(is.na(subgroups_previously))] <- NA
   subgroups_previously[which(is.na(merge_group))] <- NA
   
-  #get number of subgroups now and in last time step (previous)
+  #get number of subgroups now and in next time step (later)
   n_merge_group <- length(unique(merge_group[!is.na(merge_group)]))
   n_subgroups_previously <- length(unique(subgroups_previously[!is.na(subgroups_previously)]))
   
-  #get number of singleton groups now and previous
+  #get number of singleton groups now and later
   singletons_now <- sum(table(merge_group)==1)
-  singletons_previous <- sum(table(subgroups_previously)==1)
+  singletons_later <- sum(table(subgroups_previously)==1)
   
   #determine if this time step is a merge
-  #if we have more than one group (not including singletons) that goes to one group, then its a merge
+  #if we have one group that goes to more than one, and there are no singletons subsequently, then it's a split
   if(n_merge_group==1 
      & n_subgroups_previously >1
-     & singletons_previous==0
+     & singletons_later==0
   ){
     merge <- c(merge, t)
   }
   
-  #if we have more than one group (not including singletons) that goes to one group, and then number of singletons doesn't change, then its a merge 
+  #if we have more than one group, but rest are singletons, and number of singletons doesn't change (so we don't have just one loner moving off), then it's a split
   if(n_merge_group > 1 
      & (singletons_now + 1) == n_merge_group
      & n_subgroups_previously > n_merge_group
-     & singletons_now == singletons_previous
+     & singletons_now == singletons_later
   ){
     merge <- c(merge, t)
   }
@@ -99,7 +100,7 @@ for(i in 1:nrow(merge_df)){
   merge_group <- subgroup_data$ind_subgroup_membership[,t]
   subgroups_previously <- subgroup_data$ind_subgroup_membership[,t-1]
   
-  #transfer NAs from now to previous and previous to now
+  #transfer NAs from now to later and later to now
   merge_group[which(is.na(subgroups_previously))] <- NA
   subgroups_previously[which(is.na(merge_group))] <- NA
   
@@ -110,11 +111,11 @@ for(i in 1:nrow(merge_df)){
   #store original group membership in data frame
   merge_df$merge_group[i] <- list(orig_subgroup_members)
   
-  #find the groups where the original members were from previously
-  group_ids_previous <- unique(subgroups_previously[orig_subgroup_members])
+  #find the groups where the original members went
+  group_ids_later <- unique(subgroups_previously[orig_subgroup_members])
   
-  for(j in 1:length(group_ids_previous)){
-    group_id <- group_ids_previous[j]
+  for(j in 1:length(group_ids_later)){
+    group_id <- group_ids_later[j]
     inds_in_group <- which(subgroups_previously==group_id)
     orig_inds_in_group <- intersect(inds_in_group, orig_subgroup_members) #only count the original group members 
     
@@ -143,11 +144,11 @@ merge_df$n_sub1 <- sapply(merge_df$sub1, function(x){return(sum(!is.na(x)))})
 merge_df$n_sub2 <- sapply(merge_df$sub2, function(x){return(sum(!is.na(x)))})
 merge_df$n_sub3 <- sapply(merge_df$sub3, function(x){return(sum(!is.na(x)))})
 
-save(merge_df, file = paste0(data_dir, "merge_df.Rdata"))
+save(merge_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Presedente/merge_df.Rdata")  
 
 
 #this dataframe was created in fission_fusion_presedente_V1.R
-load(paste0(data_dir, "splits_df.Rdata"))
+load("C:/Users/egrout/Dropbox/coatithon_notgithub/Presedente_fission_fusion/splits_df.Rdata")
 
 #number of splits and merges is not the same, so should rbind them
 
@@ -192,9 +193,9 @@ time_diff$diff_time_hour <- as.numeric(time_diff$diff_time_hour)
 time_diff_pres <- time_diff
 
 #time_diff_gal was made in the merge_analysis script
-hist(time_diff_pres$diff_time_hour, col='green', add=TRUE)
+hist(time_diff_gal$diff_time_hour, col='green', add=TRUE)
 
-png(file = paste0(plot_dir, "split_duration_hist.png"), width = 1000, height = 600, units = "px")
+png(file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Presedente/split_duration_hist.png", width = 1000, height = 600, units = "px")
 
 par(mar=c(8, 8, 8, 8))
 hist(time_diff_pres$diff_time_hour, breaks = 80, xlab = "Time between splits and merges (hours)", col = "lightblue3", main = "", cex.lab = 2,cex.axis = 1.5)
@@ -204,7 +205,7 @@ dev.off()
 
 
 #making a plot for both galaxy and presedente overlapping (need to run the merge_analysis_galaxy for galaxy for this to work)
-png(file = paste0(plot_dir, "split_duration_hist_both1.png"), width = 1000, height = 600, units = "px")
+png(file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/split_duration_hist_both1.png", width = 1000, height = 600, units = "px")
 par(mar=c(8, 8, 8, 8))
 hist(time_diff_gal$diff_time_hour, col='lightblue4', breaks = 80, xlab = "Time between splits and merges (hours)", main = "", cex.lab = 2,cex.axis = 1.5, ylim = c(0, 8))
 hist(time_diff_pres$diff_time_hour, breaks = 10 ,col=rgb(0.7,1,1,0.5),add=TRUE, alpha = 0.5)
@@ -218,13 +219,13 @@ dev.off()
 #these values used in low res ff paper
 mean(time_diff_gal$diff_time_hour) #13.21724
 sd(time_diff_gal$diff_time_hour) #14.843
-min(time_diff_gal$diff_time_hour) #0.3
-max(time_diff_gal$diff_time_hour) #62.8
+min(time_diff_gal$diff_time_hour) #13.21724
+max(time_diff_gal$diff_time_hour)
 
-mean(time_diff_pres$diff_time_hour) #3.205882
-sd(time_diff_pres$diff_time_hour) #3.089998
-min(time_diff_pres$diff_time_hour) #0.3
-max(time_diff_pres$diff_time_hour) #12
+mean(time_diff_pres$diff_time_hour) #2.3944
+sd(time_diff_pres$diff_time_hour) #2.656
+min(time_diff_pres$diff_time_hour) #13.21724
+max(time_diff_pres$diff_time_hour)
 
 
 

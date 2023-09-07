@@ -2,15 +2,11 @@
 #fission fusion analysis script for Galaxy group 
 
 #--------PARAMS-------
-# Because of the way the paste function is called below, it is important
-# that all the dirs end in /
-#--------PARAMS-------
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
 gps_file <- "galaxy_xy_10min_level1.RData" #level0 is when Venus is not removed
 id_file <- 'galaxy_coati_ids.RData'
-
 
 #list of Rs
 Rs <- c(10,20,30,40,50,100)
@@ -20,13 +16,13 @@ R <- 50
 
 library(fields)
 library(viridis)
+library(tidyverse)
 library(lubridate)
 library(hms)
 library(dplyr)
 library(tidyr)
 library(ggthemes)
 library(vioplot)
-library(ggplot2)
 
 #read in library of functions
 setwd(code_dir)
@@ -116,16 +112,13 @@ for(i in 1:n_inds){
 }
 
 diag(ff_net) <- NA
-#new order so the two subgroups can be more clearly seen:
 new_order <- c(5,1,11,4,10,2, 3,6,7,8,9)
 ffnet_reorder <- ff_net[new_order, new_order]
 
 png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'subgroup_network_level1.png'))
 
-visualize_network_matrix_galaxy(ffnet_reorder, coati_ids[new_order,])
+visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
 dev.off()
-
-
 
 #--------------------------------------------------------------------------
 
@@ -161,7 +154,7 @@ within_group_data <- get_proximity_data(subset_x, subset_y, 10)
 new_order <- c(1,10,4,9,2,3,5,6,7,8)
 
 png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'withingroup_network_withoutgus_level1.png'))
-visualize_network_matrix_galaxy(within_group_data$proximity_net, coati_ids_nogus[new_order,])
+visualize_network_matrix(within_group_data$proximity_net, coati_ids_nogus[new_order,])
 dev.off()
 
 #there's an additional 42 data points but the proximity values don't change much
@@ -264,8 +257,8 @@ for(t in 1:(n_times-1)){
   
   #determine if this time step is a split
   #if we have one group that goes to more than one, and there are no singletons subsequently, then it's a split
-  if((n_subgroups_now==1 | n_subgroups_now == 2)
-     & n_subgroups_later >n_subgroups_now
+  if(n_subgroups_now==1 
+     & n_subgroups_later >1
      & singletons_later==0
   ){
     splits <- c(splits, t)
@@ -273,7 +266,7 @@ for(t in 1:(n_times-1)){
   
   #if we have more than one group, but rest are singletons, and number of singletons doesn't change (so we don't have just one loner moving off), then it's a split
   if(n_subgroups_now > 1 
-     & ((singletons_now+1) == n_subgroups_now | (singletons_now+2) == n_subgroups_now)
+     & (singletons_now+1) == n_subgroups_now
      & n_subgroups_later > n_subgroups_now
      & singletons_now == singletons_later
   ){
@@ -335,9 +328,7 @@ splits_df$n_sub2 <- sapply(splits_df$sub2, function(x){return(sum(!is.na(x)))})
 splits_df$n_sub3 <- sapply(splits_df$sub3, function(x){return(sum(!is.na(x)))})
 
 #should save this dataframe as its needed for the merge_analysis_galaxy 
-# pranav: I have edited the below line to be a bit more generalisable.
-save(splits_df, file = paste0(data_dir, "splits_df.Rdata"))
-
+save(splits_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/splits_on_map/Galaxy/splits_df.Rdata")  
 
 #DONE WITH DATAFRAME
 
@@ -388,7 +379,7 @@ p_dyad_together_reorder <- p_dyad_together[new_order, new_order]
 
 png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'subgroup_network_splits.png'))
 par(mfrow=c(1,1), mar = c(1,2,1,1))#(bottom, left, top, right)
-visualize_network_matrix_galaxy(p_dyad_together_reorder, coati_ids[new_order,])
+visualize_network_matrix(p_dyad_together_reorder, coati_ids[new_order,])
 dev.off()
 
 #---------------------------------------------------------------------

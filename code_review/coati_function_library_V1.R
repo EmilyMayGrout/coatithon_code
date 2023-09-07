@@ -17,25 +17,22 @@ if(.Platform$OS.type=="windows") {
 #Converts a matrix of lons and lats (lons first column, lats second column) to UTM
 #Inputs:
 #	LonsLats: [N x 2 matrix] of lons (col 1) and lats (col2)
-#	utm.zone: [numeric or string], value needs to be given 
-#	southern_hemisphere: [boolean], TRUE/FALSE needed
+#	utm.zone: [numeric or string], by default 34 (this is where the KRR is)
+#	southern_hemisphere: [boolean], by default TRUE
 #	EastingsCol1: whether eastings should be given in first column of output (default) or not
 #Outputs:
 #	EastNorths or NorthEasts: [N x 2 matrix] of Eastings and Northings - eastings are first column by default
-latlon.to.utm <- function(LonsLats, EastingsCol1 = TRUE, utm.zone = '34', southern_hemisphere = TRUE){
+latlon.to.utm <- function(LonsLats,EastingsCol1 = TRUE,utm.zone='34',southern_hemisphere=TRUE){
   latlons <- data.frame(X=LonsLats[,2],Y=LonsLats[,1])
   non.na.idxs <- which(!is.na(latlons$X) & !is.na(latlons$Y))
   len <- nrow(latlons)
   non.na.latlons <- latlons[non.na.idxs,]
-  # pranav: flagging the below line because ChatGPT, Vlad, *and* I didn't understand the notation with
-  # the tilde ('~'), but we are not used to tidyverse stuff.
-  # Just make sure it's correct on your end.
   coordinates(non.na.latlons) <- ~Y + X
   proj4string(non.na.latlons) <- CRS('+proj=longlat +ellps=WGS84 +datum=WGS84')
   if(southern_hemisphere){
-    projection.string <- paste0('+proj=utm +zone=',utm.zone,'+ellps=WGS84 +south',sep='')
+    projection.string <- paste('+proj=utm +zone=',utm.zone, '+ellps=WGS84 +south',sep='')
   } else{
-    projection.string <- paste0('+proj=utm +zone=',utm.zone,'+ellps=WGS84 +north',sep='')
+    projection.string <- paste('+proj=utm +zone=',utm.zone, '+ellps=WGS84 +north',sep='')
   }
   utm <- spTransform(non.na.latlons,CRS(projection.string))
   EastNorths <- matrix(NA,nrow=len,ncol=2)
@@ -165,12 +162,11 @@ get_subgroup_data <- function(xs, ys, R){
 #coati_ids[dataframe of the coati ids]
 #OUTPUT:
 #plot
-visualize_network_matrix_galaxy <- function(net, coati_ids){
+visualize_network_matrix <- function(net, coati_ids){
   
   zmin <- min(net, na.rm=T)
   zmax <- max(net, na.rm=T)
   par(mgp=c(3, 1, 0), mar=c(11,11,3,3)) #bottom, left, top, and right ##CHANGE THESE VALUES IF DOING FORLOOP OF THE MATRIX PLOTS AND THEY DON'T FIT mar=c(11,10,6,4))
-  #par(mgp=c(3, 1, 0), mar=c(11,11,3,7))
   image.plot(net, col = viridis(256), zlim=c(zmin,zmax), xaxt= 'n', yaxt = 'n', legend.cex = 7, legend.width = 1.3,legend.mar = 6, axis.args=list(cex.axis=2))
   axis(1, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2, cex.axis=1.8)
   axis(2, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2,  cex.axis=1.8)
@@ -186,19 +182,7 @@ visualize_network_matrix_galaxy <- function(net, coati_ids){
 #-0.8 to move the coloured ID points out of the matrix plot
 #legend.cex = 5 changed to 7
 
-visualize_network_matrix_presedente <- function(net, coati_ids){
-  
-  zmin <- min(net, na.rm=T)
-  zmax <- max(net, na.rm=T)
-  #par(mgp=c(3, 1, 0), mar=c(11,11,3,3)) #bottom, left, top, and right ##CHANGE THESE VALUES IF DOING FORLOOP OF THE MATRIX PLOTS AND THEY DON'T FIT mar=c(11,10,6,4))
-  #par(mgp=c(3, 1, 0), mar=c(11,11,3,7)) this was for the all_matrix plot in genetics
-  image.plot(net, col = viridis(256), zlim=c(zmin,zmax), xaxt= 'n', yaxt = 'n', legend.cex = 7, legend.width = 1.3,legend.mar = 6, axis.args=list(cex.axis=2))
-  axis(1, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2, cex.axis=1.8)
-  axis(2, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2,  cex.axis=1.8)
-  
-  points(rep(-.05, nrow(net)),seq(0,1,length.out=n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
-  points(seq(0,1,length.out=nrow(net)),rep(-.05,n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
-}
+#for presidente matrix plot, change the points(rep(-.07 for gal to -0.05 for presidente
 
 visualize_network_matrix_trago <- function(net, coati_ids){
   
@@ -209,8 +193,8 @@ visualize_network_matrix_trago <- function(net, coati_ids){
   axis(1, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2, cex.axis=1.8)
   axis(2, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2,  cex.axis=1.8)
   
-  points(rep(-.076, nrow(net)),seq(0,1,length.out=n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
-  points(seq(0,1,length.out=nrow(net)),rep(-.076,n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
+  points(rep(-.078, nrow(net)),seq(0,1,length.out=n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
+  points(seq(0,1,length.out=nrow(net)),rep(-.078,n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
 }
 
 

@@ -1,10 +1,9 @@
 #fission fusion analysis script with Presidente group
-
 #first define groups for each time step (each 10 mins)
 
 #--------PARAMS-------
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
-code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/'
+code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
 gps_file <- "presedente_xy_10min_level1.RData"
 id_file <- 'presedente_coati_ids.RData'
@@ -16,6 +15,7 @@ R <- 50
 
 library(fields)
 library(viridis)
+library(tidyverse)
 library(vioplot)
 
 #read in library of functions
@@ -119,7 +119,7 @@ par(mgp=c(3, 1, 0), mar=c(11,10,4,2))
 ffnet_reorder <- ff_net[new_order, new_order]
 png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'subgroup_network_onlyGroup_level1.png'))
 
-visualize_network_matrix_presedente(ffnet_reorder, coati_ids[new_order,])
+visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
 
 dev.off()
 
@@ -154,7 +154,7 @@ within_group_data <- get_proximity_data(subset_x, subset_y, 10)
 new_order <- c(1,9,10,3,4,12,2,11,7,5,13,16,8,15,6,14)
 
 png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'withingroup_network_onlyGroup_level1.png'))
-visualize_network_matrix_presedente(within_group_data$proximity_net, coati_ids[new_order,])
+visualize_network_matrix(within_group_data$proximity_net, coati_ids[new_order,])
 dev.off()
 
 
@@ -242,8 +242,8 @@ for(t in 1:(n_times-1)){
   
   #determine if this time step is a split
   #if we have one group that goes to more than one, and there are no singletons subsequently, then it's a split
-  if((n_subgroups_now==1 | n_subgroups_now == 2)
-     & n_subgroups_later >n_subgroups_now
+  if(n_subgroups_now==1 
+     & n_subgroups_later >1
      & singletons_later==0
   ){
     splits <- c(splits, t)
@@ -251,12 +251,13 @@ for(t in 1:(n_times-1)){
   
   #if we have more than one group, but rest are singletons, and number of singletons doesn't change (so we don't have just one loner moving off), then it's a split
   if(n_subgroups_now > 1 
-     & ((singletons_now+1) == n_subgroups_now | (singletons_now+2) == n_subgroups_now)
+     & (singletons_now+1) == n_subgroups_now
      & n_subgroups_later > n_subgroups_now
      & singletons_now == singletons_later
   ){
     splits <- c(splits, t)
-  }  
+  }
+  
   
 }
 
@@ -312,7 +313,7 @@ splits_df$n_sub2 <- sapply(splits_df$sub2, function(x){return(sum(!is.na(x)))})
 splits_df$n_sub3 <- sapply(splits_df$sub3, function(x){return(sum(!is.na(x)))})
 
 #this dataframe is used in merge_analysis_presedente_V1
-save(splits_df, file = paste0(data_dir, "splits_df.Rdata"))  
+save(splits_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/splits_on_map/Presedente/splits_df.Rdata")  
 
 #DONE WITH DATAFRAME!
 
@@ -363,7 +364,7 @@ p_dyad_together_reorder <- p_dyad_together[new_order, new_order]
 
 png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'subgroup_network_splits.png'))
 par(mfrow=c(1,1), mar = c(1,2,1,1))#(bottom, left, top, right)
-visualize_network_matrix_presedente(p_dyad_together_reorder, coati_ids[new_order,])
+visualize_network_matrix(p_dyad_together_reorder, coati_ids[new_order,])
 dev.off()
 
 
