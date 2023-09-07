@@ -3,7 +3,7 @@
 
 #--------PARAMS-------
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
-code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
+code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
 gps_file <- "presedente_xy_10min_level1.RData"
 id_file <- 'presedente_coati_ids.RData'
@@ -314,7 +314,7 @@ splits_df$n_sub2 <- sapply(splits_df$sub2, function(x){return(sum(!is.na(x)))})
 splits_df$n_sub3 <- sapply(splits_df$sub3, function(x){return(sum(!is.na(x)))})
 
 #this dataframe is used in merge_analysis_presedente_V1
-save(splits_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/splits_on_map/Presedente/splits_df.Rdata")  
+save(splits_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/Presedente_fission_fusion/splits_df.Rdata")  
 
 #DONE WITH DATAFRAME!
 
