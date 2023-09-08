@@ -136,7 +136,7 @@ par(mgp=c(3, 1, 0), mar=c(11,10,4,2))
 
 png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'subgroup_network_onlyGroup_level1.png'))
 
-visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
+visualize_network_matrix_presedente(ffnet_reorder, coati_ids[new_order,])
 
 
 dev.off()
@@ -167,14 +167,21 @@ subset_y <- ys[, full_group_index]
 
 #get proximity network
 within_group_data <- get_proximity_data(subset_x, subset_y, 10)
-
-
 new_order <- c(1,9,10,3,4,12,2,11,7,5,13,16,8,15,6,14)
 
 png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'withingroup_network_onlyGroup_level1.png'))
-visualize_network_matrix(within_group_data$proximity_net, coati_ids[new_order,])
+visualize_network_matrix_presedente(within_group_data$proximity_net, coati_ids[new_order,])
 dev.off()
 
+ffnet_reorder <- ff_net[new_order, new_order]
+#save matrix for mrqap analysis
+write.table(within_group_data$proximity_net,file="C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/presedente_matrix_10min_proptimeinfullgroup.txt",row.names=FALSE)
+
+
+#get proximity network for 3m
+within_group_data3m <- get_proximity_data(subset_x, subset_y, 3)
+new_order <- c(1,9,10,3,4,12,2,11,7,5,13,16,8,15,6,14)
+write.table(within_group_data3m$proximity_net,file="C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/presedente_matrix_10min_proptimeinfullgroup3m.txt",row.names=FALSE)
 
 
 #-------------------------------------------------------------------

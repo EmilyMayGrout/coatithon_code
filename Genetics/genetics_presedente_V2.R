@@ -1,16 +1,22 @@
 #this script is for the MRQAP analysis for Presidente group 
 
+#TODO go through the age classes and check which ones need changing - make these changes for the coati_ids and the age matrices and rerun the analysis - but removing within group associations in the model and add it as a mantel test with subgorup membership. Then get the 3m matrices and run this mantel test
+#then need to make the age class changes to the full group associations
 
 library(sna)  
 library(asnipe) 
 library(abind) 
+library(fields) 
+library(ecodist)
+library(vegan)
 
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/" 
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/' 
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/' 
-id_file <- 'presedente_coati_ids.RData' 
+id_file <- 'presedente_coati_ids_level1.RData'  #level one is where May and Cleopatra have been changed to subadults
 pres_gps_matrix <- 'pres_matrix_10min_proptimeinsamesubgroup.txt' #saved from plot3 in fission_fusion_presedente
-pres_gps_matrix_full <- 'pres_matrix_10min_proptimeinfullgroup.txt' #saved from plot4 in fission_fusion_presedente
+pres_gps_matrix_full <- 'presedente_matrix_10min_proptimeinfullgroup.txt' #saved from plot4 in fission_fusion_presedente
+pres_gps_matrix_full3m <- 'presedente_matrix_10min_proptimeinfullgroup3m.txt' #saved from plot4 in 
 
 all_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/CoatiTrioMLmatrix.csv', header = T) 
 
@@ -26,6 +32,12 @@ source('coati_function_library.R')
 setwd(data_dir) 
 load(id_file) 
 
+#changing the juvenile colour to subadult colour for Cleopatra and May
+#coati_ids[3,5] <- "#FFAA66"
+#coati_ids[11,5] <- "#FFAA66"
+#save(coati_ids, file="presedente_coati_ids_level1.RData")
+
+
 pres_matrix <- read.table(pres_gps_matrix, header = T) 
 #make subgroup membership matrix a matrix 
 pres_matrix <- as.matrix(pres_matrix) 
@@ -36,6 +48,10 @@ pres_matrix_full <- read.table(pres_gps_matrix_full, header = T)
 pres_matrix_full <- as.matrix(pres_matrix_full) 
 diag(pres_matrix_full) <- NA 
 
+pres_matrix_full3m <- read.table(pres_gps_matrix_full3m, header = T) 
+#make subgroup membership matrix a matrix 
+pres_matrix_full3m <- as.matrix(pres_matrix_full3m) 
+diag(pres_matrix_full3m) <- NA 
 
 
 
@@ -116,6 +132,9 @@ visualize_network_matrix_presedente(gen_matrix, coati_ids_cut[pres_neworder_indx
 mtext("4) Genetics - Triadic Maximum Likelihood method", cex = 1.2)
 visualize_network_matrix_presedente(pres_matrix_full, coati_ids_cut[pres_neworder_indx,]) 
 mtext('5) Within full group proportion of time within 10m', cex = 1.2)
+visualize_network_matrix_presedente(pres_matrix_full3m, coati_ids_cut[pres_neworder_indx,]) 
+mtext('6) Within full group proportion of time within 3m', cex = 1.2)
+
 #dev.off()
 
 #MRQAP with Double-Semi-Partialing (DSP) 
@@ -126,11 +145,42 @@ t2 <- mrqap.dsp(pres_matrix~gen_matrix+age_matrix, directed="undirected")
 t3 <- mrqap.dsp(pres_matrix~age_matrix+sex_matrix+gen_matrix, directed="undirected", diagonal = F) 
 
 t4 <- mrqap.dsp(pres_matrix~age_matrix+sex_matrix+gen_matrix+pres_matrix_full, directed="undirected", diagonal = F) 
+t4.1 <- mrqap.dsp(pres_matrix~age_matrix+sex_matrix+gen_matrix+pres_matrix_full3m, directed="undirected", diagonal = F) 
 #within group associations and genetics explains subgroup membership
 
 #is within group associations affected by genetics 
 t5 <- mrqap.dsp(pres_matrix_full ~ gen_matrix+age_matrix+sex_matrix, directed="undirected", diagonal = F)
 #genetics, sex and age don't affect within group associations
+#also running this test with the 3m within group associations 
+t5.1 <- mrqap.dsp(pres_matrix_full ~ gen_matrix+age_matrix+sex_matrix, directed="undirected", diagonal = F)
+
+#Ben comment: distance to individuals shouldn't be in the model as it subgroup membership could be dependent on it, so use results for t3 and then do a mantel test to look at the distance relationships
+
+t6 <- mantel(xdis = pres_matrix, ydis = pres_matrix_full, method = "pearson", permutations = 999)
+t7 <- mantel(xdis = pres_matrix, ydis = pres_matrix_full3m, method = "pearson", permutations = 999)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #-----------------------------------------------------------------------

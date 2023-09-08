@@ -92,7 +92,7 @@ dev.off()
 
 setwd(plot_dir)
 
-png(height = 900, width = 900, units = 'px', filename = paste0(plot_dir,'all_matrices.png'))
+#png(height = 900, width = 900, units = 'px', filename = paste0(plot_dir,'all_matrices.png'))
 par(mfrow=c(2,2))
 
 visualize_network_matrix_trago(trago_matrix, coati_ids[trago_neworder_indx,])
@@ -103,10 +103,10 @@ visualize_network_matrix_trago(sex_matrix, coati_ids[trago_neworder_indx,])
 mtext("3) Sex homophily", cex = 1.2)
 visualize_network_matrix_trago(gen_matrix, coati_ids[trago_neworder_indx,]) 
 mtext("4) Genetics - Triadic Maximum Likelihood method", cex = 1.2)
-dev.off()
+#dev.off()
 
 
-t3 <- mrqap.dsp(trago_matrix~age_matrix+sex_matrix+gen_matrix, directed="undirected", diagonal = F) 
+#t3 <- mrqap.dsp(trago_matrix~age_matrix+sex_matrix+gen_matrix, directed="undirected", diagonal = F) 
 
 
 
