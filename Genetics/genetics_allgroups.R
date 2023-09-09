@@ -1,6 +1,11 @@
 #this script is bringing the genetics for all coatis into the same matrices
 
 
+code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/' 
+#read in library of functions 
+setwd(code_dir) 
+source('coati_function_library.R') 
+
 all_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/CoatiTrioMLmatrix.csv', header = T)  
 #first column is index numbers but I want this to be the IDs  
 rownames(all_matrix) <- all_matrix$X  
@@ -17,7 +22,7 @@ load("C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/galaxy_coati_ids.R
 #adding Sol to coati_ids
 galaxy_withSOl <- rbind(coati_ids, list('Sol', 'na', 'Adult', 'Female', '#FF0000'))
 
-load("C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/presedente_coati_ids.RData")
+load("C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/presedente_coati_ids_level1.RData")
 pres_ids <- coati_ids
 
 # G8 - Tequila 
@@ -98,9 +103,5 @@ n_inds <- 44
 png(height = 1200, width = 1300, units = 'px', filename = 'C:/Users/egrout/Dropbox/coatithon/results/all_genetics.png')  
 visualize_network_matrix_galaxy(gen_matrix, all_ids)  
 dev.off()  
-
-
-
-
 
 

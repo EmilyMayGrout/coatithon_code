@@ -159,18 +159,22 @@ mtext('6) Within full group proportion of time within 3m', cex = 1.2)
 t1 <- mrqap.dsp(gal_matrix~gen_matrix+sex_matrix, directed="undirected") 
 t2 <- mrqap.dsp(gal_matrix~gen_matrix+age_matrix, directed="undirected") 
 
+#Q1:
 t3 <- mrqap.dsp(gal_matrix~age_matrix+sex_matrix+gen_matrix, directed="undirected", diagonal = F) 
 #not sure how to interpret the results, but from what I can understand age and sex don't influence the subgroup membership but genetics does (if these genetics are correct which is unlikely) 
 
+#Q2
 t4 <- mrqap.dsp(gal_matrix~age_matrix+sex_matrix+gen_matrix +gal_matrix_full, directed="undirected", diagonal = F) 
 #within group associations do not predict subgrouping patterns
 
-#does genetics affect within- full group location
-t5 <- mrqap.dsp(gal_matrix_full ~ gen_matrix+age_matrix+sex_matrix, directed="undirected", diagonal = F)
+
+#Q3: does genetics affect within- full group location
+t5 <- mrqap.dsp(gal_matrix_full3m ~ gen_matrix+age_matrix+sex_matrix, directed="undirected", diagonal = F)
 
 
 #Ben comment: distance to individuals shouldn't be in the model as it subgroup membership could be dependent on it, so use results for t3 and then do a mantel test to look at the distance relationships
 
+#Q4:
 t6 <- mantel(xdis = gal_matrix, ydis = gal_matrix_full, method = "pearson", permutations = 999)
 t7 <- mantel(xdis = gal_matrix, ydis = gal_matrix_full3m, method = "pearson", permutations = 999)
 

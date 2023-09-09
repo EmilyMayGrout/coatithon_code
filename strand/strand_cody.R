@@ -13,9 +13,9 @@ rm(list = ls())
 
 # Load libraries
 library(ggplot2)
+library
 
-#library(devtools)
-#install_github("ctross/STRAND", force = TRUE)
+devtools::install_github('ctross/STRAND@ctross-patch-1')
 
 library(STRAND)
 library(cmdstanr)
