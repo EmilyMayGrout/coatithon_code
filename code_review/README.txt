@@ -7,7 +7,7 @@ to be reviewed and the names of the data files for each group where the plots we
 
 #install packages:
 
-install.packages(c("dbscan", "rgdal", "lubridate", "stringr", "fields", "viridis", "tidyverse", "hms", "dplyr", "tidyr", "ggthemes", "vioplot"
+install.packages(c("dbscan", "rgdal", "lubridate", "stringr", "fields", "viridis", "tidyverse", "hms", "dplyr", "tidyr", "ggthemes", "vioplot", "sf"))
 
 data_dir is the file directory where all the data is stored (the coati id file and the associated groups gps file e.g. for Galaxy the files are 'galaxy_xy_10min_level1.RData' (a list of 'xs','ys','ts') and 'galaxy_coati_ids.RDS')
 code_dir is the file directory where the coati_function_library_V1.R is stored
