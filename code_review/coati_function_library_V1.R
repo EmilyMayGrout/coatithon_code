@@ -3,6 +3,7 @@
 #LIBRARIES
 library(dbscan)
 library(rgdal)
+library(sp)
 library(lubridate)
 library(stringr)
 
@@ -12,70 +13,6 @@ if(.Platform$OS.type=="windows") {
 }
 
 #--------------------------------------------------------------------------
-
-#LAT/LON TO UTM CONVERSIONS (AND VICE VERSA)
-#Converts a matrix of lons and lats (lons first column, lats second column) to UTM
-#Inputs:
-#	LonsLats: [N x 2 matrix] of lons (col 1) and lats (col2)
-#	utm.zone: [numeric or string], by default 34 (this is where the KRR is)
-#	southern_hemisphere: [boolean], by default TRUE
-#	EastingsCol1: whether eastings should be given in first column of output (default) or not
-#Outputs:
-#	EastNorths or NorthEasts: [N x 2 matrix] of Eastings and Northings - eastings are first column by default
-latlon.to.utm <- function(LonsLats,EastingsCol1 = TRUE,utm.zone='34',southern_hemisphere=TRUE){
-  latlons <- data.frame(X=LonsLats[,2],Y=LonsLats[,1])
-  non.na.idxs <- which(!is.na(latlons$X) & !is.na(latlons$Y))
-  len <- nrow(latlons)
-  non.na.latlons <- latlons[non.na.idxs,]
-  coordinates(non.na.latlons) <- ~Y + X
-  proj4string(non.na.latlons) <- CRS('+proj=longlat +ellps=WGS84 +datum=WGS84')
-  if(southern_hemisphere){
-    projection.string <- paste('+proj=utm +zone=',utm.zone, '+ellps=WGS84 +south',sep='')
-  } else{
-    projection.string <- paste('+proj=utm +zone=',utm.zone, '+ellps=WGS84 +north',sep='')
-  }
-  utm <- spTransform(non.na.latlons,CRS(projection.string))
-  EastNorths <- matrix(NA,nrow=len,ncol=2)
-  EastNorths[non.na.idxs,] <- utm@coords
-  if(!EastingsCol1){
-    NorthEasts <- EastNorths[,c(2,1)]
-    return(NorthEasts)
-  } else{
-    return(EastNorths)
-  }
-}
-#-----------------------------------------------------------------
-
-#Converts a matrix of eastings and northings (eastings first column, northings second column) to latlong
-#Inputs:
-#	EastNorths: [N x 2 matrix] of eastings (col 1) and northings (col2)
-#	utm.zone: [numeric or string], by default 34 (this is where the KRR is)
-#	southern_hemisphere: [boolean], by default TRUE
-#	LonsCol1: whether lons should be given in first column of output (default) or not
-#Outputs:
-#	LonLats or LatLons: [N x 2 matrix] of longitudes and latitudes - lons are first column by default 
-utm.to.latlon <- function(EastNorths,LonsCol1=TRUE,utm.zone = '34',southern_hemisphere=TRUE){
-  utms <- data.frame(X=EastNorths[,1],Y=EastNorths[,2])
-  non.na.idxs <- which(!is.na(utms$X) & !is.na(utms$Y))
-  len <- nrow(utms)
-  if(southern_hemisphere){
-    projection.string <- paste('+proj=utm +zone=',utm.zone, '+ellps=WGS84 +south',sep='')
-  } else{
-    projection.string <- paste('+proj=utm +zone=',utm.zone, '+ellps=WGS84 +north',sep='')
-  }
-  non.na.utms <- SpatialPoints(utms[non.na.idxs,],proj4string=CRS(projection.string))
-  lonlat <- spTransform(non.na.utms,CRS('+proj=longlat +ellps=WGS84 +datum=WGS84'))
-  LonLats <- matrix(NA,nrow=len,ncol=2)
-  LonLats[non.na.idxs,] <- lonlat@coords
-  if(!LonsCol1){
-    LatLons <- LonLats[,c(2,1)]
-    return(LatLons)
-  } else{
-    return(LonLats)
-  }	
-}
-
-#-----------------------------------------------------------------
 
 #This function computes information about subgroup membership over time
 #Inputs:
@@ -162,18 +99,24 @@ get_subgroup_data <- function(xs, ys, R){
 #coati_ids[dataframe of the coati ids]
 #OUTPUT:
 #plot
-visualize_network_matrix <- function(net, coati_ids){
+visualize_network_matrix_galaxy <- function(net, coati_ids){
   
   zmin <- min(net, na.rm=T)
   zmax <- max(net, na.rm=T)
-  par(mgp=c(3, 1, 0), mar=c(11,11,3,3)) #bottom, left, top, and right ##CHANGE THESE VALUES IF DOING FORLOOP OF THE MATRIX PLOTS AND THEY DON'T FIT mar=c(11,10,6,4))
+  par(mgp=c(3, 1, 0), mar=c(11,11,3,3)) #bottom, left, top, and right ##CHANGE THESE VALUES IF DOING FORLOOP OF THE MATRIX PLOTS AND THEY DON'T FIT mar=c(11,8,3,5)) and legend.mar = 12
   image.plot(net, col = viridis(256), zlim=c(zmin,zmax), xaxt= 'n', yaxt = 'n', legend.cex = 7, legend.width = 1.3,legend.mar = 6, axis.args=list(cex.axis=2))
   axis(1, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2, cex.axis=1.8)
   axis(2, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2,  cex.axis=1.8)
   
-  points(rep(-.07, nrow(net)),seq(0,1,length.out=n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
-  points(seq(0,1,length.out=nrow(net)),rep(-.07,n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
+  #points(rep(-.07, nrow(net)),seq(0,1,length.out=n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
+  #points(seq(0,1,length.out=nrow(net)),rep(-.07,n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
+  
+  #for the all group matrices
+  points(rep(-.018, nrow(net)),seq(0,1,length.out=n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
+  points(seq(0,1,length.out=nrow(net)),rep(-.018,n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
+  
 }
+#for all groups genetics matrix, changed rep to -.02 from -.07
 
 #changed the size of the labels with cex.axis = 1.5, default is 1
 #also changed the size of the legend axis values with: axis.args=list(cex.axis=2), remove if want default
@@ -182,22 +125,34 @@ visualize_network_matrix <- function(net, coati_ids){
 #-0.8 to move the coloured ID points out of the matrix plot
 #legend.cex = 5 changed to 7
 
-#for presidente matrix plot, change the points(rep(-.07 for gal to -0.05 for presidente
+visualize_network_matrix_presedente <- function(net, coati_ids){
+  
+  zmin <- min(net, na.rm=T)
+  zmax <- max(net, na.rm=T)
+  par(mgp=c(3, 1, 0), mar=c(11,11,3,3)) #bottom, left, top, and right ##CHANGE THESE VALUES IF DOING FORLOOP OF THE MATRIX PLOTS AND THEY DON'T FIT mar=c(11,8,3,5)) and change legend mar from 6 to 9
+  #par(mgp=c(3, 1, 0), mar=c(11,8,3,8))
+  image.plot(net, col = viridis(256), zlim=c(zmin,zmax), xaxt= 'n', yaxt = 'n', legend.cex = 7, legend.width = 1.3,legend.mar = 6, axis.args=list(cex.axis=2))
+  axis(1, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2, cex.axis=1.8)
+  axis(2, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2,  cex.axis=1.8)
+  
+  points(rep(-.05, nrow(net)),seq(0,1,length.out=n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
+  points(seq(0,1,length.out=nrow(net)),rep(-.05,n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
+}
 
 visualize_network_matrix_trago <- function(net, coati_ids){
   
   zmin <- min(net, na.rm=T)
   zmax <- max(net, na.rm=T)
   par(mgp=c(3, 1, 0), mar=c(9,9,3,1)) #bottom, left, top, and right
-  image.plot(net, col = viridis(256), zlim=c(zmin,zmax), xaxt= 'n', yaxt = 'n', legend.cex = 7, legend.width = 1.3,legend.mar = 6, axis.args=list(cex.axis=2))
+  #change legend.mar to 8 for plotting multiple together, not legend axis
+  image.plot(net, col = viridis(256), zlim=c(zmin,zmax), xaxt= 'n', yaxt = 'n', legend.cex = 7, 
+             legend.width = 1.3,legend.mar = 6, legend.line = 1, axis.args=list(cex.axis=2))
   axis(1, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2, cex.axis=1.8)
   axis(2, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2,  cex.axis=1.8)
   
   points(rep(-.078, nrow(net)),seq(0,1,length.out=n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
   points(seq(0,1,length.out=nrow(net)),rep(-.078,n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
 }
-
-
 
 
 #---------------------------------------------------------------------------

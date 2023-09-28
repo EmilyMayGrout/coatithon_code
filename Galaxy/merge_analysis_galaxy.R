@@ -203,12 +203,12 @@ plot(merge_xy$xs, merge_xy$ys, col = merge_xy$ID)
 #remove id column
 merge_xy_1 <- merge_xy[,-c(1,4)]
 
-#convert to latlon
-merge_latlon <- as.data.frame(utm.to.latlon(merge_xy_1, utm.zone = '17',southern_hemisphere=FALSE))
-merges_utm_latlon <- cbind(merge_latlon, merge_xy)
-merges_utm_latlon$event <- as.factor(merges_utm_latlon$event)
-
-save(merges_utm_latlon, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Galaxy/merges_utm_latlon.RData") 
+# #convert to latlon
+# merge_latlon <- as.data.frame(utm.to.latlon(merge_xy_1, utm.zone = '17',southern_hemisphere=FALSE))
+# merges_utm_latlon <- cbind(merge_latlon, merge_xy)
+# merges_utm_latlon$event <- as.factor(merges_utm_latlon$event)
+# 
+# save(merges_utm_latlon, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Galaxy/merges_utm_latlon.RData") 
 
 
 

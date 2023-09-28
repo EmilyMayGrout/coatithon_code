@@ -57,7 +57,7 @@ png(height = 400, width = 1280, units = 'px', filename = paste0(plot_dir,'50m_ch
 
 par(mfrow=c(1,3), mar = c(6,5,2,1)) #(bottom, left, top, right)
 subgroup_data <- get_subgroup_data(xs, ys, R)
-hist(subgroup_data$n_subgroups[all_tracked_idxs],main = "50m radii", xlab =  'Number of subgroups', col = "darkolivegreen3", breaks = seq(.5,11,1), cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 6))
+hist(subgroup_data$n_subgroups[all_tracked_idxs],main = "50m radii", xlab =  'Number of subgroups', col = "darkolivegreen3", breaks = seq(.5,11,1), cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 6), border = "transparent")
 
 subgroup_counts <- subgroup_data$subgroup_counts[,all_tracked_idxs]
 n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
@@ -65,8 +65,8 @@ n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
 s2 <- which(n_subgroups == 2)
 s3 <- which(n_subgroups == 3)
 
-hist(subgroup_counts[,s2], breaks=seq(0.5,11,1), xlab = 'Subgroup size', main = '2 subgroups', col = "darkolivegreen4", cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 11))
-hist(subgroup_counts[,s3], breaks=seq(0.5,11,1), xlab = 'Subgroup size', main = '3 subgroups', col = "darkolivegreen4", cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 11))
+hist(subgroup_counts[,s2], breaks=seq(0.5,11,1), xlab = 'Subgroup size', main = '2 subgroups', col = "darkolivegreen4", cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 11), border = "transparent")
+hist(subgroup_counts[,s3], breaks=seq(0.5,11,1), xlab = 'Subgroup size', main = '3 subgroups', col = "darkolivegreen4", cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 11), border = "transparent")
 
 dev.off()
 
@@ -257,8 +257,8 @@ for(t in 1:(n_times-1)){
   
   #determine if this time step is a split
   #if we have one group that goes to more than one, and there are no singletons subsequently, then it's a split
-  if((n_subgroups_now==1 | n_subgroups_now == 2)
-     & n_subgroups_later >n_subgroups_now
+  if((n_subgroups_now == 1 )
+     & n_subgroups_later > n_subgroups_now
      & singletons_later==0
   ){
     splits <- c(splits, t)
@@ -266,7 +266,7 @@ for(t in 1:(n_times-1)){
   
   #if we have more than one group, but rest are singletons, and number of singletons doesn't change (so we don't have just one loner moving off), then it's a split
   if(n_subgroups_now > 1 
-     & ((singletons_now+1) == n_subgroups_now | (singletons_now+2) == n_subgroups_now)
+     & ((singletons_now + 1) == n_subgroups_now )
      & n_subgroups_later > n_subgroups_now
      & singletons_now == singletons_later
   ){

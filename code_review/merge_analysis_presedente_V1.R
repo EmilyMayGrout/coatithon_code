@@ -6,8 +6,8 @@
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/'
-gps_file <- "presedente_xy_10min_level0.RData"
-id_file <- 'presedente_coati_ids.RData' 
+gps_file <- "presedente_xy_10min_level1.RData"
+id_file <- 'presedente_coati_ids_level1.RData' 
 
 library(fields)
 library(viridis)
@@ -58,32 +58,32 @@ for(t in 1:(n_times-1)){
     next
   }
   
-  #transfer NAs from now to later and later to now
+  #transfer NAs from now to previous and previous to now
   merge_group[which(is.na(subgroups_previously))] <- NA
   subgroups_previously[which(is.na(merge_group))] <- NA
   
-  #get number of subgroups now and in next time step (later)
+  #get number of subgroups now and in last time step (previous)
   n_merge_group <- length(unique(merge_group[!is.na(merge_group)]))
   n_subgroups_previously <- length(unique(subgroups_previously[!is.na(subgroups_previously)]))
   
-  #get number of singleton groups now and later
+  #get number of singleton groups now and previous
   singletons_now <- sum(table(merge_group)==1)
-  singletons_later <- sum(table(subgroups_previously)==1)
+  singletons_previous <- sum(table(subgroups_previously)==1)
   
   #determine if this time step is a merge
   #if we have one group that goes to more than one, and there are no singletons subsequently, then it's a split
-  if(n_merge_group==1 
-     & n_subgroups_previously >1
-     & singletons_later==0
+  if((n_merge_group == 1 )
+     & n_subgroups_previously > n_merge_group
+     & singletons_previous == 0
   ){
     merge <- c(merge, t)
   }
   
   #if we have more than one group, but rest are singletons, and number of singletons doesn't change (so we don't have just one loner moving off), then it's a split
   if(n_merge_group > 1 
-     & (singletons_now + 1) == n_merge_group
+     & ((singletons_now + 1) == n_merge_group)
      & n_subgroups_previously > n_merge_group
-     & singletons_now == singletons_later
+     & singletons_now == singletons_previous
   ){
     merge <- c(merge, t)
   }
@@ -100,7 +100,7 @@ for(i in 1:nrow(merge_df)){
   merge_group <- subgroup_data$ind_subgroup_membership[,t]
   subgroups_previously <- subgroup_data$ind_subgroup_membership[,t-1]
   
-  #transfer NAs from now to later and later to now
+  #transfer NAs from now to previous and previous to now
   merge_group[which(is.na(subgroups_previously))] <- NA
   subgroups_previously[which(is.na(merge_group))] <- NA
   
@@ -112,10 +112,10 @@ for(i in 1:nrow(merge_df)){
   merge_df$merge_group[i] <- list(orig_subgroup_members)
   
   #find the groups where the original members went
-  group_ids_later <- unique(subgroups_previously[orig_subgroup_members])
+  group_ids_previous <- unique(subgroups_previously[orig_subgroup_members])
   
-  for(j in 1:length(group_ids_later)){
-    group_id <- group_ids_later[j]
+  for(j in 1:length(group_ids_previous)){
+    group_id <- group_ids_previous[j]
     inds_in_group <- which(subgroups_previously==group_id)
     orig_inds_in_group <- intersect(inds_in_group, orig_subgroup_members) #only count the original group members 
     
@@ -193,7 +193,7 @@ time_diff$diff_time_hour <- as.numeric(time_diff$diff_time_hour)
 time_diff_pres <- time_diff
 
 #time_diff_gal was made in the merge_analysis script
-hist(time_diff_gal$diff_time_hour, col='green', add=TRUE)
+hist(time_diff_pres$diff_time_hour, col='green', add=TRUE)
 
 png(file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Presedente/split_duration_hist.png", width = 1000, height = 600, units = "px")
 

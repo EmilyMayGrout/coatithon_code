@@ -6,7 +6,7 @@ data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
 gps_file <- "presedente_xy_10min_level1.RData"
-id_file <- 'presedente_coati_ids.RData'
+id_file <- 'presedente_coati_ids_level1.RData'
 
 #list of Rs
 Rs <- c(10,20,30,40,50,100)
@@ -75,7 +75,7 @@ png(height = 400, width = 1280, units = 'px', filename = paste0(plot_dir,'50m_ch
 
 par(mfrow=c(1,3), mar = c(6,5,2,1)) #(bottom, left, top, right)
 subgroup_data <- get_subgroup_data(xs, ys, R)
-hist(subgroup_data$n_subgroups[all_tracked_idxs],main = "50m radii", xlab =  'Number of subgroups', col = "aquamarine3", breaks = seq(.5,16,1), cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 6))
+hist(subgroup_data$n_subgroups[all_tracked_idxs],main = "50m radii", xlab =  'Number of subgroups', col = "aquamarine3", breaks = seq(.5,16,1), cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 6), border = "transparent")
 
 subgroup_counts <- subgroup_data$subgroup_counts[,all_tracked_idxs]
 n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
@@ -83,8 +83,8 @@ n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
 s2 <- which(n_subgroups == 2)
 s3 <- which(n_subgroups == 3)
 
-hist(subgroup_counts[,s2], breaks=seq(0.5,16,1), xlab = 'Subgroup size', main = '2 subgroups', col = "aquamarine4", cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 16))
-hist(subgroup_counts[,s3], breaks=seq(0.5,16,1), xlab = 'Subgroup size', main = '3 subgroups', col = "aquamarine4", cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 16))
+hist(subgroup_counts[,s2], breaks=seq(0.5,16,1), xlab = 'Subgroup size', main = '2 subgroups', col = "aquamarine4", cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 16), border = "transparent")
+hist(subgroup_counts[,s3], breaks=seq(0.5,16,1), xlab = 'Subgroup size', main = '3 subgroups', col = "aquamarine4", cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 16), border = "transparent")
 
 dev.off()
 
@@ -119,7 +119,7 @@ par(mgp=c(3, 1, 0), mar=c(11,10,4,2))
 ffnet_reorder <- ff_net[new_order, new_order]
 png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'subgroup_network_onlyGroup_level1.png'))
 
-visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
+visualize_network_matrix_presedente(ffnet_reorder, coati_ids[new_order,])
 
 dev.off()
 
@@ -154,7 +154,7 @@ within_group_data <- get_proximity_data(subset_x, subset_y, 10)
 new_order <- c(1,9,10,3,4,12,2,11,7,5,13,16,8,15,6,14)
 
 png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'withingroup_network_onlyGroup_level1.png'))
-visualize_network_matrix(within_group_data$proximity_net, coati_ids[new_order,])
+visualize_network_matrix_presedente(within_group_data$proximity_net, coati_ids[new_order,])
 dev.off()
 
 
@@ -242,7 +242,7 @@ for(t in 1:(n_times-1)){
   
   #determine if this time step is a split
   #if we have one group that goes to more than one, and there are no singletons subsequently, then it's a split
-  if((n_subgroups_now==1 | n_subgroups_now == 2)
+  if((n_subgroups_now==1 )
      & n_subgroups_later >n_subgroups_now
      & singletons_later==0
   ){
@@ -251,7 +251,7 @@ for(t in 1:(n_times-1)){
   
   #if we have more than one group, but rest are singletons, and number of singletons doesn't change (so we don't have just one loner moving off), then it's a split
   if(n_subgroups_now > 1 
-     & ((singletons_now+1) == n_subgroups_now | (singletons_now+2) == n_subgroups_now)
+     & ((singletons_now+1) == n_subgroups_now )
      & n_subgroups_later > n_subgroups_now
      & singletons_now == singletons_later
   ){
@@ -365,7 +365,7 @@ p_dyad_together_reorder <- p_dyad_together[new_order, new_order]
 
 png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'subgroup_network_splits.png'))
 par(mfrow=c(1,1), mar = c(1,2,1,1))#(bottom, left, top, right)
-visualize_network_matrix(p_dyad_together_reorder, coati_ids[new_order,])
+visualize_network_matrix_presedente(p_dyad_together_reorder, coati_ids[new_order,])
 dev.off()
 
 

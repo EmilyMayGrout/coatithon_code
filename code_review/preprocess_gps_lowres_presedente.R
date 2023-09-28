@@ -1,9 +1,11 @@
 #this script will read in the movebank csv file, make it into raw txt files and
 #output a preprocess r data file for the low res data (1 gps point/10 mins)
 library(lubridate)
+library(sf)
+library(tidyverse)
 
 #load useful functions
-source('C:/Users/egrout/Dropbox/coatithon/coatithon_code/coati_function_library.R')
+source('C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/coati_function_library_V1.R')
 
 firsttime <- as.POSIXct('2023-01-19 11:00', tz = 'UTC')
 lasttime <-  as.POSIXct('2023-02-02 23:00', tz = 'UTC')
@@ -97,14 +99,12 @@ for(i in 1:length(all_files)){
   #take the modulus 10 (divide by 10 and get remainder) to find values which are within 2 min of a 10 min interval
   tagdata <- tagdata[which(minute(tagdata$datetime) %% 10 <= 2),]
   
-  
   #round down the times to the nearest 10 mins
   tagdata$roundtime <- floor_date(tagdata$datetime,unit="10 minutes")
   highresdata$roundtime <- highresdata$datetime #need this for the matching later
   
   #add in the high res data
   tagdata <- rbind(tagdata, highresdata)
-  
   
   #match times to get lons and lats at each time for that individual
   lon <- tagdata$lon[match(ts, tagdata$roundtime)]
@@ -113,12 +113,22 @@ for(i in 1:length(all_files)){
   lats[i,] <- lat
   lons[i,] <- lon
   
-  #convert to UTM
-  eastsNorths <- latlon.to.utm(LonsLats = cbind(lon, lat), utm.zone = 17, southern_hemisphere = F)
+  #to convert to UTM, need to use sf function and for this we need to combine the matrices rows to a dataframe
+  combined_df <- data.frame(lat = lats[i,], lon = lons[i,])
   
+  #convert NA's to zero for sf functions to work
+  combined_df$lon[is.na(combined_df$lon)] <- 0
+  combined_df$lat[is.na(combined_df$lat)] <- 0
+  
+  #convert to UTM
+  #first need to give the latlon data the correct CRS so it converts to UTM correctly
+  latlon_i <- st_as_sf(x=combined_df, coords=c("lon", "lat"), crs="+proj=longlat +datum=WGS84")
+  #convert to UTM
+  utm_i <- st_transform(latlon_i, crs="+proj=utm +zone=17 +north +datum=WGS84 +units=m") #convert UTM to lat/long - coordinates are stored in a geometry column of class 'sfc_POINT'
+ 
   #store eastings and northings in xs and ys matrices
-  xs[i,] <- eastsNorths[,1]
-  ys[i,] <- eastsNorths[,2]
+  xs[i,] <- unlist(map(utm_i$geometry,1))
+  ys[i,] <- unlist(map(utm_i$geometry,2))
   
 }
 

@@ -80,6 +80,10 @@ diag(pres_matrix_full3m) <- NA
 
 pres_inds_neworder <- c("B12.L001", "B17.L001", "B16.L001", "B09.L001", "B03.L001", "B01.L001", "B02.L001", "B04.L001", "B14.L001", "B10.L001", "B07.L001", "B05.L001", "B06.L001", "B13.L001", "B11.L001", "B15.L001") 
 
+
+#ardern, merkel, truss, moscoso, cleopatra, may, peron, gillard, torrijos, khan, gandhi, obama, castro, mujica, zelenskyy, meir
+pres_inds_neworder_agesex <- c("B12.L001", "B17.L001", "B13.L001", "B16.L001", "B09.L001", "B14.L001",  "B07.L001", "B11.L001", "B15.L001","B10.L001", "B03.L001", "B01.L001", "B02.L001", "B04.L001",  "B05.L001", "B06.L001") 
+
 t <- coati_ids[-c(5, 8, 9, 10, 18, 21),] 
 t$n <- 1:nrow(t) 
 
@@ -163,24 +167,25 @@ t7 <- mantel(xdis = pres_matrix, ydis = pres_matrix_full3m, method = "pearson", 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #-----------------------------------------------------------------------
+#reordering the matrices to age/sex class based on Ben's comments
+
+#ardern, merkel, truss, moscoso, cleopatra, may, peron, gillard, torrijos, khan, gandhi, obama, mujica, castro, zelenskyy, meir
+pres_inds_neworder_agesex <- c("B12.L001", "B17.L001", "B13.L001", "B16.L001", "B09.L001", "B14.L001",  "B07.L001", "B11.L001", "B15.L001","B10.L001", "B03.L001", "B01.L001","B04.L001",  "B02.L001",  "B05.L001", "B06.L001") 
+pres_neworder_indx_agesex <- c(1,9,15,10,3,7,13,6,14,5,4,12,11,2,16,8)
+gen_matrix_agesex <- all_matrix[pres_inds_neworder_agesex, pres_inds_neworder_agesex] 
+gen_matrix_agesex  <- as.matrix(gen_matrix_agesex) 
+diag(gen_matrix_agesex) <- NA 
+n_inds <- 16 
+png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'pres_genetics_agesexorder.png')) 
+visualize_network_matrix_presedente(gen_matrix_agesex, coati_ids_cut[pres_neworder_indx_agesex,]) 
+dev.off() 
+#-----------------------------------------------------------------------
+
+
+
+
+
+
+
+

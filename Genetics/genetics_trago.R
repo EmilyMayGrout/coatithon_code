@@ -106,7 +106,7 @@ mtext("4) Genetics - Triadic Maximum Likelihood method", cex = 1.2)
 #dev.off()
 
 
-#t3 <- mrqap.dsp(trago_matrix~age_matrix+sex_matrix+gen_matrix, directed="undirected", diagonal = F) 
+t3 <- mrqap.dsp(trago_matrix~age_matrix+sex_matrix+gen_matrix, directed="undirected", diagonal = F) 
 
 
 

@@ -1,6 +1,5 @@
 #this script is bringing the genetics for all coatis into the same matrices
 
-
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/' 
 #read in library of functions 
 setwd(code_dir) 
@@ -17,6 +16,9 @@ all_matrix <- all_matrix[,-1]
 load("C:/Users/egrout/Dropbox/coatithon/processed/2022/trago/trago_coati_ids.RData")
 #adding Gin
 trago_withGin <- rbind(coati_ids, list('Gin', 'na', 'Adult', 'Female', '#FF0000'))
+#adding Absynth
+trago_withGin <- rbind(trago_withGin, list('Absynthe', 'na', 'Adult', 'Female', '#FF0000'))
+
 
 load("C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/galaxy_coati_ids.RData")
 #adding Sol to coati_ids
@@ -35,9 +37,10 @@ pres_ids <- coati_ids
 # G37 - Tiger 
 # G38 - Limoncello 
 # G39 - Cerveza 
+# Absinthe.L001 - Absinthe
 
-trago_neworder_indx <- c(2,3,7:9,1,5,4,6,10) 
-trago_inds_neworder <- c("G36", "G38", "G34", "G39", "G35", "G37", "G32", "G33", "G8", "G9") 
+trago_neworder_indx <- c(2,3,7:9,1,5,4,6,10,11) 
+trago_inds_neworder <- c("G36", "G38", "G34", "G39", "G35", "G37", "G32", "G33", "G8", "G9", "Absinthe.L001") 
 trago_withGin_ordered <- trago_withGin[trago_neworder_indx,]
 
 # G1 -  Sol 
@@ -92,14 +95,14 @@ all_ids <- rbind(trago_withGin_ordered, galaxy_withSOl_ordered, pres_ids_ordered
 
 #then need to match this order with the genetic codes to subset the data
 
-all_neworder <- c("G36", "G38", "G34", "G39", "G35", "G37", "G32", "G33", "G8", "G9","G10", "G18", "G1", "G15C", "G16", "G3", "G15B","G12", "G13", "G17", "G11", "G14", "B12.L001", "B17.L001", "B16.L001", "B09.L001", "B03.L001", "B01.L001", "B02.L001", "B04.L001", "B14.L001", "B10.L001", "B07.L001", "B05.L001", "B06.L001", "B13.L001", "B11.L001", "B15.L001", "B08.L001", "B18.L001", "B19.L001", "B21.L001", "B20.L001", "B22.L001") 
+all_neworder <- c("G36", "G38", "G34", "G39", "G35", "G37", "G32", "G33", "G8", "G9","Absinthe.L001", "G10", "G18", "G1", "G15C", "G16", "G3", "G15B","G12", "G13", "G17", "G11", "G14", "B12.L001", "B17.L001", "B16.L001", "B09.L001", "B03.L001", "B01.L001", "B02.L001", "B04.L001", "B14.L001", "B10.L001", "B07.L001", "B05.L001", "B06.L001", "B13.L001", "B11.L001", "B15.L001", "B08.L001", "B18.L001", "B19.L001", "B21.L001", "B20.L001", "B22.L001") 
 
 gen_matrix <- all_matrix[all_neworder, all_neworder]  
 gen_matrix <- as.matrix(gen_matrix) 
 diag(gen_matrix) <- NA  
 
 #need to change the rep value to -.018 in the visualize_network_matrix_galaxy function for the agesex dots to be in correct place
-n_inds <- 44 
+n_inds <- 45 
 png(height = 1200, width = 1300, units = 'px', filename = 'C:/Users/egrout/Dropbox/coatithon/results/all_genetics.png')  
 visualize_network_matrix_galaxy(gen_matrix, all_ids)  
 dev.off()  
