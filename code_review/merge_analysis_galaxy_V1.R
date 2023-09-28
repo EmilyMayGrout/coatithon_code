@@ -4,7 +4,7 @@
 #TODO: if more than 3 subgroups present, need to generalize
 
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
-code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
+code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/'
 gps_file <- "galaxy_xy_10min_level1.RData"
 id_file <- 'coati_ids.RData' 
@@ -12,10 +12,11 @@ id_file <- 'coati_ids.RData'
 library(fields)
 library(viridis)
 library(hms)
+library(sf)
 
 #read in library of functions
 setwd(code_dir)
-source('coati_function_library.R')
+source('coati_function_library_V1.R')
 
 #load data
 setwd(data_dir)
@@ -204,12 +205,30 @@ plot(merge_xy$xs, merge_xy$ys, col = merge_xy$ID)
 merge_xy_1 <- merge_xy[,-c(1,4)]
 
 # #convert to latlon
-# merge_latlon <- as.data.frame(utm.to.latlon(merge_xy_1, utm.zone = '17',southern_hemisphere=FALSE))
-# merges_utm_latlon <- cbind(merge_latlon, merge_xy)
-# merges_utm_latlon$event <- as.factor(merges_utm_latlon$event)
-# 
-# save(merges_utm_latlon, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Galaxy/merges_utm_latlon.RData") 
 
+#convert NA's to zero for sf functions to work
+merge_xy_1$xs[is.na(merge_xy_1$xs)] <- 0
+merge_xy_1$ys[is.na(merge_xy_1$ys)] <- 0
+
+merge_utm <- st_as_sf(x=merge_xy_1, coords=c("xs", "ys"), crs="+proj=utm +zone=17 +north +datum=WGS84 +units=m")
+#convert to UTM
+merge_latlon <- st_transform(merge_utm, crs= "+proj=longlat +datum=WGS84") #convert UTM to lat/long - coordinates are stored in a geometry column of class 'sfc_POINT'
+
+#store lat and long in the dataframe with the id and utm coords
+lon <- unlist(map(merge_latlon$geometry,1)) #longitude is X
+lat <- unlist(map(merge_latlon$geometry,2)) #latitude is Y
+
+merges_utm_latlon <- cbind(merge_xy, lon, lat)
+
+#change the rows to 0 if lat or lon values are 0
+merges_utm_latlon$lon[merges_utm_latlon$lat == 0] <- 0
+merges_utm_latlon[merges_utm_latlon == 0] <-  NA
+
+merges_utm_latlon$event <- as.factor(merges_utm_latlon$event)
+
+save(merges_utm_latlon, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Galaxy/merges_utm_latlon.RData") 
+
+#load("C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Galaxy/merges_utm_latlon.RData")
 
 
 

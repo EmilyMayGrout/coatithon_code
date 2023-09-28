@@ -73,9 +73,14 @@ dev.off()
 # Figure 2a,b,c: Characterizing the subgroup patterns when group was split into 2 or 3 subgroups
 png(height = 400, width = 1280, units = 'px', filename = paste0(plot_dir,'50m_charecterisations.png'))
 
+blue <- rgb(69, 119, 116, maxColorValue = 255)
+
+lightblue <- rgb(128, 218, 178, maxColorValue = 255)
+
 par(mfrow=c(1,3), mar = c(6,5,2,1)) #(bottom, left, top, right)
+par(mgp = c(3,0,-1.2))
 subgroup_data <- get_subgroup_data(xs, ys, R)
-hist(subgroup_data$n_subgroups[all_tracked_idxs],main = "50m radii", xlab =  'Number of subgroups', col = "aquamarine3", breaks = seq(.5,16,1), cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 6), border = "transparent")
+hist(subgroup_data$n_subgroups[all_tracked_idxs],main = "", xlab =  'Number of subgroups (radius = 50 meters)', col = "aquamarine3", breaks = seq(.5,16,1), cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 6), border = lightblue, las = 1)
 
 subgroup_counts <- subgroup_data$subgroup_counts[,all_tracked_idxs]
 n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
@@ -83,8 +88,8 @@ n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
 s2 <- which(n_subgroups == 2)
 s3 <- which(n_subgroups == 3)
 
-hist(subgroup_counts[,s2], breaks=seq(0.5,16,1), xlab = 'Subgroup size', main = '2 subgroups', col = "aquamarine4", cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 16), border = "transparent")
-hist(subgroup_counts[,s3], breaks=seq(0.5,16,1), xlab = 'Subgroup size', main = '3 subgroups', col = "aquamarine4", cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 16), border = "transparent")
+hist(subgroup_counts[,s2], breaks=seq(0.5,16,1), xlab = 'Subgroup size (N subgroups = 2)', main = '', col = blue, cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 16), border = "aquamarine4", las = 1)
+hist(subgroup_counts[,s3], breaks=seq(0.5,16,1), xlab = 'Subgroup size (N subgroups = 3)', main = '', col = blue, cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 16), border = "aquamarine4", las = 1)
 
 dev.off()
 

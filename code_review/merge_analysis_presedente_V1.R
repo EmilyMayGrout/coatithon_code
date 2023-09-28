@@ -229,3 +229,65 @@ max(time_diff_pres$diff_time_hour)
 
 
 
+
+#------------------------------------------------------------------
+#get latlon coords for merge events
+
+#get the index of when there was a split
+merge_indx <- merge_df$t
+
+#find the x and y UTM coords of those splits
+merge_xs <- xs[,merge_indx]
+merge_ys <- ys[,merge_indx]
+
+#make this into a dataframe to reshape it so its not a matrix and that we can join the x and y coords together for the mapping
+merge_xs <- as.data.frame(merge_xs) 
+merge_xs <- reshape(merge_xs, varying=1:ncol(merge_xs), v.names="xs", direction ="long", idvar = "ID")
+
+merge_ys <- as.data.frame(merge_ys)
+merge_ys <- reshape(merge_ys, varying=1:ncol(merge_ys), v.names="xs", direction ="long", idvar = "ID")
+
+merge_xy <- cbind(merge_xs, merge_ys)
+merge_xy <- merge_xy[,-c(3,4)]
+colnames(merge_xy) <- c("event", "xs","ys", "ID")
+
+#quick plot of merge locations 
+plot(merge_xy$xs, merge_xy$ys, col = merge_xy$ID) 
+
+#remove id column
+merge_xy_1 <- merge_xy[,-c(1,4)]
+
+# #convert to latlon
+
+#convert NA's to zero for sf functions to work
+merge_xy_1$xs[is.na(merge_xy_1$xs)] <- 0
+merge_xy_1$ys[is.na(merge_xy_1$ys)] <- 0
+
+merge_utm <- st_as_sf(x=merge_xy_1, coords=c("xs", "ys"), crs="+proj=utm +zone=17 +north +datum=WGS84 +units=m")
+#convert to UTM
+merge_latlon <- st_transform(merge_utm, crs= "+proj=longlat +datum=WGS84") #convert UTM to lat/long - coordinates are stored in a geometry column of class 'sfc_POINT'
+
+#store lat and long in the dataframe with the id and utm coords
+lon <- unlist(map(merge_latlon$geometry,1)) #longitude is X
+lat <- unlist(map(merge_latlon$geometry,2)) #latitude is Y
+
+merges_utm_latlon <- cbind(merge_xy, lon, lat)
+
+#change the rows to 0 if lat or lon values are 0
+merges_utm_latlon$lon[merges_utm_latlon$lat == 0] <- 0
+merges_utm_latlon[merges_utm_latlon == 0] <-  NA
+
+merges_utm_latlon$event <- as.factor(merges_utm_latlon$event)
+
+save(merges_utm_latlon, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/results/merge_results/Presedente/merges_utm_latlon.RData") 
+
+
+
+
+
+
+
+
+
+
+
