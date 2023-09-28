@@ -69,6 +69,15 @@ time_df <- data.frame(ts, 1:length(ts))
 names(time_df)[2] <- "time"
 test <- left_join(test, time_df)
 
+#filter test df to 05.01.22 for Alie to look at
+start_time <- as.POSIXct("2022-01-05 11:00:00")
+end_time <- as.POSIXct("2022-01-05 23:00:00")
+
+# Subset the dataframe to include only rows within the date range
+subset_df <- test[test$ts >= start_time & test$ts <= end_time, ]
+
+write.csv(subset_df, file = "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/050122_gal_subgrouping.csv", row.names = FALSE)
+#read.csv("C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/050122_gal_subgrouping.csv")
 
 library(dplyr)
 test$subgroup_mod <- case_when(
@@ -136,7 +145,7 @@ g3 <- ggplot(data = test, aes(x = Time,
   theme_classic()
 
 saveRDS(g3, file = paste0(plot_dir,"sub_groupings_over_time_50m_Dec29th_Jan1st.rds"))
-readRDS(file = "C:/Users/egrout/Dropbox/coatithon/results/sub_groupings_over_time_50m_Dec29th_Jan1st.rds")
+readRDS(file = "C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/sub_groupings_over_time_50m_Dec29th_Jan1st.rds")
 
 png(height = 500, width = 800, units = 'px', filename = paste0(plot_dir,'subgroup_4days.png'))
 g3
