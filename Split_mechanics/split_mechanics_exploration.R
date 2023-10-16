@@ -287,6 +287,29 @@ dev.off()
 
 
 
+#filter dataframe to columns needed for the distance travelled and order the subgroup by size (so the larger subgroup is on the X axis and the smaller subgroup is on the Y axis)
+
+fission_df <- data.frame(cbind(events$A_during_disp[fis], events$B_during_disp[fis], events$A_subgroup_size[fis], events$B_subgroup_size[fis], events$AB_before_disp[fis]))
+colnames(fission_df) <- c("A_during_disp", "B_during_disp", "A_subgroup_size", "B_subgroup_size", "AB_before_disp")
+
+#create column for the distnace travelled for the larger subgroup
+fission_df$Distance_Larger_Group <- ifelse(fission_df$A_subgroup_size >= fission_df$B_subgroup_size, fission_df$A_during_disp, fission_df$B_during_disp)
+#create column for the distance travelled of the smaller subgroup
+fission_df$Distance_Smaller_Group <- ifelse(fission_df$A_subgroup_size >= fission_df$B_subgroup_size,fission_df$B_during_disp, fission_df$A_during_disp)
+
+png(height = 800, width = 800, units = 'px', filename = paste0(plot_dir,'subgroup_dist_travelled_duringfission_groupsizeorder.png'))
+par(mar = c(8,8,2,2))
+plot(fission_df$Distance_Larger_Group, fission_df$Distance_Smaller_Group, pch = 20, xlab = "Distance travelled by larger subgroup (m)", ylab = "Distance travelled by smaller subgroup (m)", main = '', cex = 4, cex.axis = 2.5, cex.lab = 2, col = "darkolivegreen3",mgp=c(5,2,0))
+#abline(lm(fission_df$Distance_Smaller_Group ~ fission_df$Distance_Larger_Group))
+dev.off()
+
+png(height = 800, width = 800, units = 'px', filename = paste0(plot_dir,'subgroup_dist_travelled_beforefission_groupsizeorder.png'))
+par(mar = c(8,8,2,2), mgp = c(3,0,-1.7))
+hist(fission_df$AB_before_disp, main = '', xlab = "Distance traveled 10 minutes before fission (m)", ylab = '', col = "darkolivegreen",cex.axis = 2.5, cex.lab = 2, cex.main = 3, breaks = 25)
+dev.off()
+
+
+
 ### PLOTTING EACH AGE CLASS IN ONE GRAPH ###
 #changing the xlim for Galaxy to 60 (Presedente is 80)
 a <- 0.5
@@ -382,7 +405,7 @@ png(height = 1000, width = 2000, units = 'px', filename = paste0(plot_dir,'subgr
 par(mfrow=c(1,2), mar = c(10,10,10,10),(mgp=c(3,5,1))) #bottom, left, top, right)
 
 #plot 1:
-plot(events$A_during_disp[fus], events$B_during_disp[fus], pch = 20, xlab = "sub-group A", ylab = "sub-group B", main = 'Distance traveled during fusion event (m)', col = "cadetblue4",cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3,mgp=c(5,2,.5))
+plot(events$A_during_disp[fus], events$B_during_disp[fus], pch = 20, xlab = "", ylab = "", main = 'Distance traveled during fusion event (m)', col = "cadetblue4",cex = 4, cex.axis = 3, cex.lab = 3, cex.main = 3,mgp=c(5,2,.5))
 abline(lm(events$B_during_disp[fus] ~ events$A_during_disp[fus]))
 
 #plot 2:
