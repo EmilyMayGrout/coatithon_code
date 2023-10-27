@@ -77,6 +77,18 @@ end_time <- as.POSIXct("2022-01-05 23:00:00")
 subset_df <- test[test$ts >= start_time & test$ts <= end_time, ]
 
 write.csv(subset_df, file = "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/050122_gal_subgrouping.csv", row.names = FALSE)
+
+
+#filter test df to 05.01.22 for Alie to look at
+start_time <- as.POSIXct("2022-01-06 11:00:00")
+end_time <- as.POSIXct("2022-01-06 23:00:00")
+
+# Subset the dataframe to include only rows within the date range
+subset_df <- test[test$ts >= start_time & test$ts <= end_time, ]
+
+write.csv(subset_df, file = "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/060122_gal_subgrouping.csv", row.names = FALSE)
+
+
 #read.csv("C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/050122_gal_subgrouping.csv")
 
 library(dplyr)
