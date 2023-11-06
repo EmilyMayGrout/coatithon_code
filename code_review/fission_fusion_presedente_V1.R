@@ -53,7 +53,7 @@ all_tracked_idxs <- which(n_tracked==n_inds)
 
 #Figure S2b: number of sub groups when the radius is changed (graph put in dropbox results folder) 
 png(height = 1080, width = 480, units = 'px', filename = paste0(plot_dir,'n_subgroups_hists_onlyGroup_level1.png'))
-par(mfrow=c(6,1), mar = c(6,5,1,1))
+par(mfrow=c(6,1), mar = c(8,7,1,1), mgp=c(4,1,0))
 
 for (i in 1:length(Rs)){
   
@@ -63,7 +63,8 @@ for (i in 1:length(Rs)){
   if(i == length(Rs)){
     xlab <- 'Number of subgroups'
   }
-  hist(subgroup_data$n_subgroups[all_tracked_idxs],main = paste(R, "m"), xlab = xlab, col = "aquamarine3", breaks = seq(.5,22,1), cex.lab = 2, cex.main = 2, cex.axis=2, freq = FALSE, ylim=c(0,.7), xlim = c(0,16))
+  hist(subgroup_data$n_subgroups[all_tracked_idxs],main = paste(R, "m"), xlab = xlab, col = "aquamarine3", breaks = seq(.5,22,1), cex.lab = 2.5, cex.main = 2, cex.axis=2, freq = FALSE, ylim=c(0,.7), xlim = c(0,16), yaxt = "n")
+  axis(2, at = c(0,0.3,0.6), cex.axis = 2, las = 1)
   
 }
 dev.off()
@@ -77,10 +78,11 @@ blue <- rgb(69, 119, 116, maxColorValue = 255)
 
 lightblue <- rgb(128, 218, 178, maxColorValue = 255)
 
-par(mfrow=c(1,3), mar = c(6,5,2,1)) #(bottom, left, top, right)
-par(mgp = c(3,0,-1.2))
+par(mfrow=c(1,3), mar = c(6,7,2,1)) #(bottom, left, top, right)
+par(mgp = c(4,0.4,-1.2)) #axis title, axis labels, axis line
 subgroup_data <- get_subgroup_data(xs, ys, R)
-hist(subgroup_data$n_subgroups[all_tracked_idxs],main = "", xlab =  'Number of subgroups (radius = 50 meters)', col = "aquamarine3", breaks = seq(.5,16,1), cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 6), border = lightblue, las = 1)
+hist(subgroup_data$n_subgroups[all_tracked_idxs],main = "", xlab =  'Number of subgroups (radius = 50m)', col = "aquamarine3", breaks = seq(.5,16,1), cex.lab = 2.9, cex.main = 3, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 6), border = lightblue, las = 1,yaxt = "n")
+axis(2, at = c(0,0.3,0.6), cex.axis = 3, las = 1)
 
 subgroup_counts <- subgroup_data$subgroup_counts[,all_tracked_idxs]
 n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
@@ -88,8 +90,10 @@ n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
 s2 <- which(n_subgroups == 2)
 s3 <- which(n_subgroups == 3)
 
-hist(subgroup_counts[,s2], breaks=seq(0.5,16,1), xlab = 'Subgroup size (N subgroups = 2)', main = '', col = blue, cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 16), border = "aquamarine4", las = 1)
-hist(subgroup_counts[,s3], breaks=seq(0.5,16,1), xlab = 'Subgroup size (N subgroups = 3)', main = '', col = blue, cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 16), border = "aquamarine4", las = 1)
+hist(subgroup_counts[,s2], breaks=seq(0.5,16,1), xlab = 'Subgroup size (N subgroups = 2)', main = '', col = blue, cex.lab = 3, cex.main = 2.9, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 16), border = "aquamarine4", las = 1,yaxt = "n")
+axis(2, at = c(0,0.3,0.6), cex.axis = 3, las = 1)
+hist(subgroup_counts[,s3], breaks=seq(0.5,16,1), xlab = 'Subgroup size (N subgroups = 3)', main = '', col = blue, cex.lab = 3, cex.main = 2.9, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 16), border = "aquamarine4", las = 1,yaxt = "n")
+axis(2, at = c(0,0.3,0.6), cex.axis = 3, las = 1)
 
 dev.off()
 
@@ -118,6 +122,10 @@ diag(ff_net) <- NA
 
 #order - without Wildflower AND males: 
 new_order <- c(1,9,10,3,4,12,2,11,7,5,13,16,8,15,6,14)
+
+#save matrix for mrqap analysis
+write.table(ffnet_reorder,file="C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/presedente_matrix_10min_proptimeinsamesubgroup_50m.txt",row.names=FALSE)
+
 
 par(mgp=c(3, 1, 0), mar=c(11,10,4,2))
 

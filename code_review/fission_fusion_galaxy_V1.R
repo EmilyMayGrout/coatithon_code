@@ -55,24 +55,26 @@ all_tracked_idxs <- which(n_tracked==n_inds)
 # Figure 2a,b,c: Characterizing the subgroup patterns when group was split into 2 or 3 subgroups
 png(height = 400, width = 1280, units = 'px', filename = paste0(plot_dir,'50m_charecterisations.png'))
 
-par(mfrow=c(1,3), mar = c(6,5,2,1)) #(bottom, left, top, right)
-par(mgp = c(3,0,-1.2))
+par(mfrow=c(1,3), mar = c(6,7,2,1)) #(bottom, left, top, right)
+par(mgp = c(4,0.4,-1.2)) #axis title, axis labels, axis line
 #for dark olivegreen3 match
 green <- rgb(120, 170, 80, maxColorValue = 255)
 
 darkgreen <- rgb(120, 160, 80, maxColorValue = 255)
 
 subgroup_data <- get_subgroup_data(xs, ys, R)
-hist(subgroup_data$n_subgroups[all_tracked_idxs], main = "", xlab =  'Number of subgroups (radius = 50 meters)', col = green, breaks = seq(.5,11,1), cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 6), border = "darkolivegreen3", las = 1)
-
+hist(subgroup_data$n_subgroups[all_tracked_idxs], main = "", xlab =  'Number of subgroups (radius = 50m)', col = green, breaks = seq(.5,11,1), cex.lab = 2.9, cex.main = 3, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 6), border = "darkolivegreen3", las = 1, yaxt = "n")
+axis(2, at = c(0,0.3,0.6), cex.axis = 3, las = 1)
 subgroup_counts <- subgroup_data$subgroup_counts[,all_tracked_idxs]
 n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
 
 s2 <- which(n_subgroups == 2)
 s3 <- which(n_subgroups == 3)
 
-hist(subgroup_counts[,s2], breaks=seq(0.5,11,1), main = "", xlab = 'Subgroup size (N subgroups = 2)',  col = "darkolivegreen", cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 11), border = darkgreen, las = 1)
-hist(subgroup_counts[,s3], breaks=seq(0.5,11,1), main = "", xlab = 'Subgroup size (N subgroups = 3)',  col = "darkolivegreen", cex.lab = 2, cex.main = 3, cex.axis=2, freq = FALSE, ylim=c(0,.6), xlim = c(0, 11), border = darkgreen, las = 1)
+hist(subgroup_counts[,s2], breaks=seq(0.5,11,1), main = "", xlab = 'Subgroup size (N subgroups = 2)',  col = "darkolivegreen", cex.lab = 2.9, cex.main = 3, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 11), border = darkgreen, las = 1, yaxt = "n")
+axis(2, at = c(0,0.3,0.6), cex.axis = 3,las = 1)
+hist(subgroup_counts[,s3], breaks=seq(0.5,11,1), main = "", xlab = 'Subgroup size (N subgroups = 3)',  col = "darkolivegreen", cex.lab = 2.9, cex.main = 3, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 11), border = darkgreen, las = 1, yaxt = "n")
+axis(2, at = c(0,0.3,0.6), cex.axis = 3, las = 1)
 
 dev.off()
 
@@ -81,7 +83,7 @@ dev.off()
 #Figure S2a: Number of sub groups when the radius is changed (graph put in dropbox results folder)
 
 png(height = 1080, width = 480, units = 'px', filename = paste0(plot_dir,'n_subgroups_hists_level1.png'))
-par(mfrow=c(6,1), mar = c(6,5,1,1))
+par(mfrow=c(6,1), mar = c(8,7,1,1), mgp=c(4,1,0))
 
 for (i in 1:length(Rs)){
   
@@ -91,16 +93,18 @@ for (i in 1:length(Rs)){
   if(i == length(Rs)){
     xlab <- 'Number of subgroups'
   }
-  hist(subgroup_data$n_subgroups[all_tracked_idxs],main = paste(R, "m"), xlab = xlab, col = "darkolivegreen3", breaks = seq(.5,11,1), cex.lab = 2, cex.main = 2, cex.axis=2, freq = FALSE, ylim=c(0,.7))
+  hist(subgroup_data$n_subgroups[all_tracked_idxs],main = paste(R, "m"), xlab = xlab, col = "darkolivegreen3", breaks = seq(.5,11,1), cex.lab = 2.5, cex.main = 2, cex.axis=2, freq = FALSE, ylim=c(0,.7), yaxt = "n")
+  axis(2, at = c(0,0.3,0.6), cex.axis = 2, las = 1)
   
 }
 dev.off()
 
 #--------------------------------------------------------------
+R <- 50
 
 #Figure 3a: which individuals tend to be in the same subgroup
 
-subgroup_data <- get_subgroup_data(xs, ys, R=50)
+subgroup_data <- get_subgroup_data(xs, ys, R= R)
 
 ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
 
@@ -120,10 +124,13 @@ for(i in 1:n_inds){
 diag(ff_net) <- NA
 new_order <- c(5,1,11,4,10,2, 3,6,7,8,9)
 ffnet_reorder <- ff_net[new_order, new_order]
+#save matrix for mrqap analysis
+write.table(ffnet_reorder,file="C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/gal_matrix_10min_proptimeinsamesubgroup_50m.txt",row.names=FALSE)
+
 
 png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'subgroup_network_level1.png'))
 
-visualize_network_matrix(ffnet_reorder, coati_ids[new_order,])
+visualize_network_matrix_galaxy(ffnet_reorder, coati_ids[new_order,])
 dev.off()
 
 #--------------------------------------------------------------------------
@@ -135,7 +142,6 @@ xs_nogus <- xs[-c(5), ]
 ys_nogus <- ys[-c(5), ]
 coati_ids_nogus <- coati_ids[-c(5),]
 
-R = 50
 subgroup_data <- get_subgroup_data(xs_nogus, ys_nogus, R)
 
 n_inds <- nrow(xs_nogus)
@@ -160,7 +166,7 @@ within_group_data <- get_proximity_data(subset_x, subset_y, 10)
 new_order <- c(1,10,4,9,2,3,5,6,7,8)
 
 png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'withingroup_network_withoutgus_level1.png'))
-visualize_network_matrix(within_group_data$proximity_net, coati_ids_nogus[new_order,])
+visualize_network_matrix_galaxy(within_group_data$proximity_net, coati_ids_nogus[new_order,])
 dev.off()
 
 #there's an additional 42 data points but the proximity values don't change much
@@ -232,8 +238,8 @@ n_tracked <- colSums(!is.na(xs))
 #indexes to time points where all individuals were tracked
 all_tracked_idxs <- which(n_tracked==n_inds)
 
-#get the subgroup data when radius is 50m
-subgroup_data <- get_subgroup_data(xs, ys, 50)
+#get the subgroup data when radius is R m
+subgroup_data <- get_subgroup_data(xs, ys, R)
 
 
 #run through time by time and check if each time is a split
@@ -385,7 +391,7 @@ p_dyad_together_reorder <- p_dyad_together[new_order, new_order]
 
 png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'subgroup_network_splits.png'))
 par(mfrow=c(1,1), mar = c(1,2,1,1))#(bottom, left, top, right)
-visualize_network_matrix(p_dyad_together_reorder, coati_ids[new_order,])
+visualize_network_matrix_galaxy(p_dyad_together_reorder, coati_ids[new_order,])
 dev.off()
 
 #---------------------------------------------------------------------

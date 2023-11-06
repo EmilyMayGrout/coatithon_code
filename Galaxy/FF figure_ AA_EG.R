@@ -95,6 +95,17 @@ df_mod2$new_sg[which(df_mod2$sub.group != 1 &
                        (df_mod2$ts >= as.POSIXct("2022-01-05 13:50:00") &
                           df_mod2$ts <= as.POSIXct("2022-01-05 15:40:00") ))] <- 0
 
+df_mod2$new_sg[which(df_mod2$sub.group == 3 & 
+                       (df_mod2$ts >= as.POSIXct("2022-01-06 09:10:00") &
+                          df_mod2$ts <= as.POSIXct("2022-01-06 09:20:00") ))] <- 2
+
+df_mod2$new_sg[which(df_mod2$sub.group == 2 & 
+                       (df_mod2$ts >= as.POSIXct("2022-01-06 09:10:00") &
+                          df_mod2$ts <= as.POSIXct("2022-01-06 09:20:00") ))] <- 3
+
+
+
+
 #now we need to recalculate the special subgroup jitter values, since we've changed some of the subgroup values
 # (same code as above basically)
 df_mod2 <- df_mod2 %>%
@@ -120,6 +131,7 @@ df_ts_lines <- df_mod2 %>%
             bottom_subgroup = min(sg_jitter)) # take the lowest point at each timestamp
 
 dev.off() #needed to reset plotting area after using ggplotly (above)
+
 
 #ok now we plot it again
 p2 <- ggplot() +
@@ -165,28 +177,34 @@ p2 <- ggplot() +
             fill = "transparent", #transparent fill so that they don't block otu the coati points and lines
             color = "grey40") + #dark grey outline
   #now choose some nice differentiated colors for each coati
+  #scale_color_manual(values =  sample(c('#b2df8a','#fb9a99','#fb9a99','#fb9a99','#1f78b4','#fb9a99','#cab2d6','#cab2d6','#cab2d6','#fb9a99','#fb9a99'), 11, replace = FALSE)) +
   scale_color_manual(values = sample(c('#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a','#b15928'), #these are 11 distinct colors, they will be randomly assigned to the coatis
                                      11, replace = FALSE)) +
   theme_classic() +
   #get rid of all the extra stuff (note, this now is for a horizontal plot. if you want a vertical plot,
   # then replace the xs with ys and the ys with xs)
   theme(legend.position = "none",
+        #panel.background = element_rect(fill='transparent'), #transparent panel bg
+        #plot.background = element_rect(fill='transparent', color=NA),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        axis.text.y = element_blank(),
-        axis.text.x = element_text(size = 20),
+        axis.text.y = element_text(size = 20, color = "black"),
+        axis.text.x = element_blank(),
+        #axis.text.x = element_text(size = 20, color = "black"),
         axis.title.y = element_blank(),
         axis.title.x = element_blank(),
-        axis.line.y = element_blank(),
-        axis.ticks.y = element_blank())
-# +coord_flip() # flip it so that it's vertical
+        axis.line.y = element_line(),
+        #axis.line.y = element_blank(),
+        axis.line.x.bottom=element_line(color="black"),
+        axis.ticks.y = element_blank()) +
+ coord_flip() # flip it so that it's vertical
 
 p2 #look at it
 
 # save it
-ggsave(filename = "C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/FF line and dot subgroupings_0501022.png",
-       width = 15,
-       height = 3,
+ggsave(filename = "C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/FF line and dot subgroupings_0501022_vert.png",
+       width = 3,
+       height = 15,
        units = "in",
        dpi = 350,
        scale = 1)

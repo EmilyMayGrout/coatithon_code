@@ -9,9 +9,9 @@ library(vegan)
 
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/" 
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/' 
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/' 
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/dbscan_70/' 
 id_file <- 'galaxy_coati_ids.RData' 
-gal_gps_matrix <- 'gal_matrix_10min_proptimeinsamesubgroup.txt' #saved from plot3 in fission_fusion_galaxy 
+gal_gps_matrix <- 'gal_matrix_10min_proptimeinsamesubgroup_70m.txt' #saved from plot3 in fission_fusion_galaxy 
 gal_gps_matrix_full <- 'gal_matrix_10min_proptimeinfullgroup.txt' #saved from plot4 in fission_fusion_galaxy
 gal_gps_matrix_full3m <- 'gal_matrix_10min_proptimeinfullgroup3m.txt' #saved from plot4 in fission_fusion_galaxy
 
@@ -198,5 +198,31 @@ t7 <- mantel(xdis = gal_matrix, ydis = gal_matrix_full3m, method = "pearson", pe
 
 
 
+write.csv(gal_matrix, file = "C:/Users/egrout/Dropbox/coatithon/processed/genetics/galaxy/gal_matrix.csv")
+write.csv(gen_matrix, file = "C:/Users/egrout/Dropbox/coatithon/processed/genetics/galaxy/gen_matrix.csv")
 
+#struggled to do this with a for loop so made it in excel and reading it in here
+gen_gal_long <- read.csv("C:/Users/egrout/Dropbox/coatithon/processed/genetics/galaxy/long_form_gen_gal_dyads.csv")
+
+#plot to show the relationship between relatedness and dyadic strength 
+png(height = 1000, width = 1000, units = 'px', filename = paste0(plot_dir,'gen_gal_scatter.png'))
+par(mar=c(8,8,6,3), mgp=c(4,1.5,0))
+plot(gen_gal_long$gal, gen_gal_long$gen, xlab = "Dyadic strength (proportion of time in same subgroup)", ylab = "Relatedness (Triadic Maximum Likelihood)", pch = 19, col = "aquamarine4", cex = 3, cex.lab = 3, cex.axis = 2.5)
+abline(lm(gen ~ gal, data = gen_gal_long), col = "hotpink3", lwd = 2)
+
+dev.off()
+
+
+#different method to make the scatter plot without needing to use excel
+png(height = 1000, width = 1000, units = 'px', filename = paste0(plot_dir,'gen_gal_scatter_2.png'))
+par(mar=c(8,8,6,3), mgp=c(5,1.2,0))
+gen_vec <- gen_matrix[upper.tri(gen_matrix)]
+gal_vec <- gal_matrix[upper.tri(gal_matrix)]
+df <- data.frame(cbind(gen_vec, gal_vec))
+plot(df$gen_vec, df$gal_vec, ylab = "Proportion of time together", xlab = "Relatedness (Triadic Maximum Likelihood)", pch = 19, col = "darkolivegreen3", cex = 3, cex.lab = 3, cex.axis = 2.5, yaxt = "n", ylim = c(0.3,1))
+axis(2, at = c(0,0.3,0.6,0.9), cex.axis = 3, las = 1)
+abline(lm(gal_vec ~ gen_vec, data = data.frame(df)), col = "hotpink3", lwd = 2)
+
+#str(summary(lm(gal_vec ~ gen_vec, data = data.frame(df)))) #rsquared = 0.182
+dev.off()
 

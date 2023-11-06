@@ -14,7 +14,7 @@ data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/' 
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/' 
 id_file <- 'presedente_coati_ids_level1.RData'  #level one is where May and Cleopatra have been changed to subadults
-pres_gps_matrix <- 'pres_matrix_10min_proptimeinsamesubgroup.txt' #saved from plot3 in fission_fusion_presedente
+pres_gps_matrix <- 'presedente_matrix_10min_proptimeinsamesubgroup_50m.txt' #saved from plot3 in fission_fusion_presedente
 pres_gps_matrix_full <- 'presedente_matrix_10min_proptimeinfullgroup.txt' #saved from plot4 in fission_fusion_presedente
 pres_gps_matrix_full3m <- 'presedente_matrix_10min_proptimeinfullgroup3m.txt' #saved from plot4 in 
 
@@ -183,6 +183,20 @@ dev.off()
 #-----------------------------------------------------------------------
 
 
+
+#make plot with dyadic strength against relatedness
+
+png(height = 1000, width = 1000, units = 'px', filename = paste0(plot_dir,'gen_pres_scatter_2.png'))
+par(mar=c(8,8,6,3), mgp=c(5,1.2,0))
+gen_vec <- gen_matrix[upper.tri(gen_matrix)]
+pres_vec <- pres_matrix[upper.tri(pres_matrix)]
+df <- data.frame(cbind(gen_vec, pres_vec))
+plot(df$gen_vec, df$pres_vec, ylab = "Proportion of time together", xlab = "Relatedness (Triadic Maximum Likelihood)", pch = 19, col = "aquamarine3", cex = 3, cex.lab = 3, cex.axis = 2.5, yaxt = "n", ylim = c(0.3, 1))
+axis(2, at = c(0,0.3,0.6,0.9), cex.axis = 3, las = 1)
+abline(lm(pres_vec ~ gen_vec, data = data.frame(df)), col = "hotpink3", lwd = 2)
+#str(summary(lm(pres_vec ~ gen_vec, data = data.frame(df)))) #rsquared 0.0885
+
+dev.off()
 
 
 

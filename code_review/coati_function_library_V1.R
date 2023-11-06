@@ -112,11 +112,11 @@ visualize_network_matrix_galaxy <- function(net, coati_ids){
   #points(seq(0,1,length.out=nrow(net)),rep(-.07,n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
   
   #for the all group matrices
-  points(rep(-.018, nrow(net)),seq(0,1,length.out=n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
-  points(seq(0,1,length.out=nrow(net)),rep(-.018,n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
+  points(rep(-.07, nrow(net)),seq(0,1,length.out=n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
+  points(seq(0,1,length.out=nrow(net)),rep(-.07,n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
   
 }
-#for all groups genetics matrix, changed rep to -.02 from -.07
+#for all groups genetics matrix, changed rep to -.018 from -.07
 
 #changed the size of the labels with cex.axis = 1.5, default is 1
 #also changed the size of the legend axis values with: axis.args=list(cex.axis=2), remove if want default
