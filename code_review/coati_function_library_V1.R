@@ -111,7 +111,7 @@ visualize_network_matrix_galaxy <- function(net, coati_ids){
   #points(rep(-.07, nrow(net)),seq(0,1,length.out=n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
   #points(seq(0,1,length.out=nrow(net)),rep(-.07,n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
   
-  #for the all group matrices
+  #for the all group matrices - genetics
   points(rep(-.07, nrow(net)),seq(0,1,length.out=n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
   points(seq(0,1,length.out=nrow(net)),rep(-.07,n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
   

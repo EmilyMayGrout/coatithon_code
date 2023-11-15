@@ -27,6 +27,45 @@ setwd(data_dir)
 load(gps_file)
 load(id_file)
 
+
+#---------------------------------------------------------------
+#calculate prop time males are with group
+
+#n_inds <- nrow(xs)
+#n_times <- ncol(xs)
+# subgroup_data_males <- get_subgroup_data(xs, ys, 50)
+# #males are 5,8,9,10,18,21 #ardern is 1, merkel is 13, Truss is 20 - used as measure for being in group
+# subgroup_id <- subgroup_data_males$ind_subgroup_membership[c(1,5,8,9,10,13,18,20,21),]
+# rownames(subgroup_id) <- coati_ids$name[c(1,5,8,9,10,13,18,20,21)]
+# 
+# #because I'm curious - number of times Wildflower is with males- only with Gendry
+# sum(subgroup_id[9,] == subgroup_id[2,], na.rm = T) #32 #Wildflower and Gendry
+# 
+# #get sum of times the male is with either Ardern, Merkel, or Truss
+# gendry_group <- sum((subgroup_id[1,] == subgroup_id[2,] | subgroup_id[6,] == subgroup_id[2,] | subgroup_id[8,] == subgroup_id[2,]), na.rm = TRUE) #Ardern, Merkel, Truss with Gendry #144
+# kenyatta_group <- sum((subgroup_id[1,] == subgroup_id[3,] | subgroup_id[6,] == subgroup_id[3,] | subgroup_id[8,] == subgroup_id[3,]), na.rm = TRUE) #Ardern, Merkel, Truss with Kenyatta #253
+# lula_group <- sum((subgroup_id[1,] == subgroup_id[4,] | subgroup_id[6,] == subgroup_id[4,] | subgroup_id[8,] == subgroup_id[4,]), na.rm = TRUE)#Ardern, Merkel, Truss with Lula #198
+# mandela_group <- sum((subgroup_id[1,] == subgroup_id[5,] | subgroup_id[6,] == subgroup_id[5,] | subgroup_id[8,] == subgroup_id[5,]), na.rm = TRUE) #Ardern, Merkel, Truss with Mandela #144
+# sam_group <- sum((subgroup_id[1,] == subgroup_id[7,] | subgroup_id[6,] == subgroup_id[7,] | subgroup_id[8,] == subgroup_id[7,]), na.rm = TRUE) #Ardern, Merkel with Sam #155
+# 
+# #sum gps points for each male
+# gendry_sum <- sum(!is.na(subgroup_id[2,])) #Gendry 958
+# kenyatta_sum <- sum(!is.na(subgroup_id[3,])) #Kenyatta 1046
+# lula_sum <- sum(!is.na(subgroup_id[4,])) #Lula 1003
+# mandela_sum <- sum(!is.na(subgroup_id[5,])) #Mandela 985
+# sam_sum <- sum(!is.na(subgroup_id[7,])) #Sam 872
+# 
+# #prop time with group
+# gendry_prop <- gendry_group/gendry_sum
+# kenyatta_prop <- kenyatta_group/kenyatta_sum
+# lula_prop <- lula_group/lula_sum
+# mandela_prop <- mandela_group/mandela_sum
+# sam_prop <- sam_group/sam_sum
+
+
+#---------------------------------------------------------------
+
+
 #removing males and wildflower
 xs <- xs[c(1:4,6,7,11:17,19,20,22),]
 ys <- ys[c(1:4,6,7,11:17,19,20,22),]
@@ -301,7 +340,7 @@ for(i in 1:nrow(splits_df)){
     inds_in_group <- which(subgroups_later==group_id)
     orig_inds_in_group <- intersect(inds_in_group, orig_subgroup_members) #only count the original group members 
     
-    #really hacky shit to get R to put lists into a data frame :(
+    #put lists into a data frame
     if(j==1){
       splits_df$sub1[i] <- list(orig_inds_in_group)
     }
@@ -380,5 +419,10 @@ png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'subgrou
 par(mfrow=c(1,1), mar = c(1,2,1,1))#(bottom, left, top, right)
 visualize_network_matrix_presedente(p_dyad_together_reorder, coati_ids[new_order,])
 dev.off()
+
+
+
+
+
 
 

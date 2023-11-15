@@ -8,10 +8,10 @@ library(ecodist)
 library(vegan)
 
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/" 
-code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/' 
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/dbscan_70/' 
+code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/' 
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/' 
 id_file <- 'galaxy_coati_ids.RData' 
-gal_gps_matrix <- 'gal_matrix_10min_proptimeinsamesubgroup_70m.txt' #saved from plot3 in fission_fusion_galaxy 
+gal_gps_matrix <- 'gal_matrix_10min_proptimeinsamesubgroup_50m.txt' #saved from plot3 in fission_fusion_galaxy 
 gal_gps_matrix_full <- 'gal_matrix_10min_proptimeinfullgroup.txt' #saved from plot4 in fission_fusion_galaxy
 gal_gps_matrix_full3m <- 'gal_matrix_10min_proptimeinfullgroup3m.txt' #saved from plot4 in fission_fusion_galaxy
 
@@ -23,7 +23,7 @@ age_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/gal
 
 #read in library of functions 
 setwd(code_dir) 
-source('coati_function_library.R') 
+source('coati_function_library_V1.R') 
 
 #load data 
 setwd(data_dir) 

@@ -33,10 +33,31 @@ setwd(data_dir)
 load(gps_file)
 load(id_file)
 
+
 #-----FUNCTIONS----
 mode <- function(x) {
   return(as.numeric(names(which.max(table(x)))))
 }
+
+#------------------------------------------------------------------------------
+#find prop time Gus with the group
+
+#n_inds <- nrow(xs)
+#n_times <- ncol(xs)
+# subgroup_data_males <- get_subgroup_data(xs, ys, 50)
+# #group will be orbita is 6 and cometa is 11
+# #gus is 5 
+# subgroup_id <- subgroup_data_males$ind_subgroup_membership[c(5,6,11),]
+# rownames(subgroup_id) <- coati_ids$name[c(5,6,11)]
+# 
+# #prop time the 2 subgroups are together (Orbita and Cometa) = 605
+# sum((subgroup_id[1,] == subgroup_id[3,]), na.rm = TRUE) 
+# #prop time Gus with either subgroup = 780
+# gus_group <- sum((subgroup_id[1,] == subgroup_id[2,] | subgroup_id[3,] == subgroup_id[2,]), na.rm = TRUE)
+# 
+# #number of gps points for Gus
+# gus_sum <- sum(!is.na(subgroup_id[2,]))
+# gus_prop <- gus_group/gus_sum
 
 #-----MAIN------
 
@@ -314,7 +335,7 @@ for(i in 1:nrow(splits_df)){
     inds_in_group <- which(subgroups_later==group_id)
     orig_inds_in_group <- intersect(inds_in_group, orig_subgroup_members) #only count the original group members 
     
-    #really hacky shit to get R to put lists into a data frame :(
+    #put lists into a data frame
     if(j==1){
       splits_df$sub1[i] <- list(orig_inds_in_group)
     }
