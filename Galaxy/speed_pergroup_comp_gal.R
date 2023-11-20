@@ -28,6 +28,8 @@ library(broom)
 library(AICcmodavg)
 library(doBy)
 library(FSA)
+library(lubridate)
+library(hms)
 
 #read in library of functions
 setwd(code_dir)
@@ -133,12 +135,22 @@ for (i in 1:nrow(speed_df)){
 #filter to just day (remove weird speed values for overnight)
 speed_days <- speed_df
 speed_days$time_only <- format(speed_days$UTC_time, format = "%H:%M:%S")
-speed_days$time_only<- as_hms(speed_days$time_only)
+speed_days$time_only <- as_hms(speed_days$time_only)
 speed_days <- speed_days %>%  filter(time_only > as_hms("11:30:00") & time_only < as_hms("22:30:00")) 
+
+#split time of day into three categories, morning (6-10 or 11-15UTC) midday (10-14 or 15-19UTC) afternoon (14-18 or 19-23UTC)
+#first convert to time object from datetime
+speed_days$time_only <- as_hms(speed_days$time_only)
+
+speed_days$day_period <- ifelse(speed_days$time_only > as_hms("10:50:00") & speed_days$time_only < as_hms("15:01:00"), "Morning", 
+                         ifelse(speed_days$time_only > as_hms("15:01:00") & speed_days$time_only < as_hms("19:01:00"),  "Midday", 
+                         ifelse(speed_days$time_only > as_hms("19:01:00") & speed_days$time_only < as_hms("23:01:00"), "Afternoon", NA)))
+
 
 #remove NA's (when individual was not tracked) or when too few individuals were tracked
 speed_days <- speed_days %>%  filter(n_tracked > min_tracked)
 speed_days <- speed_days %>% filter(!is.na(speed))
+
 
 
 #histogram of speeds
@@ -156,9 +168,7 @@ give.n <- function(x){
 
 
 #remove times when alone
-
 speed_days <- speed_days[!(speed_days$context == "alone"),]
-
 
 
 png(height = 600, width = 900, units = 'px', filename = paste0(plot_dir,'speeds_in_subgroups_all.png'))
@@ -253,6 +263,14 @@ speed_df <- speed_df %>% drop_na(speed)
 
 kruskal.test(speed ~ name, data = speed_df)
 
+
+#doing test when alone inds are not included
+kruskal.test(speed ~ context, data = speed_days)
+
+#doing Mann Whitney test to compare the speeds when the group is split or together
+wilcox.test(speed ~ context, data = speed_days,
+            exact = FALSE)
+
 dunnTest(speed ~ name,
          data = speed_df,
          method = "holm")
@@ -262,11 +280,9 @@ dunnTest(speed ~ name,
 
 #speeds before a split
 
-
 #variation of speeds depending on group size
 
 #variance in individual travel speeds will be greater in groups that split than stay cohesive 
-
 
 
 

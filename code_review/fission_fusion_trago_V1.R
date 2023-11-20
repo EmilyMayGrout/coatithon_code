@@ -2,7 +2,7 @@
 
 #--------PARAMS-------
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/trago/"
-code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
+code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/trago_results/'
 gps_file <- "trago_xy_10min_level0.RData"
 id_file <- 'trago_coati_ids.RData'
@@ -107,4 +107,47 @@ visualize_network_matrix_trago(ffnet_reorder, coati_ids[new_order,])
 dev.off()
 
 
+#---------------------------------------------------------------------------------------------
+#look at which age/sex classes tend to be on their own
+inds_subgroup <- data.frame(subgroup_data$ind_subgroup_membership)
+#make an empty dataframe to add the alone inds data to
+df <- data.frame(matrix(nrow = 9, ncol = ncol(inds_subgroup)))
 
+# Loop through columns
+for (i in 1:ncol(inds_subgroup)) {
+  # Find unique rows without considering NAs and excluding rows with all NAs
+  unique_rows <- which(!duplicated(inds_subgroup[, i], na.rm = TRUE) & 
+                         !duplicated(inds_subgroup[, i], fromLast = TRUE, na.rm = TRUE) &
+                         !is.na(inds_subgroup[, i]))
+  # Assign 1 to the cells where an individual is alone
+  df[unique_rows, i] <- 1
+}
+
+
+coati_ids$inds_alone <- rowSums(df, na.rm = TRUE)
+#get sum of times each ind has data
+coati_ids$total_gps <- ncol(inds_subgroup) - rowSums(is.na(inds_subgroup))
+#get proportion of time alone
+coati_ids$prop_alone <- coati_ids$inds_alone/coati_ids$total_gps
+
+coati_ids$age_sex <- paste(coati_ids$age, coati_ids$sex, sep = " ")
+
+colors <- c("orange3","orange2","orange","orange", "aquamarine4", "aquamarine3")
+
+gg <- ggplot(aes(x = prop_alone, y = age_sex), data = coati_ids)+
+  xlab("Proportion of time alone (%)")+
+  ylab("Age class")+
+  geom_point(aes(color = interaction(age, sex)), position = position_identity(), size = 3)+
+  facet_grid(vars(age_sex), scales = "free", space = "free")+
+  scale_color_manual(values = colors) +
+  theme_classic()+
+  guides(color = "none")+  # Remove the legend
+  theme( strip.text.y = element_blank())
+
+gg
+
+coati_ids_alone_trago <- coati_ids
+#this dataframe is used in alone_inds_all_groups
+save(coati_ids_alone_trago, file = "C:/Users/egrout/Dropbox/coatithon/processed/2022/trago/trago_alone_inds_level1.Rdata")  
+
+ggsave(filename = paste0(plot_dir, 'prop_time_alone.png'), plot = gg, width = 6, height = 6, dpi = 300)

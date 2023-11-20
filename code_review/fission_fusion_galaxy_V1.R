@@ -71,6 +71,10 @@ n_tracked <- colSums(!is.na(xs))
 #indexes to time points where all individuals were tracked
 all_tracked_idxs <- which(n_tracked==n_inds)
 
+#double checking Venus not being in the group isn't an artefact of the network matrix
+#so going to add NA's for Venus from ts[1] to ts[341]
+#xs[1:11, 1:341] <- NA
+#ys[1:11, 1:341] <- NA
 #----------------------------------------------------------------------
 
 # Figure 2a,b,c: Characterizing the subgroup patterns when group was split into 2 or 3 subgroups
@@ -149,7 +153,7 @@ ffnet_reorder <- ff_net[new_order, new_order]
 write.table(ffnet_reorder,file="C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/gal_matrix_10min_proptimeinsamesubgroup_50m.txt",row.names=FALSE)
 
 
-png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'subgroup_network_level1.png'))
+png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'subgroup_network_level1_cut.png'))
 
 visualize_network_matrix_galaxy(ffnet_reorder, coati_ids[new_order,])
 dev.off()
@@ -525,6 +529,50 @@ ggplot(data = test, aes(x = Panama_time,
 
 dev.off()
 
+
+#look at which age/sex classes tend to be on their own
+inds_subgroup <- data.frame(subgroup_data$ind_subgroup_membership)
+#make an empty dataframe to add the alone inds data to
+df <- data.frame(matrix(nrow = 11, ncol = ncol(inds_subgroup)))
+
+for(i in 1:ncol(inds_subgroup)){
+  
+  #find the individuals in each column who are on their own
+  col_i <- inds_subgroup[,i]
+  #get the indices of the rows which are on their own
+  unique_rows <- which(!duplicated(inds_subgroup[,i]) & !duplicated(inds_subgroup[, i], fromLast = TRUE))
+  #for the individual who is on its own, add 1 to that row in column i  
+  df[unique_rows, i] <- 1
+}
+
+coati_ids$inds_alone <- rowSums(df, na.rm = TRUE)
+#get sum of times each ind has data
+coati_ids$total_gps <- ncol(inds_subgroup) - rowSums(is.na(inds_subgroup))
+#get proportion of time alone
+coati_ids$prop_alone <- coati_ids$inds_alone/coati_ids$total_gps
+
+coati_ids$age_sex <- paste(coati_ids$age, coati_ids$sex, sep = " ")
+
+colors <- c("orange3","orange2","orange","aquamarine4", "aquamarine3")
+
+gg <- ggplot(aes(x = prop_alone, y = age_sex), data = coati_ids)+
+  xlab("Proportion of time alone (%)")+
+  ylab("Age class")+
+  geom_point(aes(color = interaction(age, sex)), position = position_identity(), size = 3)+
+  facet_grid(vars(age_sex), scales = "free", space = "free")+
+  scale_color_manual(values = colors) +
+  theme_classic()+
+  guides(color = "none")+  # Remove the legend
+  theme( strip.text.y = element_blank())
+
+gg
+
+coati_ids_alone_gal <- coati_ids
+#this dataframe is used in alone_inds_all_groups
+save(coati_ids_alone_gal, file = "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/gal_alone_inds_level1.Rdata")  
+
+
+ggsave(filename = paste0(plot_dir, 'prop_time_alone.png'), plot = gg, width = 6, height = 6, dpi = 300)
 
 
 
