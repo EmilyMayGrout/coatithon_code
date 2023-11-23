@@ -23,7 +23,7 @@ colors <- c("darkolivegreen3", "aquamarine3","hotpink3")
 gg <- ggplot(aes(x = prop_alone, y = age_sex), data = gal_pres_trag_inds_alone) +
   xlab("Proportion of time alone (%)") +
   ylab("Age class") +
-  geom_point(aes(color = factor(group)), shape = 16, size = 3, alpha = 0.7, position = position_jitter(width = 0.001, height = 0.25)) +
+  geom_point(aes(color = factor(group)), shape = 16, size = 3, alpha = 0.7, position = position_jitter(width = 0.001, height = 0.25, seed = 312)) +
   facet_grid(vars(age_sex), scales = "free", space = "free") +
   scale_color_manual(values = colors) +
   theme_classic() +
@@ -33,6 +33,7 @@ gg <- ggplot(aes(x = prop_alone, y = age_sex), data = gal_pres_trag_inds_alone) 
 
 gg
 
+#for visualisation purposes, the data was jittered
 
 ggsave(filename = 'C:/Users/egrout/Dropbox/coatithon/results/inds_alone_both_groups.png', plot = gg, width = 6, height = 6, dpi = 300)
 
