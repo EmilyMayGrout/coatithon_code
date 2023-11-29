@@ -25,6 +25,8 @@ setwd(data_dir)
 load(gps_file)
 load(id_file)
 
+t <- coati_ids
+
 #-----MAIN------
 
 n_inds <- nrow(xs)
@@ -98,6 +100,7 @@ for(i in 1:n_inds){
 
 diag(ff_net) <- NA
 new_order <- c(2,3,7:9,1,5,4,6)
+new_order <- c(4,1:3, 5:7)
 ffnet_reorder <- ff_net[new_order, new_order]
 
 

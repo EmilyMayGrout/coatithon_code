@@ -150,9 +150,10 @@ visualize_network_matrix_trago <- function(net, coati_ids){
   axis(1, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2, cex.axis=1.8)
   axis(2, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2,  cex.axis=1.8)
   
-  points(rep(-.078, nrow(net)),seq(0,1,length.out=n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
-  points(seq(0,1,length.out=nrow(net)),rep(-.078,n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2)
+  points(rep(-.1, nrow(net)),seq(0,1,length.out=n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2.5)
+  points(seq(0,1,length.out=nrow(net)),rep(-.1,n_inds),col=coati_ids$color, xpd = T, pch = 19, cex = 2.5)
 }
+
 
 
 #---------------------------------------------------------------------------

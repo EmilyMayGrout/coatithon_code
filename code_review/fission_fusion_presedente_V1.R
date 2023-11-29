@@ -238,9 +238,11 @@ n_subs$mean_group_size <- (n_subs$n_inds/n_subs$n_groups)
 #change hour to Panama time
 n_subs$panama_time <- n_subs$hour-5
 n_subs$date <- as.Date(n_subs$ts)
+#n_subs_pres <- n_subs
 
 #save n_subs as an RData object
-#save(n_subs, file = "C:/Users/egrout/Dropbox/stats_Franzi/data/n_subs.Rdata")
+#save(n_subs_pres, file = "C:/Users/egrout/Dropbox/coatithon/processed/n_subs_pres.Rdata")
+#this dataframe will be used in the subgoups_vioplot_combined script to compare with the other group
 
 #now plotting mean group size for each hour of the day
 png(height = 500, width = 700, units = 'px', filename = paste0(plot_dir, "mean_group_size_violin_level1_green.png"))

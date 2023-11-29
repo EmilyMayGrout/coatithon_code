@@ -147,7 +147,7 @@ for(i in 1:n_inds){
 }
 
 diag(ff_net) <- NA
-new_order <- c(5,1,11,4,10,2, 3,6,7,8,9)
+new_order <- c(5,1,11,4,10,2,3,6,7,8,9)
 ffnet_reorder <- ff_net[new_order, new_order]
 #save matrix for mrqap analysis
 write.table(ffnet_reorder,file="C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/gal_matrix_10min_proptimeinsamesubgroup_50m.txt",row.names=FALSE)
@@ -227,9 +227,11 @@ n_subs$mean_group_size <- (n_subs$n_inds/n_subs$n_groups)
 #change hour to Panama time
 n_subs$panama_time <- n_subs$hour-5
 n_subs$date <- as.Date(n_subs$ts)
+#n_subs_gal <- n_subs
 
 #save n_subs as an RData object
-#save(n_subs, file = "C:/Users/egrout/Dropbox/stats_Franzi/data/n_subs.Rdata")
+#save(n_subs_gal, file = "C:/Users/egrout/Dropbox/coatithon/processed/n_subs_gal.Rdata")
+#this dataframe will be used in the subgoups_vioplot_combined script to compare with the other group
 
 #now plotting mean group size for each hour of the day
 png(height = 500, width = 700, units = 'px', filename = paste0(plot_dir, "mean_group_size_violin_level1_red.png"))
@@ -364,7 +366,7 @@ splits_df$n_sub1 <- sapply(splits_df$sub1, function(x){return(sum(!is.na(x)))})
 splits_df$n_sub2 <- sapply(splits_df$sub2, function(x){return(sum(!is.na(x)))})
 splits_df$n_sub3 <- sapply(splits_df$sub3, function(x){return(sum(!is.na(x)))})
 
-#should save this dataframe as its needed for the merge_analysis_galaxy 
+#save dataframe as its needed for the figure1_fissionfusion_plot.R
 save(splits_df, file = "C:/Users/egrout/Dropbox/coatithon_notgithub/Galaxy_fission_fusion/splits_df.Rdata")  
 
 #DONE WITH DATAFRAME
