@@ -8,7 +8,7 @@ behaviours, they have less code than Galaxy and Presedente.
 
 install.packages(c("dbscan", "rgdal", "lubridate", "stringr", "fields", "viridis", "tidyverse", "hms", "dplyr", "tidyr", "ggthemes", "vioplot", "sf"))
 
-data_dir is the file directory where all the data is stored (the coati id file and the associated groups gps file e.g. for Galaxy the files are 'galaxy_xy_10min_level1.RData' (a list of 'xs','ys','ts') and 'galaxy_coati_ids.RDS')
+data_dir is the file directory where all the data is stored (the coati id file and the associated groups gps file e.g. for Galaxy the files are 'galaxy_xy_10min_level1.RData' (a list of 'xs','ys','ts') and 'galaxy_coati_ids.RData')
 code_dir is the file directory where the coati_function_library_V1.R is stored
 plot_dir is the file directory where you want to put the plots - I have a different directory for each group
 gps_file is the filename of the data for the specific group 
@@ -25,8 +25,8 @@ preprocessing code (5 files):
 	       Trago -> 'preprocess_Trago.R'
 
 output files for analysis and plotting:
-	       Galaxy -> 'galaxy_xy_10min_level1.RData' (a list of 'xs','ys','ts') and 'galaxy_coati_ids.RDS'
-	       Presedente -> 'presedente_xy_10min_level1.RData' (a list of 'xs','ys','ts') and 'presedente_coati_ids.RDS'
+	       Galaxy -> 'galaxy_xy_10min_level1.RData' (a list of 'xs','ys','ts') and 'galaxy_coati_ids.RData'
+	       Presedente -> 'presedente_xy_10min_level1.RData' (a list of 'xs','ys','ts') and 'presedente_coati_ids.RData'
 	       Trago -> 'trago_xy_10min_level0.RData' (a list of 'xs','ys','ts') and 'coati_ids.RData'
 
 #-----------------------------------------------------------------------------------------------------------
