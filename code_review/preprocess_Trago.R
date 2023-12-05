@@ -27,7 +27,7 @@ ts <- ts[which((hour(ts) <= maxhr) & (hour(ts) >= minhr))]
 #making a list of all individuals in trago
 all_files <- sort(list.files())
 
-#remove Tequila and Rum 
+#remove Tequila and Rum because were not part of the group
 all_files <- all_files[-c(4,6)]
 
 lats <- lons <- xs <- ys <- matrix(NA, nrow = length(all_files), ncol = length(ts))
@@ -57,7 +57,6 @@ for(i in 1:length(all_files)){
   tagdata$diffs <- diffs
   highresdata$diffs <- NA #need to add these columns for the rbind later
   
-  #to do: check whether the 160s time between fixes is right - to account for time taken to get GPS fix
   #filter the gps points to the last fix
   tagdata <- tagdata[which(tagdata$diffs > 160) ,]
   
@@ -113,9 +112,8 @@ coati_ids$color[which(coati_ids$age == 'Adult' & coati_ids$sex == 'Female')] <- 
 coati_ids$color[which(coati_ids$age == 'Sub-adult' & coati_ids$sex == 'Female')] <- '#FFAA66'
 coati_ids$color[which(coati_ids$age == 'Sub-adult' & coati_ids$sex == 'Male')] <- '#66AAFF'
 coati_ids$color[which(coati_ids$age == 'Juvenile')] <- '#666666'
-
-
 save(coati_ids, file = paste0(outdir, 'trago_coati_ids.RData'))
+
 save(list=c('xs','ys','ts'), file = paste0(outdir,'trago_xy_10min_level0.RData'))
 save(list=c('lats','lons','ts'), file = paste0(outdir,'trago_latlon_10min_level0.RData'))  
 

@@ -12,13 +12,13 @@ firsttime <- as.POSIXct('2021-12-24 11:00', tz = 'UTC')
 lasttime <-  as.POSIXct('2022-01-13 23:00', tz = 'UTC')
 
 indir <-  "C:/Users/egrout/Dropbox/coatithon/rawdata/2022/galaxy/gps/binded_files/"
-outdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/"
+outdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 metadatadir <-  "C:/Users/egrout/Dropbox/coatithon/rawdata/2022/galaxy/metadata/"
 
 #setting the working directory to the raw data file in dropbox
 setwd(indir)
 
-#the file structure for the rbind code below has been changed so this no longer works, but the binded data is in the binded_files folder
+#the file structure for the rbind code below has been changed so the commented code no longer works, but the binded data is in the binded_files folder
 #rbind the last day to each gps txt file
 #9460
 #all_files[2]
@@ -149,7 +149,6 @@ for(i in 1:length(all_files)){
   tagdata$diffs <- diffs
   highresdata$diffs <- NA #need to add these columns for the rbind later
   
-  #to do: check whether the 160s time between fixes is right - to account for time taken to get GPS fix
   #filter the gps points to the last fix
   tagdata <- tagdata[which(tagdata$diffs > 160) ,]
   
@@ -198,7 +197,7 @@ coati_ids$color[which(coati_ids$age == 'Adult' & coati_ids$sex == 'Female')] <- 
 coati_ids$color[which(coati_ids$age == 'Sub-adult' & coati_ids$sex == 'Female')] <- '#FFAA66'
 coati_ids$color[which(coati_ids$age == 'Sub-adult' & coati_ids$sex == 'Male')] <- '#66AAFF'
 coati_ids$color[which(coati_ids$age == 'Juvenile')] <- '#666666'
-save(coati_ids, file = paste0(outdir, 'coati_ids.RData'))
+save(coati_ids, file = paste0(outdir, 'galaxy_coati_ids.RData'))
 
 save(list=c('xs','ys','ts'), file = paste0(outdir,'galaxy_xy_10min_level0.RData'))
 save(list=c('lats','lons','ts'), file = paste0(outdir,'galaxy_latlon_10min_level0.RData'))  

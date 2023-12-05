@@ -92,8 +92,7 @@ for(i in 1:length(all_files)){
   tagdata$diffs <- diffs
   highresdata$diffs <- NA #need to add these columns for the rbind later
   
-  #to do: check whether the 160s time between fixes is right - to account for time taken to get GPS fix
-  #filter the gps points to the last fix
+ #filter the gps points to the last fix
   tagdata <- tagdata[which(tagdata$diffs > 160) ,]
   
   #take the modulus 10 (divide by 10 and get remainder) to find values which are within 2 min of a 10 min interval
@@ -141,9 +140,7 @@ coati_ids$color[which(coati_ids$age == 'Adult' & coati_ids$sex == 'Female')] <- 
 coati_ids$color[which(coati_ids$age == 'Sub-adult' & coati_ids$sex == 'Female')] <- '#FFAA66'
 coati_ids$color[which(coati_ids$age == 'Sub-adult' & coati_ids$sex == 'Male')] <- '#66AAFF'
 coati_ids$color[which(coati_ids$age == 'Juvenile')] <- '#666666'
-save(coati_ids, file = paste0(outdir, 'coati_ids.RData'))
-
-
+save(coati_ids, file = paste0(outdir, 'presedente_coati_ids.RData'))
 
 
 save(list=c('xs','ys','ts'), file = paste0(outdir,'presedente_xy_10min_level0.RData'))
