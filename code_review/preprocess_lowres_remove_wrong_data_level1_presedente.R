@@ -8,7 +8,7 @@ data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/'
 gps_file <- "presedente_xy_10min_level0.RData" 
-id_file <- 'coati_ids.RData'
+id_file <- 'presedente_coati_ids.RData'
 
 outdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
 
@@ -40,3 +40,7 @@ ys[14,741:772] <- NA
 
 
 save(list=c('xs','ys','ts'), file = paste0(outdir,'presedente_xy_10min_level1.RData'))
+
+
+
+

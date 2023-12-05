@@ -6,7 +6,7 @@ data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
 gps_file <- "presedente_xy_10min_level1.RData"
-id_file <- 'presedente_coati_ids_level1.RData'
+id_file <- 'presedente_coati_ids.RData'
 
 #list of Rs
 Rs <- c(10,20,30,40,50,100)

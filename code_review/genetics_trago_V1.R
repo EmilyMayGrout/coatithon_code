@@ -12,7 +12,7 @@ plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/trago_results/'
 gps_file <- "trago_xy_10min_level0.RData" 
 id_file <- 'trago_coati_ids.RData' 
 
-trago_gps_matrix <- 'trago_matrix_10min_proptimeinsamesubgroup.txt' #saved from plot3 in fission_fusion_trago 
+trago_gps_matrix <- 'trago_matrix_10min_proptimeinsamesubgroup.txt' #saved from plot3/FigureS1 in fission_fusion_trago 
 all_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/CoatiTrioMLmatrix.csv', header = T)  
 
 #I manually made these matrices in excel 

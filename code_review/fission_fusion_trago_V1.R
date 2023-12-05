@@ -78,7 +78,7 @@ hist(subgroup_counts[,s3], breaks=seq(0.5,11,1), xlab = 'Subgroup size', main = 
 dev.off()
 
 #-------------------------------------------------------------------------
-
+# plot 3
 #Figure S1 in ff low res manuscript
 
 subgroup_data <- get_subgroup_data(xs, ys, R=50)
@@ -108,6 +108,9 @@ png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'subgrou
 par(mfrow=c(1,1), mar = c(6,6,1,1)) #bottom, left, top, and right
 visualize_network_matrix_trago(ffnet_reorder, coati_ids[new_order,])
 dev.off()
+
+#save matrix for mrqap analysis
+write.table(ffnet_reorder,file="C:/Users/egrout/Dropbox/coatithon/processed/2022/trago/trago_matrix_10min_proptimeinsamesubgroup.txt",row.names=FALSE)
 
 
 #---------------------------------------------------------------------------------------------
