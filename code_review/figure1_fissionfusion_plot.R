@@ -30,6 +30,13 @@ load(id_file)
 #load in splits df from fission_fusion_galaxy_V1 to get the split times, so before and after the event can be extracted for the ff plot
 load(file = "C:/Users/egrout/Dropbox/coatithon_notgithub/Galaxy_fission_fusion/splits_df.Rdata")
 
+
+#need to use your own API for this to work - replace xxx with your API
+register_google(key="xxx")
+#check your key worked:
+has_google_key()
+
+
 #-----MAIN------
 n_inds <- nrow(xs)
 n_times <- ncol(xs)
@@ -184,6 +191,7 @@ max_lon <- (max(c(event_i$lon, event_i$lon_bef, event_i$lon_aft), na.rm = TRUE) 
 sites.data = data.frame(lon = c(min_lon, max_lon),
                         lat = c(min_lat, max_lat))
 
+#make your map
 map.base <- get_map(location = c(lon = mean(sites.data$lon),
                                  lat = mean(sites.data$lat)), zoom = 18)
 
@@ -403,7 +411,6 @@ gg <- ggmap(map) +
   NULL
 
 gg
-  
 
 
 ggsave(filename = paste0(plot_dir, 'ggmap_traj_28_col', '.png'), plot = gg, width = 14, height = 10, dpi = 300)

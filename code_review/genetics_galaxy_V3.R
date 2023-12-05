@@ -12,9 +12,7 @@ data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/' 
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/' 
 id_file <- 'galaxy_coati_ids.RData' 
-gal_gps_matrix <- 'gal_matrix_10min_proptimeinsamesubgroup_70m.txt' #saved from plot3 in fission_fusion_galaxy 
-gal_gps_matrix_full <- 'gal_matrix_10min_proptimeinfullgroup.txt' #saved from plot4 in fission_fusion_galaxy
-gal_gps_matrix_full3m <- 'gal_matrix_10min_proptimeinfullgroup3m.txt' #saved from plot4 in fission_fusion_galaxy
+gal_gps_matrix <- 'gal_matrix_10min_proptimeinsamesubgroup_50m.txt' #saved from plot3a in fission_fusion_galaxy 
 
 all_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/CoatiTrioMLmatrix.csv', header = T) 
 
@@ -34,13 +32,6 @@ gal_matrix <- read.table(gal_gps_matrix, header = T)
 #make subgroup membership matrix a matrix 
 gal_matrix <- as.matrix(gal_matrix) 
 
-gal_matrix_full <- read.table(gal_gps_matrix_full, header = T) 
-#make subgroup membership matrix a matrix 
-gal_matrix_full <- as.matrix(gal_matrix_full) 
-
-gal_matrix_full3m <- read.table(gal_gps_matrix_full3m, header = T) 
-#make subgroup membership matrix a matrix 
-gal_matrix_full3m <- as.matrix(gal_matrix_full3m) 
 
 #order of group in gal_gps matrix to the coati_ids order: c(5,1,11,4,10,2,3,6,7,8,9) 
 #this order is gus, quasar, cometa, lucero, luna, estrella, venus, orbita, planeta, saturno, pluto 
@@ -132,7 +123,7 @@ age_matrix <- age_matrix[gal_inds_neworder_agesex, gal_inds_neworder_agesex]
 # NOW WE HAVE ALL 4 MATRICES WITH THE SAME ORDER OF GROUP MEMBERS!
 
 #png(height = 900, width = 1400, units = 'px', filename = paste0(plot_dir,'all_matrices.png'))
-par(mfrow=c(2,3))
+par(mfrow=c(2,2))
 visualize_network_matrix_galaxy(gal_matrix, coati_ids[gal_neworder_indx,])
 mtext("1) Proportion of time each dyad was in the same subgroup", cex = 1.2)
 visualize_network_matrix_galaxy(age_matrix, coati_ids[gal_neworder_indx,]) 
@@ -141,10 +132,6 @@ visualize_network_matrix_galaxy(sex_matrix, coati_ids[gal_neworder_indx,])
 mtext("3) Sex homophily", cex = 1.2)
 visualize_network_matrix_galaxy(gen_matrix, coati_ids[gal_neworder_indx,]) 
 mtext("4) Genetics - Triadic Maximum Likelihood method", cex = 1.2)
-visualize_network_matrix_galaxy(gal_matrix_full, coati_ids[gal_neworder_indx,]) 
-mtext('5) Within full group proportion of time within 10m', cex = 1.2)
-visualize_network_matrix_galaxy(gal_matrix_full3m, coati_ids[gal_neworder_indx,]) 
-mtext('6) Within full group proportion of time within 3m', cex = 1.2)
 
 #dev.off()
 

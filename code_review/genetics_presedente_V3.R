@@ -12,9 +12,7 @@ data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/' 
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/' 
 id_file <- 'presedente_coati_ids_level1.RData'  #level one is where May and Cleopatra have been changed to subadults
-pres_gps_matrix <- 'presedente_matrix_10min_proptimeinsamesubgroup_50m.txt' #saved from plot3 in fission_fusion_presedente
-pres_gps_matrix_full <- 'presedente_matrix_10min_proptimeinfullgroup.txt' #saved from plot4 in fission_fusion_presedente
-pres_gps_matrix_full3m <- 'presedente_matrix_10min_proptimeinfullgroup3m.txt' #saved from plot4 in fission_fusion_presedente
+pres_gps_matrix <- 'presedente_matrix_10min_proptimeinsamesubgroup_50m.txt' #saved from plot3c in fission_fusion_presedente
 
 all_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/CoatiTrioMLmatrix.csv', header = T) 
 
@@ -34,18 +32,6 @@ pres_matrix <- read.table(pres_gps_matrix, header = T)
 #make subgroup membership matrix a matrix 
 pres_matrix <- as.matrix(pres_matrix) 
 diag(pres_matrix) <- NA 
-
-pres_matrix_full <- read.table(pres_gps_matrix_full, header = T) 
-#make subgroup membership matrix a matrix 
-pres_matrix_full <- as.matrix(pres_matrix_full) 
-diag(pres_matrix_full) <- NA 
-
-pres_matrix_full3m <- read.table(pres_gps_matrix_full3m, header = T) 
-#make subgroup membership matrix a matrix 
-pres_matrix_full3m <- as.matrix(pres_matrix_full3m) 
-diag(pres_matrix_full3m) <- NA 
-
-
 
 #order - without Wildflower AND males:  
 #new_order <- c(1,9,10,3,4,12,2,11,7,5,13,16,8,15,6,14) 
@@ -110,7 +96,7 @@ diag(sex_matrix) <- NA
 setwd(plot_dir)
 
 #png(height = 900, width = 1400, units = 'px', filename = paste0(plot_dir,'all_matrices.png'))
-par(mfrow=c(2,3))
+par(mfrow=c(2,2))
 visualize_network_matrix_presedente(pres_matrix, coati_ids_cut[pres_neworder_indx,])
 mtext("1) Proportion of time each dyad was in the same subgroup", cex = 1.2)
 visualize_network_matrix_presedente(age_matrix, coati_ids_cut[pres_neworder_indx,]) 
@@ -119,10 +105,6 @@ visualize_network_matrix_presedente(sex_matrix, coati_ids_cut[pres_neworder_indx
 mtext("3) Sex homophily", cex = 1.2)
 visualize_network_matrix_presedente(gen_matrix, coati_ids_cut[pres_neworder_indx,]) 
 mtext("4) Genetics - Triadic Maximum Likelihood method", cex = 1.2)
-visualize_network_matrix_presedente(pres_matrix_full, coati_ids_cut[pres_neworder_indx,]) 
-mtext('5) Within full group proportion of time within 10m', cex = 1.2)
-visualize_network_matrix_presedente(pres_matrix_full3m, coati_ids_cut[pres_neworder_indx,]) 
-mtext('6) Within full group proportion of time within 3m', cex = 1.2)
 
 #dev.off()
 
