@@ -8,6 +8,12 @@ behaviours, they have less code than Galaxy and Presedente.
 
 install.packages(c("dbscan", "rgdal", "lubridate", "stringr", "fields", "viridis", "tidyverse", "hms", "dplyr", "tidyr", "ggthemes", "vioplot", "sf"))
 
+#data for code review is given in 2 folders:
+1. "raw data" folder has 2 folders per group: one folder has the gps data per individual (saved as a txt file for each individual), and the other folder has the metadata which contains the csv file for the coati_id info and the age and sex homophiliy matrices. Inside the raw data foler is the CoatiTrioMLMatrix.csv which is all the genetic relatedness associations.
+2. "processed data" folder contains the gps and id data for each group stored as .RData files. These gps data are filtered to one gps point every 10 minutes and these data are used in the analysis scripts (they are the output of the preprocessing scripts). There are 2 gps files per group, one is the Eastings and Northings (xy) and the other is Latitudes and Longitudes (latlon). All analyses use the xy data.
+
+
+
 data_dir is the file directory where all the data is stored (the coati id file and the associated groups gps file e.g. for Galaxy the files are 'galaxy_xy_10min_level1.RData' (a list of 'xs','ys','ts') and 'galaxy_coati_ids.RData')
 code_dir is the file directory where the coati_function_library_V1.R is stored
 plot_dir is the file directory where you want to put the plots - I have a different directory for each group
@@ -18,9 +24,10 @@ id_file is the filename of the coati ids with their age/sex class
 
 preprocessing code (5 files): 
 # the preprocessing code puts the raw data into the correct formats for running the analysis (level0)
-# for some of the groups, data were removed for specific individuals (e.g. if a collar had fallen off) (level1)
+
+# for some of the groups, data were removed for specific individuals (e.g. if a collar had fallen off). This data removal were done in the "preprocess_lowres_remove_wrong_data_level1_groupname" scripts
               
-	       Galaxy -> 'preprocess_gps_lowres.R' and 'preprocess_lowres_remove_wrong_data_level1.R'
+	       Galaxy -> 'preprocess_gps_lowres_galaxy.R' and 'preprocess_lowres_remove_wrong_data_level1_galaxy.R'
 	       Presedente -> 'preprocess_gps_lowres_presedente.R' and 'preprocess_lowres_remove_wrong_data_level1_presedente.R'
 	       Trago -> 'preprocess_Trago.R'
 
