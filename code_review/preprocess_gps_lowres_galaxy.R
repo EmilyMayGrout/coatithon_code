@@ -203,4 +203,15 @@ save(coati_ids, file = paste0(outdir, 'coati_ids.RData'))
 save(list=c('xs','ys','ts'), file = paste0(outdir,'galaxy_xy_10min_level0.RData'))
 save(list=c('lats','lons','ts'), file = paste0(outdir,'galaxy_latlon_10min_level0.RData'))  
 
+#calculate the proportion of missing fixes
+each_sum <- data.frame(sum = rowSums(!is.na(xs)))
+max(each_sum$sum)
+min(each_sum$sum)
+each_sum$missing <- max(each_sum$sum)- each_sum$sum
+each_sum$prop <- (each_sum$missing/max(each_sum$sum))*100
+100 - mean(each_sum$prop) #96.46707
+100 - max(each_sum$prop) #93.02885
+sd(each_sum$prop)#2.280898
+
+
 

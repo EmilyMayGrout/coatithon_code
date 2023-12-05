@@ -16,6 +16,7 @@ library(ggplot2)
 library(sf)
 library(ggmap)
 library(dplyr)
+library(lubridate)
 
 #read in library of functions
 setwd(code_dir)
@@ -202,8 +203,8 @@ sbar$lon.end <- sbar$lon.start + ((sbar$lon.end-sbar$lon.start)/sbar$distance)*s
 #------------------------------------------------------------------------------------------
 #FIG1: make plot for group split with DBSCAN for each individual
 
-lon_time <- event_i$lon
-lat_time <- event_i$lat
+lon_time <- event_i$lon_aft
+lat_time <- event_i$lat_aft
 
 #for event 25 (for paper, used size 130 for aft split and 120 for before (due to change in plot margins))
 
@@ -217,7 +218,8 @@ gg <- #ggmap(map)+
   scale_y_continuous(limits = c(min_lat, max_lat))+ 
   xlab(" ") +  # Add X-axis label
   ylab(" ") +  # Add Y-axis label
-  
+  ggtitle("c")+
+  annotate("text", x=max_lon - 0.0001, y=min_lat, label= "t+1", color = "yellow", size = 20)+ #for aft, do max_lon - 0.0001, for dur, only max_lon
   #adding a scale bar
   geom_segment(data = sbar,
                aes(x = lon.start + 0.0018,
@@ -240,11 +242,13 @@ gg <- #ggmap(map)+
         axis.text.y = element_blank(),
         axis.text.x = element_blank(),
         axis.title.y = element_blank(),
-        axis.title.x = element_blank())
+        axis.title.x = element_blank(),
+        axis.ticks = element_blank(),
+        plot.title = element_text(size=60, color = "white", hjust = 0.03, vjust = -1))
 
 gg
 
-ggsave(filename = paste0(plot_dir, 'ggmap_split_dur', 25, '.png'), plot = gg, width = 11, height = 10, dpi = 300)
+ggsave(filename = paste0(plot_dir, 'ggmap_split_aft', 25, '.png'), plot = gg, width = 11, height = 10, dpi = 300)
 
 #------------------------------------------------------------------------------------------
 #make plot of groups trajectories using the lat/lon data from preprocess_gps_lowres_galaxy.R script
@@ -279,7 +283,7 @@ df <- na.omit(df)
 
 #filter data frame to one date
 df$ts <- as.POSIXct(df$ts)
-df_subset <- subset(df, ts > as.POSIXct("2021-12-28 11:00:00") & ts < as.POSIXct("2021-12-28 23:00:00"))
+df_subset <- subset(df, ts > as.POSIXct("2021-12-28 14:00:00") & ts < as.POSIXct("2021-12-28 23:00:00"))
 df_subset <- subset(df_subset, id != 5) 
 
 #plot the lat and lons for all points
@@ -318,9 +322,13 @@ df_subset$id <- as.factor(df_subset$id)
 #register_google(key="xxx")
 has_google_key()
 
+df_subset$group <- 1
+
+row.names(df_subset) <- 1:nrow(df_subset)
+
 #plot for group trajectories
 gg <- ggmap(map) +
-  geom_path(data = df_subset, aes(x = lon, y = lat), color = "white", size = 0.2, alpha = 1) +
+  geom_path(data = unique(df_subset), aes(x = lon, y = lat, group = id), color = "white", size = 0.2, alpha = 1) +
   geom_point(data = df_subset, aes(x = lon, y = lat, color = ts), size = 3.5, alpha = 0.6) +
   scale_colour_gradient(low = "purple", high = "yellow")+
   #data = df_subset, aes(x = lon, y = lat, color = as.factor(id)), size = 2, alpha = 0.6) #scale_color_manual(values = id_colours)+
@@ -350,23 +358,55 @@ gg <- ggmap(map) +
   NULL
 gg
 
+
 ggsave(filename = paste0(plot_dir, 'ggmap_traj_28', '.png'), plot = gg, width = 14, height = 10, dpi = 300)
 
-#-------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------
 
 #add column with subgroup id
 df_subset <- df_subset %>%
   mutate(subgroup_id = ifelse(id %in% c(3,6,7,8,9), 1, ifelse(id %in% c(1,2,4,5,10,11), 2, NA)))
 
 #trying different plot with colours representing the subgroups
-ggmap(map) +
-  geom_path(data = df_subset, aes(x = lon, y = lat, color = as.factor(subgroup_id)), size = 1, alpha = 0.5)+
+gg <- ggmap(map) +
+  geom_path(data = df_subset, aes(x = lon, y = lat, group = id), color = "white", size = 1, alpha = 0.5)+
+  geom_point(data = df_subset, aes(x = lon, y = lat, color = subgroup_id), size = 3, alpha = 0.6)+
+  scale_color_gradient(low="mediumpurple1", high="cadetblue1") +
+ # geom_point(data = df_subset, aes(x = lon, y = lat), color = "white", shape = 1, size = 2, alpha = 1)+
   scale_x_continuous(limits = c(min_lon, max_lon))+
   scale_y_continuous(limits = c(min_lat, max_lat))+
+  theme(legend.position = "none",
+        axis.text.y = element_text(size = 14),
+        axis.text.x = element_text(size = 14),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank()) +
+  theme(legend.position = "none",
+        axis.text.y = element_text(size = 14),
+        axis.text.x = element_text(size = 14),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank()) +
+  #adding a scale bar
+  geom_segment(data = sbar,
+               aes(x = lon.start + 0.0038,
+                   xend = lon.end + 0.0038,
+                   y = lat.start+0.0015,
+                   yend = lat.end+0.0015),
+               arrow=arrow(angle = 90, length = unit(0.1, "cm"),
+                           ends = "both", type = "open"), color = "white") +
+  geom_text(data = sbar,
+            aes(x = (lon.start +0.0038 + lon.end +0.0038)/2,
+                y = lat.start+ 0.0017 + 0.001*(bb$ur.lat - bb$ll.lat),
+                label = '50m'),
+            hjust = 0.5,
+            vjust = 0.7,
+            size = 8, color = "white") +
   NULL
 
+gg
+  
 
 
+ggsave(filename = paste0(plot_dir, 'ggmap_traj_28_col', '.png'), plot = gg, width = 14, height = 10, dpi = 300)
 
 
 

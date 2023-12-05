@@ -1,8 +1,7 @@
 steps for the data analysis for the low res fission fusion paper
 
 #this paper has analysis on three coati groups (Presedente, Galaxy, and Trago). Because Trago didn't show fission-fusion
-behaviours, they have less code than Galaxy and Presedente for review. Below is the information for the code that needs
-to be reviewed and the names of the data files for each group where the plots were made from.
+behaviours, they have less code than Galaxy and Presedente.
 
 
 #install packages:
@@ -16,11 +15,12 @@ gps_file is the filename of the data for the specific group
 id_file is the filename of the coati ids with their age/sex class
 
 
-#files needed for review:
-Pranav - if you want to run the preprocess code, you will need the raw data from the collars (which I didn't give to you yet as each groups data were extracted with different methods). So you can start the code review from the plot code, and once that runs and the split_df files are saved somewhere where you can read them in later, you should be able to run the split duration code (run galaxy's code then presedente's code for this, as the durations for both groups are at the end of merge_analysis_presedente_V1.R script)
 
 preprocessing code (5 files): 
-               Galaxy -> 'preprocess_gps_lowres.R' and 'preprocess_lowres_remove_wrong_data_level1.R'
+# the preprocessing code puts the raw data into the correct formats for running the analysis (level0)
+# for some of the groups, data were removed for specific individuals (e.g if a collar had fallen off) (level1)
+              
+	       Galaxy -> 'preprocess_gps_lowres.R' and 'preprocess_lowres_remove_wrong_data_level1.R'
 	       Presedente -> 'preprocess_gps_lowres_presedente.R' and 'preprocess_lowres_remove_wrong_data_level1_presedente.R'
 	       Trago -> 'preprocess_Trago.R'
 
@@ -32,7 +32,7 @@ output files for analysis and plotting:
 functions code:
 	     'coati_function_library_V1.R'
 
-plot code:
+fission-fusion analysis code:
 	     'fission_fusion_galaxy_V1.R'
 	     'fission_fusion_presedente_V1.R'
              'fission_fusion_trago_V1.R'
@@ -40,6 +40,16 @@ plot code:
 split duration code:
 	     'merge_analysis_galaxy_V1.R'
 	     'merge_analysis_presedente_V1.R'
+
+genetics code for MRQAP analysis:
+	     'genetics_galaxy_V3.R' (most up to date versions of the script)
+	     'genetics_presedente_V3.R'
+	     'genetics_trago_V1.R' 
+
+plot scripts:
+	for Figure 1: 'figure1_fissionfusion_plot.R'
+	for S4: 'subgrouping_overtime_combined.R'
+
 
 1. Preprocess data:
 

@@ -211,44 +211,43 @@ dev.off()
 
 #-------------------------------------------------------------------
 
-#Figure S3b: Plotting the mean sub-group size for each hour for all individuals
+#Plotting the mean sub-group size for each hour for all individuals
 
 #get mean group size for each timepoint - so need to get the total number of individuals divided by the number of groups
 
-sub_counts <- as.data.frame(t(subgroup_data$subgroup_counts))
-colnames(sub_counts) <- c("sub1", "sub2", "sub3", "sub4")
-n_groups <- as.data.frame(subgroup_data$n_subgroups)
-#combine to make dataframe with the number of individuals in each sub group and the number of subgroups
-n_subs <- cbind(sub_counts, n_groups)
-colnames(n_subs)[colnames(n_subs) == 'subgroup_data$n_subgroups'] <- 'n_groups'
-#adding time to n_subs
-n_subs <- cbind(n_subs, ts)
-
-#get the hour
-n_subs$hour <- hour(n_subs$ts)
-
-#get total number of individuals
-n_subs$n_inds <- n_tracked
-
-#calculate the mean group size
-n_subs$mean_group_size <- NA
-
-n_subs$mean_group_size <- (n_subs$n_inds/n_subs$n_groups)
-
-#change hour to Panama time
-n_subs$panama_time <- n_subs$hour-5
-n_subs$date <- as.Date(n_subs$ts)
-#n_subs_pres <- n_subs
-
-#save n_subs as an RData object
-#save(n_subs_pres, file = "C:/Users/egrout/Dropbox/coatithon/processed/n_subs_pres.Rdata")
-#this dataframe will be used in the subgoups_vioplot_combined script to compare with the other group
-
-#now plotting mean group size for each hour of the day
-png(height = 500, width = 700, units = 'px', filename = paste0(plot_dir, "mean_group_size_violin_level1_green.png"))
-vioplot(n_subs$mean_group_size ~ n_subs$panama_time,  xlab = "panama time", ylab = "mean subgroup size",col = "aquamarine3", cex.axis = 1.5, colMed = "black")
-dev.off()
-
+# sub_counts <- as.data.frame(t(subgroup_data$subgroup_counts))
+# colnames(sub_counts) <- c("sub1", "sub2", "sub3", "sub4")
+# n_groups <- as.data.frame(subgroup_data$n_subgroups)
+# #combine to make dataframe with the number of individuals in each sub group and the number of subgroups
+# n_subs <- cbind(sub_counts, n_groups)
+# colnames(n_subs)[colnames(n_subs) == 'subgroup_data$n_subgroups'] <- 'n_groups'
+# #adding time to n_subs
+# n_subs <- cbind(n_subs, ts)
+# 
+# #get the hour
+# n_subs$hour <- hour(n_subs$ts)
+# 
+# #get total number of individuals
+# n_subs$n_inds <- n_tracked
+# 
+# #calculate the mean group size
+# n_subs$mean_group_size <- NA
+# 
+# n_subs$mean_group_size <- (n_subs$n_inds/n_subs$n_groups)
+# 
+# #change hour to Panama time
+# n_subs$panama_time <- n_subs$hour-5
+# n_subs$date <- as.Date(n_subs$ts)
+# #n_subs_pres <- n_subs
+# 
+# #save n_subs as an RData object
+# #save(n_subs_pres, file = "C:/Users/egrout/Dropbox/coatithon/processed/n_subs_pres.Rdata")
+# #this dataframe will be used in the subgoups_vioplot_combined script to compare with the other group
+# 
+# #now plotting mean group size for each hour of the day
+# png(height = 500, width = 700, units = 'px', filename = paste0(plot_dir, "mean_group_size_violin_level1_green.png"))
+# vioplot(n_subs$mean_group_size ~ n_subs$panama_time,  xlab = "panama time", ylab = "mean subgroup size",col = "aquamarine3", cex.axis = 1.5, colMed = "black")
+# dev.off()
 
 #-------------------------------------------------------------------
 
@@ -261,6 +260,18 @@ hist(sum_tracked[ !(sum_tracked==0) ], ylim = c(0, 400), main = "", xlab = "Numb
 each_sum <- data.frame(sum = rowSums(!is.na(xs)))
 barplot(each_sum$sum, names.arg = coati_ids$name, las=2, col = "aquamarine3", ylab = "Number of GPS points",  cex.lab = 2, cex.axis = 2, cex.names=2, mgp=c(5,1,0))
 dev.off()
+
+#------------------------------------------------------------------------------
+
+#calculate the proportion of missing data
+max(each_sum$sum)
+min(each_sum$sum)
+each_sum$missing <- max(each_sum$sum)- each_sum$sum
+each_sum$prop <- (each_sum$missing/max(each_sum$sum))*100
+mean(each_sum$prop)
+sd(each_sum$prop)
+
+
 
 #---------------------------------------------------------------------
 

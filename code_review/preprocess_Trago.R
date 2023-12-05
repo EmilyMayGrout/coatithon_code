@@ -120,3 +120,17 @@ save(list=c('xs','ys','ts'), file = paste0(outdir,'trago_xy_10min_level0.RData')
 save(list=c('lats','lons','ts'), file = paste0(outdir,'trago_latlon_10min_level0.RData'))  
 
 
+#calculate the proportion of missing fixes
+each_sum <- data.frame(sum = rowSums(!is.na(xs)))
+max(each_sum$sum)
+min(each_sum$sum)
+each_sum$missing <- max(each_sum$sum)- each_sum$sum
+each_sum$prop <- (each_sum$missing/max(each_sum$sum))*100
+100 - mean(each_sum$prop)#96.1
+sd(each_sum$prop)#3.36
+
+
+
+
+
+

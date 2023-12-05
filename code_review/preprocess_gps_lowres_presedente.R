@@ -153,7 +153,18 @@ save(list=c('lats','lons','ts'), file = paste0(outdir,'presedente_latlon_10min_l
 #save(list=c('xs','ys','ts'), file = paste0(outdir,'presedente_xy_10min_level0_sleep.RData'))
 #save(list=c('lats','lons','ts'), file = paste0(outdir,'presedente_latlon_10min_level0_sleep.RData'))
 
+#calculate the proportion of missing fixes for group members
+#remove males and Wildflower
 
+each_sum <- data.frame(sum = rowSums(!is.na(xs)))
+each_sum <- as.data.frame(each_sum[c(1:4,6,7,11:17,19,20,22),])
+colnames(each_sum) <- "sum"
+max(each_sum$sum)
+min(each_sum$sum)
+each_sum$missing <- max(each_sum$sum)- each_sum$sum
+each_sum$prop <- (each_sum$missing/max(each_sum$sum))*100
+100 - mean(each_sum$prop)#96.9 #value included in ms 
+sd(each_sum$prop) #5.17
 
 
 

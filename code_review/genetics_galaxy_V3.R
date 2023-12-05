@@ -12,7 +12,7 @@ data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/' 
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/' 
 id_file <- 'galaxy_coati_ids.RData' 
-gal_gps_matrix <- 'gal_matrix_10min_proptimeinsamesubgroup_50m.txt' #saved from plot3 in fission_fusion_galaxy 
+gal_gps_matrix <- 'gal_matrix_10min_proptimeinsamesubgroup_70m.txt' #saved from plot3 in fission_fusion_galaxy 
 gal_gps_matrix_full <- 'gal_matrix_10min_proptimeinfullgroup.txt' #saved from plot4 in fission_fusion_galaxy
 gal_gps_matrix_full3m <- 'gal_matrix_10min_proptimeinfullgroup3m.txt' #saved from plot4 in fission_fusion_galaxy
 
@@ -155,7 +155,7 @@ set.seed(2)
 
 #table 2:
 mod <- mrqap.dsp(gal_matrix~age_matrix+sex_matrix+gen_matrix, directed="undirected", diagonal = F) 
-summary(mod)
+mod
 #age and sex don't influence the subgroup membership but genetics does
 
 #write.csv(gal_matrix, file = "C:/Users/egrout/Dropbox/coatithon/processed/genetics/galaxy/gal_matrix.csv")

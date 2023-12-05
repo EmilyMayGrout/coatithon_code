@@ -23,6 +23,7 @@ library(dplyr)
 library(tidyr)
 library(ggthemes)
 library(vioplot)
+library(plotly)
 
 #read in library of functions
 setwd(code_dir)
@@ -71,10 +72,6 @@ n_tracked <- colSums(!is.na(xs))
 #indexes to time points where all individuals were tracked
 all_tracked_idxs <- which(n_tracked==n_inds)
 
-#double checking Venus not being in the group isn't an artefact of the network matrix
-#so going to add NA's for Venus from ts[1] to ts[341]
-#xs[1:11, 1:341] <- NA
-#ys[1:11, 1:341] <- NA
 #----------------------------------------------------------------------
 
 # Figure 2a,b,c: Characterizing the subgroup patterns when group was split into 2 or 3 subgroups
@@ -105,7 +102,7 @@ dev.off()
 
 #-----------------------------------------------------------
 
-#Figure S2a: Number of sub groups when the radius is changed (graph put in dropbox results folder)
+#Figure S1a: Number of sub groups when the radius is changed (graph put in dropbox results folder)
 
 png(height = 1080, width = 480, units = 'px', filename = paste0(plot_dir,'n_subgroups_hists_level1.png'))
 par(mfrow=c(6,1), mar = c(8,7,1,1), mgp=c(4,1,0))
@@ -160,7 +157,7 @@ dev.off()
 
 #--------------------------------------------------------------------------
 
-#Figure 6a: Probability of individuals being in the same sub-group using absolute dyadic distances 
+#Probability of individuals being in the same sub-group using absolute dyadic distances 
 #removing Gus (adult male) from the full group to get proximity data within group
 
 xs_nogus <- xs[-c(5), ]
@@ -200,48 +197,48 @@ dev.off()
 
 #-------------------------------------------------------------------
 
-#Figure S3a: Plotting the mean sub-group size for each hour for all individuals
+#Plotting the mean sub-group size for each hour for all individuals
 
 #get mean group size for each time point - so need to get the total number of individuals divided by the number of groups
 
-sub_counts <- as.data.frame(t(subgroup_data$subgroup_counts))
-colnames(sub_counts) <- c("sub1", "sub2", "sub3", "sub4", "sub5")
-n_groups <- as.data.frame(subgroup_data$n_subgroups)
-#combine to make dataframe with the number of individuals in each sub group and the number of subgroups
-n_subs <- cbind(sub_counts, n_groups)
-colnames(n_subs)[colnames(n_subs) == 'subgroup_data$n_subgroups'] <- 'n_groups'
-#adding time to n_subs
-n_subs <- cbind(n_subs, ts)
-
-#get the hour
-n_subs$hour <- hour(n_subs$ts)
-
-#get total number of individuals
-n_subs$n_inds <- n_tracked
-
-#calculate the mean group size
-n_subs$mean_group_size <- NA
-
-n_subs$mean_group_size <- (n_subs$n_inds/n_subs$n_groups)
-
-#change hour to Panama time
-n_subs$panama_time <- n_subs$hour-5
-n_subs$date <- as.Date(n_subs$ts)
-#n_subs_gal <- n_subs
-
-#save n_subs as an RData object
-#save(n_subs_gal, file = "C:/Users/egrout/Dropbox/coatithon/processed/n_subs_gal.Rdata")
-#this dataframe will be used in the subgoups_vioplot_combined script to compare with the other group
-
-#now plotting mean group size for each hour of the day
-png(height = 500, width = 700, units = 'px', filename = paste0(plot_dir, "mean_group_size_violin_level1_red.png"))
-vioplot(n_subs$mean_group_size ~ n_subs$panama_time,  cex.axis = 1.5, cex.lab = 1, xlab = "panama time", ylab = "mean subgroup size", col = "darkolivegreen3", colMed = "black")
-dev.off()
+# sub_counts <- as.data.frame(t(subgroup_data$subgroup_counts))
+# colnames(sub_counts) <- c("sub1", "sub2", "sub3", "sub4", "sub5")
+# n_groups <- as.data.frame(subgroup_data$n_subgroups)
+# #combine to make dataframe with the number of individuals in each sub group and the number of subgroups
+# n_subs <- cbind(sub_counts, n_groups)
+# colnames(n_subs)[colnames(n_subs) == 'subgroup_data$n_subgroups'] <- 'n_groups'
+# #adding time to n_subs
+# n_subs <- cbind(n_subs, ts)
+# 
+# #get the hour
+# n_subs$hour <- hour(n_subs$ts)
+# 
+# #get total number of individuals
+# n_subs$n_inds <- n_tracked
+# 
+# #calculate the mean group size
+# n_subs$mean_group_size <- NA
+# 
+# n_subs$mean_group_size <- (n_subs$n_inds/n_subs$n_groups)
+# 
+# #change hour to Panama time
+# n_subs$panama_time <- n_subs$hour-5
+# n_subs$date <- as.Date(n_subs$ts)
+# #n_subs_gal <- n_subs
+# 
+# #save n_subs as an RData object
+# #save(n_subs_gal, file = "C:/Users/egrout/Dropbox/coatithon/processed/n_subs_gal.Rdata")
+# #this dataframe will be used in the subgoups_vioplot_combined script to compare with the other group
+# 
+# #now plotting mean group size for each hour of the day
+# png(height = 500, width = 700, units = 'px', filename = paste0(plot_dir, "mean_group_size_violin_level1_red.png"))
+# vioplot(n_subs$mean_group_size ~ n_subs$panama_time,  cex.axis = 1.5, cex.lab = 1, xlab = "panama time", ylab = "mean subgroup size", col = "darkolivegreen3", colMed = "black")
+# dev.off()
 
 
 #---------------------------------------------------------------------
 
-#Figure S4ab: make plot for the number of GPS points recorded for each individual
+#Figure S2ab: make plot for the number of GPS points recorded for each individual
 
 png(height = 600, width = 1400, units = 'px', filename = paste0(plot_dir, "number_tracked.png"))
 par(mfrow=c(1,2), mar = c(8,8,2,1)) #c(bottom, left, top, right)
@@ -251,9 +248,17 @@ each_sum <- data.frame(sum = rowSums(!is.na(xs)))
 barplot(each_sum$sum, names.arg = coati_ids$name, las=2, col = "darkolivegreen3", ylab = "Number of GPS points",  cex.lab = 2, cex.axis = 2, cex.names=2, mgp=c(5,1,0))
 dev.off()
 
+#calculate the proportion of missing data
+max(each_sum$sum)
+min(each_sum$sum)
+each_sum$missing <- max(each_sum$sum)- each_sum$sum
+each_sum$prop <- (each_sum$missing/max(each_sum$sum))*100
+mean(each_sum$prop)
+sd(each_sum$prop)
+
 #---------------------------------------------------------------------
 
-#Figure 4a: histogram for consistency 
+#Figure S5a: histogram for consistency 
 
 #need to run this again as Gus was removed for figure 6a
 n_inds <- nrow(xs)
@@ -400,7 +405,7 @@ dev.off()
 
 #----------------------------------------------------------------
 
-#Figure 3b: consistency matrix
+#Figure S8bd + S11bd: consistency matrix
 
 #should look into repeatability of binary data - to see if there is a better metric for getting consistency values from binary data
 
@@ -422,115 +427,6 @@ visualize_network_matrix_galaxy(p_dyad_together_reorder, coati_ids[new_order,])
 dev.off()
 
 #---------------------------------------------------------------------
-
-#Figure 5: Visualisation of the temporal fission-fusion dynamics for one day in Galaxy group. 
-
-#making the subgroup data into a dataframe so I can make social networks 
-subgroup_data <- get_subgroup_data(xs, ys, R)
-t <- as.data.frame(rbind(subgroup_data$ind_subgroup_membership[,1:1633]))
-#put id into dataframe
-t <- cbind(coati_ids$name, t)
-#changing column names into a list from 1 to 1633 - one day would be good to have as time
-column_names <- c(1:1633)
-colnames(t)[-1] <- column_names
-#change ID's into numbers
-t[t == 'Quasar'] <- '1'
-t[t == 'Estrella'] <- '2'
-t[t == 'Venus'] <- '3'
-t[t == 'Lucero'] <- '4'
-t[t == 'Gus'] <- '5'
-t[t == 'Orbita'] <- '6'
-t[t == 'Planeta'] <- '7'
-t[t == 'Saturno'] <- '8'
-t[t == 'Pluto'] <- '9'
-t[t == 'Luna'] <- '10'
-t[t == 'Cometa'] <- '11'
-
-
-#pivot the data frame into a long format
-test <- t %>% pivot_longer(-c(`coati_ids$name`), names_to='time', values_to='sub-group')
-test$time <- as.numeric(test$time)
-
-#time df
-time_df <- data.frame(ts, 1:length(ts))
-names(time_df)[2] <- "time"
-test <- left_join(test, time_df)
-
-test$subgroup_mod <- case_when(
-  test$`coati_ids$name` == 1  ~ test$`sub-group` -0.32,
-  test$`coati_ids$name` == 2  ~ test$`sub-group` -0.24,
-  test$`coati_ids$name` == 3  ~ test$`sub-group` -0.18,
-  test$`coati_ids$name` == 4  ~ test$`sub-group` -0.12,
-  test$`coati_ids$name` == 5  ~ test$`sub-group` -0.06,
-  test$`coati_ids$name` == 6  ~ test$`sub-group`+ 0.0,
-  test$`coati_ids$name` == 7  ~ test$`sub-group`+ 0.06,
-  test$`coati_ids$name` == 8  ~ test$`sub-group`+ 0.12,
-  test$`coati_ids$name` == 9  ~ test$`sub-group`+ 0.18,
-  test$`coati_ids$name` == 10  ~ test$`sub-group`+ 0.24,
-  test$`coati_ids$name` == 11  ~ test$`sub-group`+ 0.33
-  
-)
-
-#remove rows with NA's
-test <- test[complete.cases(test), ]
-
-#rename coati_id column
-colnames(test)[colnames(test) == 'coati_ids$name'] <- 'id'
-colnames(test)[colnames(test) == 'ts'] <- 'Time'
-
-test$hours <- as_hms(test$Time)
-
-#change time to Panama time
-test$Panama_time <- with_tz(test$Time, tzone = "America/Panama")
-
-#need to make separate dataframe for day and night times then add it in to geom_rect, calling the different dataframe for each geom
-firstday <- as.POSIXct('2021-12-24 06:00', tz = 'America/Panama')
-lastday <-  as.POSIXct('2022-01-13 18:00', tz = 'America/Panama')
-xmax <- seq.POSIXt(from = firstday, to = lastday,  by = 'day')
-firstnight <- as.POSIXct('2021-12-24 18:00', tz = 'America/Panama')
-lastnight <-  as.POSIXct('2022-01-13 18:00', tz = 'America/Panama')
-xmin <- seq.POSIXt(from = firstnight, to = lastnight,  by = 'day')
-ymin = 0
-ymax = 6
-daynight <- data.frame(1:21,xmax, xmin, ymax, ymin)
-colnames(daynight)[colnames(daynight) == 'X1.17'] <- 'rect_id'
-
-test$hour <- as_hms(test$Panama_time)
-
-png(height = 600, width = 1200, units = 'px', filename = paste0(plot_dir,'sub_groupings_over_time_50m_2_1day.png'))
-
-ggplot(data = test, aes(x = Panama_time, 
-                        y = subgroup_mod, 
-                        color = id, 
-                        group = id)) +
-  scale_color_discrete(name="Coati ID", 
-                       labels=c("Quasar", "Luna", "Cometa", "Estrella", "Venus", "Lucero", "Gus", "Orbita", "Planeta", "Saturno", "Pluto")) +
-  geom_rect(data = daynight, 
-            aes(xmin = xmax, xmax = xmin, ymin = ymin, ymax = ymax), 
-            inherit.aes = FALSE, fill = "white") +
-  
-  geom_point(data = test, aes(x = Panama_time, 
-                              y = subgroup_mod, 
-                              color = id, 
-                              group = id), size = 1.9) +
-  geom_line(data = test, aes(x = Panama_time, 
-                             y = subgroup_mod, 
-                             color = id, 
-                             group = id)) +
-  scale_x_continuous(expand=c(0,0))+
-  scale_y_continuous("Sub-group number", limits = c(-0.1, 6),expand=c(0,-0.2), breaks = 0:5) +
-  theme(panel.background = element_rect(fill = 'lightsteelblue3'), #changed colour to snow2 for the recursion markdown
-        panel.grid.major = element_line(color = 'lightsteelblue3'),  
-        panel.grid.minor = element_line(color = 'lightsteelblue3', size = 2))+
-  scale_x_datetime(limits=c(as.POSIXct("2022-01-05 11:00:00"), as.POSIXct("2022-01-06 01:00:00"), tz = "America/Panama"), position = "top", date_breaks="6 hour", expand=c(0,0)) +
-  xlab("Panama time") +
-  theme(axis.text=element_text(size=20),
-        axis.title=element_text(size=25),
-        legend.title = element_text(size=25),
-        legend.text = element_text(size=25), legend.key=element_rect(fill="white"))
-
-dev.off()
-
 
 #look at which age/sex classes tend to be on their own
 inds_subgroup <- data.frame(subgroup_data$ind_subgroup_membership)
@@ -575,6 +471,182 @@ save(coati_ids_alone_gal, file = "C:/Users/egrout/Dropbox/coatithon/processed/20
 
 
 ggsave(filename = paste0(plot_dir, 'prop_time_alone.png'), plot = gg, width = 6, height = 6, dpi = 300)
+
+#-------------------------------------------------------------------------------------
+#Figure 1e -- the following code was written by Alie Ashbury
+
+subgroup_data_wide <- as.data.frame(rbind(subgroup_data$ind_subgroup_membership[,1:1633]))
+#put id into dataframe
+subgroup_data_wide <- cbind(coati_ids$name, subgroup_data_wide)
+#changing column names into a list from 1 to 1633 - one day would be good to have as time
+column_names <- c(1:1633)
+colnames(subgroup_data_wide)[-1] <- column_names
+#change ID's into numbers
+subgroup_data_wide[subgroup_data_wide == 'Quasar'] <- '1'
+subgroup_data_wide[subgroup_data_wide == 'Estrella'] <- '2'
+subgroup_data_wide[subgroup_data_wide == 'Venus'] <- '3'
+subgroup_data_wide[subgroup_data_wide == 'Lucero'] <- '4'
+subgroup_data_wide[subgroup_data_wide == 'Gus'] <- '5'
+subgroup_data_wide[subgroup_data_wide == 'Orbita'] <- '6'
+subgroup_data_wide[subgroup_data_wide == 'Planeta'] <- '7'
+subgroup_data_wide[subgroup_data_wide == 'Saturno'] <- '8'
+subgroup_data_wide[subgroup_data_wide == 'Pluto'] <- '9'
+subgroup_data_wide[subgroup_data_wide == 'Luna'] <- '10'
+subgroup_data_wide[subgroup_data_wide == 'Cometa'] <- '11'
+
+#pivot the data frame into a long format
+subgroup_data_long <- subgroup_data_wide %>% pivot_longer(-c(`coati_ids$name`), names_to='time', values_to='sub-group')
+subgroup_data_long$time <- as.numeric(subgroup_data_long$time)
+
+#time df
+time_df <- data.frame(ts, 1:length(ts))
+names(time_df)[2] <- "time"
+subgroup_data_long <- left_join(subgroup_data_long, time_df)
+
+#filter test df to 05.01.22
+start_time <- as.POSIXct("2022-01-05 11:00:00")
+end_time <- as.POSIXct("2022-01-05 23:00:00")
+
+# Subset the dataframe to include only rows within the date range
+subset_df <- subgroup_data_long[subgroup_data_long$ts >= start_time & subgroup_data_long$ts <= end_time, ]
+
+#convert time to Panama time
+subset_df$ts <- subset_df$ts - hours(5)
+colnames(subset_df) <- c("coati_ids.name", "time", "sub.group", "ts")
+
+#prep the main subgrouping data for plotting
+df_mod <- subset_df %>%
+  fill(sub.group, .direction = "downup") %>% #get rid of NAs
+  mutate(new_sg = sub.group) %>% #make a new subgroup column in case we mess with it (unnecessary step)
+  arrange(ts, coati_ids.name, sub.group) %>% #sort by time, coati id, and subgroup
+  group_by(ts, sub.group) %>% #group by time and subgroup
+  #make new columns...
+  mutate(n_in_sg = n(), #number of coatis in each subgroup 
+         seq_in_sg = seq_along(coati_ids.name), #number each coati in each subgroup
+         sg_jitter = new_sg - (0.07/2*n_in_sg) + (seq_in_sg*0.07)) # this is a trixie but 
+
+df_mod2 <- df_mod #lets duplicated it before we mess with it, just in case we eff it up
+
+#the following three little code chunks replace the df_mod2$new_sg for specific rows with 0
+df_mod2$new_sg[which(df_mod2$coati_ids.name >=6 & 
+                       df_mod2$coati_ids.name <= 9 &
+                       df_mod2$ts == as.POSIXct("2022-01-05 12:20:00"))] <- 0
+
+df_mod2$new_sg[which(df_mod2$coati_ids.name == 11 & 
+                       (df_mod2$ts == as.POSIXct("2022-01-05 20:20:00") |
+                          df_mod2$ts == as.POSIXct("2022-01-05 21:00:00") ))] <- 0
+
+df_mod2$new_sg[which(df_mod2$sub.group != 1 & 
+                       (df_mod2$ts >= as.POSIXct("2022-01-05 13:50:00") &
+                          df_mod2$ts <= as.POSIXct("2022-01-05 15:40:00") ))] <- 0
+
+df_mod2$new_sg[which(df_mod2$sub.group == 3 & 
+                       (df_mod2$ts >= as.POSIXct("2022-01-06 09:10:00") &
+                          df_mod2$ts <= as.POSIXct("2022-01-06 09:20:00") ))] <- 2
+
+df_mod2$new_sg[which(df_mod2$sub.group == 2 & 
+                       (df_mod2$ts >= as.POSIXct("2022-01-06 09:10:00") &
+                          df_mod2$ts <= as.POSIXct("2022-01-06 09:20:00") ))] <- 3
+
+df_mod2 <- df_mod2 %>%
+  arrange(ts, coati_ids.name, sub.group) %>%
+  group_by(ts, sub.group) %>%
+  mutate(n_in_sg = n(),
+         seq_in_sg = seq_along(coati_ids.name),
+         sg_jitter = new_sg - (0.07/2*n_in_sg) + (seq_in_sg*0.07))
+
+#make rectangles for each subgroup
+df_group_polys <- df_mod2 %>%
+  group_by(ts, sub.group) %>% # group by timestamp and subgroup
+  summarize(top_subgroup = max(sg_jitter) + 0.1, #take the highest jitter value and add a little buffer
+            bottom_subgroup = min(sg_jitter) - 0.1, #take the lowest jitter value and add a little buffer
+            left_subgroup = mean(ts) - 180, #take that timestamp and subtract a little buffer
+            right_subgroup = mean(ts) + 180) # take that time stamp and add a little buffer
+#so, above, if you want more white space between the subgroup outlines and the points, use bigger buffers
+
+#let's make some little lines that will connect subgroup boxes at the same timestamp (otherwise it's hard to see how they line up)
+df_ts_lines <- df_mod2 %>%
+  group_by(ts) %>%
+  summarize(top_subgroup= max(sg_jitter), #take the highest point at each timestamp
+            bottom_subgroup = min(sg_jitter)) # take the lowest point at each timestamp
+
+p1 <- ggplot() +
+  geom_rect(data = df_group_polys,
+            mapping = aes(xmin = left_subgroup,
+                          xmax = right_subgroup,
+                          ymin = bottom_subgroup,
+                          ymax = top_subgroup),
+            fill = "white", 
+            color = "transparent") + 
+  geom_line(data = df_mod2, 
+            mapping = aes(x = ts,
+                          y = sg_jitter,
+                          group = as.factor(coati_ids.name),
+                          color = as.factor(coati_ids.name)),
+            alpha = 0.3,
+            size = 1) +
+  geom_point(data = df_mod2,
+             mapping = aes(x = ts,
+                           y = sg_jitter,
+                           color = as.factor(coati_ids.name)),
+             size = 2.2,
+             alpha = 1) +
+  geom_rect(data = df_group_polys,
+            mapping = aes(xmin = left_subgroup,
+                          xmax = right_subgroup,
+                          ymin = bottom_subgroup,
+                          ymax = top_subgroup),
+            fill = "transparent", #transparent fill so that they don't block otu the coati points and lines
+            color = "grey40") + #dark grey outline
+  scale_color_manual(values = sample(c('#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a','#b15928'), #these are 11 distinct colors, they will be randomly assigned to the coatis
+                                     11, replace = FALSE)) +
+  theme_classic() +
+  #get rid of all the extra stuff (note, this now is for a horizontal plot. if you want a vertical plot,
+  # then replace the xs with ys and the ys with xs)
+  theme(legend.position = "none",
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y =element_blank(),
+        axis.text.x = element_text(size = 20, color = "black"),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.line.y = element_blank(),
+        axis.line.x.bottom=element_line(color="black"),
+        axis.ticks.y = element_blank()) +
+  NULL
+
+p1
+
+# save it
+ggsave(filename = "C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/FF line and dot subgroupings_0501022_horz.png",
+       width = 15,
+       height = 3,
+       units = "in",
+       dpi = 350,
+       scale = 1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

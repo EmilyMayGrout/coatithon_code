@@ -130,7 +130,7 @@ mtext('6) Within full group proportion of time within 3m', cex = 1.2)
 set.seed(2)
 
 #table 2
-t3 <- mrqap.dsp(pres_matrix~age_matrix+sex_matrix+gen_matrix, directed="undirected", diagonal = F) 
+mod <- mrqap.dsp(pres_matrix~age_matrix+sex_matrix+gen_matrix, directed="undirected", diagonal = F) 
 
 
 #-----------------------------------------------------------------------

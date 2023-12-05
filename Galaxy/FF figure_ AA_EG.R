@@ -72,7 +72,7 @@ p1 <- ggplot() +
         axis.line.y = element_blank(),
         axis.ticks.y = element_blank())
 
-p1 #look at it - notice where subgroup lines cross each other unnecessarily!
+#look at it - notice where subgroup lines cross each other unnecessarily!
 # if we add a subgroup position BELOW the main group, and pull some of the subgroup 2s down to there, it will be cleaner!
 # use ggplotly to figure out exactly which points should be moved...
 ggplotly(p1) #this allows you to hover over points with your cursor and see their aesthetic
@@ -188,23 +188,25 @@ p2 <- ggplot() +
         #plot.background = element_rect(fill='transparent', color=NA),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        axis.text.y = element_text(size = 20, color = "black"),
-        axis.text.x = element_blank(),
-        #axis.text.x = element_text(size = 20, color = "black"),
+        #axis.text.y = element_text(size = 20, color = "black"),
+        axis.text.y =element_blank(),
+        #axis.text.x = element_blank(),
+        axis.text.x = element_text(size = 20, color = "black"),
         axis.title.y = element_blank(),
         axis.title.x = element_blank(),
-        axis.line.y = element_line(),
-        #axis.line.y = element_blank(),
+        #axis.line.y = element_line(),
+        axis.line.y = element_blank(),
         axis.line.x.bottom=element_line(color="black"),
         axis.ticks.y = element_blank()) +
- coord_flip() # flip it so that it's vertical
-
+ #coord_flip() # flip it so that it's vertical
+NULL
+  
 p2 #look at it
 
 # save it
-ggsave(filename = "C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/FF line and dot subgroupings_0501022_vert.png",
-       width = 3,
-       height = 15,
+ggsave(filename = "C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/FF line and dot subgroupings_0501022_horz.png",
+       width = 15,
+       height = 3,
        units = "in",
        dpi = 350,
        scale = 1)

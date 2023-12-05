@@ -93,6 +93,8 @@ get_subgroup_data <- function(xs, ys, R){
 
 #-----------------------------------------------------------------
 
+#jet.colors <- colorRampPalette(c("black" ,"red4","lightpink3", "lightpink1", "#FFCA00"))
+
 #Make a network visualization with colors
 #INPUT:
 #net[adjacency matrix of the network]
