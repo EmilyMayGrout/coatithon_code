@@ -474,8 +474,8 @@ gg
 
 coati_ids_alone_pres <- coati_ids
 #this dataframe is used in alone_inds_all_groups
-save(coati_ids_alone_pres, file = "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/pres_alone_inds_level1.Rdata")  
+#save(coati_ids_alone_pres, file = "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/pres_alone_inds_level1.Rdata")  
 
-ggsave(filename = paste0(plot_dir, 'prop_time_alone.png'), plot = gg, width = 6, height = 6, dpi = 300)
+#ggsave(filename = paste0(plot_dir, 'prop_time_alone.png'), plot = gg, width = 6, height = 6, dpi = 300)
 
 

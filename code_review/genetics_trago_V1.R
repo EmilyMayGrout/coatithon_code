@@ -13,11 +13,14 @@ gps_file <- "trago_xy_10min_level0.RData"
 id_file <- 'trago_coati_ids.RData' 
 
 trago_gps_matrix <- 'trago_matrix_10min_proptimeinsamesubgroup.txt' #saved from plot3/FigureS1 in fission_fusion_trago 
+
+#read in the genetics matrix for all groups
 all_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/CoatiTrioMLmatrix.csv', header = T)  
 
-#I manually made these matrices in excel 
-sex_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/trago/sex_matrix.csv', header = T) 
-age_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/trago/age_matrix.csv', header = T) 
+#I manually made these matrices in excel - of the dyad are the same age/sex, they get 1, if different, they get 0
+#load these matrices in from the GoogleDrive
+sex_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/trago/trago_sex_matrix.csv', header = T) 
+age_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/trago/trago_age_matrix.csv', header = T) 
 
 rownames(age_matrix) <- age_matrix$X 
 age_matrix <- age_matrix[,-1] 

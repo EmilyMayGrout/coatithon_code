@@ -14,11 +14,13 @@ plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1
 id_file <- 'presedente_coati_ids_level1.RData'  #level one is where May and Cleopatra have been changed to subadults
 pres_gps_matrix <- 'presedente_matrix_10min_proptimeinsamesubgroup_50m.txt' #saved from plot3c in fission_fusion_presedente
 
+#read in the genetics matrix for all groups
 all_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/CoatiTrioMLmatrix.csv', header = T) 
 
-#I manually made these matrices in excel 
-sex_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/presedente/sex_matrix.csv', header = T) 
-age_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/presedente/age_matrix.csv', header = T) 
+#I manually made these matrices in excel - of the dyad are the same age/sex, they get 1, if different, they get 0
+#load from GoogleDrive 
+sex_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/presedente/pres_sex_matrix.csv', header = T) 
+age_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/presedente/pres_age_matrix.csv', header = T) 
 
 #read in library of functions 
 setwd(code_dir) 

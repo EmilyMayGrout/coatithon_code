@@ -222,11 +222,14 @@ mean(time_diff_gal$diff_time_hour) #13.21724
 sd(time_diff_gal$diff_time_hour) #14.843
 min(time_diff_gal$diff_time_hour) #13.21724
 max(time_diff_gal$diff_time_hour)
+median(time_diff_gal$diff_time_hour)#10.5
+IQR(time_diff_gal$diff_time_hour)#12.6
 
 mean(time_diff_pres$diff_time_hour) #2.3944
 sd(time_diff_pres$diff_time_hour) #2.656
 min(time_diff_pres$diff_time_hour) #13.21724
 max(time_diff_pres$diff_time_hour)
-
+median(time_diff_pres$diff_time_hour)#2
+IQR(time_diff_pres$diff_time_hour)#3
 
 

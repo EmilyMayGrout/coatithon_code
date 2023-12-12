@@ -14,11 +14,13 @@ plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
 id_file <- 'galaxy_coati_ids.RData' 
 gal_gps_matrix <- 'gal_matrix_10min_proptimeinsamesubgroup_50m.txt' #saved from plot3a in fission_fusion_galaxy 
 
+#read in the genetics matrix for all groups
 all_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/CoatiTrioMLmatrix.csv', header = T) 
 
 #I manually made these matrices in excel - of the dyad are the same age/sex, they get 1, if different, they get 0
-sex_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/galaxy/sex_matrix.csv', header = T) 
-age_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/galaxy/age_matrix.csv', header = T) 
+#load from GoogleDrive
+sex_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/galaxy/gal_sex_matrix.csv', header = T) 
+age_matrix <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/genetics/galaxy/gal_age_matrix.csv', header = T) 
 
 #read in library of functions 
 setwd(code_dir) 

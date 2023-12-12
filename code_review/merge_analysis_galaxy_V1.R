@@ -7,7 +7,7 @@ data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/'
 gps_file <- "galaxy_xy_10min_level1.RData"
-id_file <- 'coati_ids.RData' 
+id_file <- 'galaxy_coati_ids.RData' 
 
 library(fields)
 library(viridis)

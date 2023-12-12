@@ -7,12 +7,13 @@ data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/'
 gps_file <- "presedente_xy_10min_level1.RData"
-id_file <- 'presedente_coati_ids_level1.RData' 
+id_file <- 'presedente_coati_ids.RData' 
 
 library(fields)
 library(viridis)
 library(hms)
 library(dplyr)
+library(purrr)
 
 #read in library of functions
 setwd(code_dir)
@@ -221,11 +222,19 @@ mean(time_diff_gal$diff_time_hour) #13.21724
 sd(time_diff_gal$diff_time_hour) #14.843
 min(time_diff_gal$diff_time_hour) #13.21724
 max(time_diff_gal$diff_time_hour)
+median(time_diff_gal$diff_time_hour) #10.5
+IQR(time_diff_gal$diff_time_hour) #12.6
+quantile(time_diff_gal$diff_time_hour, 0.25) #2.7
+quantile(time_diff_gal$diff_time_hour, 0.75) #15.3
 
 mean(time_diff_pres$diff_time_hour) #2.3944
 sd(time_diff_pres$diff_time_hour) #2.656
 min(time_diff_pres$diff_time_hour) #13.21724
 max(time_diff_pres$diff_time_hour)
+median(time_diff_pres$diff_time_hour)#2
+IQR(time_diff_pres$diff_time_hour)#3
+quantile(time_diff_pres$diff_time_hour, 0.25) #1.3
+quantile(time_diff_pres$diff_time_hour, 0.75) #4.3
 
 
 

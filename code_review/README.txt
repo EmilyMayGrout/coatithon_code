@@ -10,11 +10,11 @@ install.packages(c("dbscan", "rgdal", "lubridate", "stringr", "fields", "viridis
 
 #data for code review are in the coati subgrouping data folder on Google Drive. These data are put in the correct format in the preprocessing stage:
 
-This folder contains the gps data, id data, and metadata for each group stored as .RData and .csv files. 
+This folder contains a folder for each coati group which contain the gps data, id data, and metadata stored as .RData and .csv files. 
 These gps data are filtered to one gps point every 10 minutes and these data are used in the analysis scripts (they are the output of the preprocessing scripts). 
 There are 2 gps files per group, one is the Eastings and Northings (xy) and the other is Latitudes and Longitudes (latlon). 
+The CoatiTrioMLmatrix.csv is the genetics matrix for all groups data combined (these data are subsetted accordingly for each group in the genetics script)
 All analyses use the xy data.
-
 
 
 data_dir is the file directory where all the data is stored (the coati id file and the associated groups gps file 
@@ -31,7 +31,7 @@ preprocessing code (5 files):
 # the preprocessing code puts the raw data into the correct formats for running the analysis (level0)
 
 # for some of the groups, data were removed for specific individuals (e.g. if a collar had fallen off). 
-This data removal were done in the "preprocess_lowres_remove_wrong_data_level1_groupname" scripts
+This data removal were done in the preprocess_lowres_remove_wrong_data_level1_[group].R scripts
               
 	       Galaxy -> 'preprocess_gps_lowres_galaxy.R' and 'preprocess_lowres_remove_wrong_data_level1_galaxy.R'
 	       Presedente -> 'preprocess_gps_lowres_presedente.R' and 'preprocess_lowres_remove_wrong_data_level1_presedente.R'
@@ -80,29 +80,29 @@ Preprocess data:
 		- For Presedente group: the gps data was downloaded from movebank because there were too many 
 		logger.bin files with the data to join them manually in R
 	
-	b. in R: preprocess_gps_lowres script (for level0) - Some extra data wrangling was needed to put the data 
+	b. in R: preprocess_gps_lowres_[group].R script (for level0) - Some extra data wrangling was needed to put the data 
 		for all individuals of each group into the right format for the preprocessing:
 		
 		- For Galaxy group: the gps data for each individual were on 2 files (because the memory card got 
-		full a few days before the data were all collected, so I bound them in the preprocess_gps_lowres 
+		full a few days before the data were all collected, so I bound them in the preprocess_gps_lowres_galaxy.R
 		to make one txt file per individual with "name", "lon", "lat", and "datetime" script (and saved this 
 		file into a new txt file, so each individual had 1 file)
 		
 		- For Trago group: all gps data were on the same logger.bin file, so did not need any extra restructuring 
-		of the data before running the rest of preprocess_gps_lowres code to put these data in the 
+		of the data before running the rest of preprocess_Trago.R code to put these data in the 
 		'trago_xy_10min_level0.RData' and 'coati_ids.RData'
 		
 		- For Presedente group: the csv file containing all individuals data were put into the same txt file 
 		structure as Galaxy group for further preprocessing (each individual had a txt file containing 
 		"name", "lon", "lat", and "datetime"
 
-        c. in R: preprocess_gps_lowres script (for level0) - for all groups, subsampled the gps to 1 gps point every 
+        c. in R: preprocess_gps_lowres_[group].R script (for level0) - for all groups, subsampled the gps to 1 gps point every 
 		10 mins and convert gps positions to utm. 
 		
-	d. use level0 output files for cleaning data in preprocess_lowres_remove_wrong_data_level1.R to make "level1"
-	this makes a list with xs, ys, ts in the file called "galaxy_xs_10min_level1.RData
+	d. use level0 output files for cleaning data in preprocess_lowres_remove_wrong_data_level1_[group].R to make "level1"
+	this makes a list with xs, ys, ts in the file called "[group]_xs_10min_level1.RData
 	
-        e. level1 data are used for all analysis
+        e. level1 files are used for Galaxy and Presedente analysis, Trago analysis use level0 because no additional cleaning was needed
 
 #---------------------------------------------------------------------------------------------------------------
 #for review
