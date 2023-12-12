@@ -8,7 +8,7 @@ behaviours, they have less code than Galaxy and Presedente.
 
 install.packages(c("dbscan", "rgdal", "lubridate", "stringr", "fields", "viridis", "tidyverse", "hms", "dplyr", "tidyr", "ggthemes", "vioplot", "sf"))
 
-#data for code review are in the coati subgrouping data folder on Google Drive. These data are after the preprocessing stage:
+#data for code review are in the coati subgrouping data folder on Google Drive. These data are put in the correct format in the preprocessing stage:
 
 This folder contains the gps data, id data, and metadata for each group stored as .RData and .csv files. 
 These gps data are filtered to one gps point every 10 minutes and these data are used in the analysis scripts (they are the output of the preprocessing scripts). 
