@@ -8,17 +8,13 @@ behaviours, they have less code than Galaxy and Presedente.
 
 install.packages(c("dbscan", "rgdal", "lubridate", "stringr", "fields", "viridis", "tidyverse", "hms", "dplyr", "tidyr", "ggthemes", "vioplot", "sf"))
 
-#data for code review is given in 2 folders:
-1. "raw data" folder has 2 folders per group: one folder has the gps data per individual (saved as a txt file for each individual), 
-and the other folder has the metadata which contains the csv file for the coati_id info and the age and sex homophiliy matrices. 
-Inside the raw data foler is the CoatiTrioMLMatrix.csv which is all the genetic relatedness associations.
-#for the scripts to run, these data downloaded must put into the correct directories
+#data for code review are in the coati subgrouping data folder on Google Drive. These data are after the preprocessing stage:
 
-2. "processed data" folder contains the gps and id data for each group stored as .RData files. 
+This folder contains the gps data, id data, and metadata for each group stored as .RData and .csv files. 
 These gps data are filtered to one gps point every 10 minutes and these data are used in the analysis scripts (they are the output of the preprocessing scripts). 
 There are 2 gps files per group, one is the Eastings and Northings (xy) and the other is Latitudes and Longitudes (latlon). 
 All analyses use the xy data.
-#if you want to go straight to the analyses scripts, you can use the processed data (which are the output of the preprocessing scripts)
+
 
 
 data_dir is the file directory where all the data is stored (the coati id file and the associated groups gps file 
@@ -28,9 +24,10 @@ plot_dir is the file directory where you want to put the plots - I have a differ
 gps_file is the filename of the data for the specific group 
 id_file is the filename of the coati ids with their age/sex class
 
-
-
+#----------------------------------------------------------------------------------------------------------
+#not for review
 preprocessing code (5 files): 
+
 # the preprocessing code puts the raw data into the correct formats for running the analysis (level0)
 
 # for some of the groups, data were removed for specific individuals (e.g. if a collar had fallen off). 
@@ -46,6 +43,8 @@ output files for analysis and plotting:
 	       Trago -> 'trago_xy_10min_level0.RData' (a list of 'xs','ys','ts') and 'coati_ids.RData'
 
 #-----------------------------------------------------------------------------------------------------------
+#code scripts for review
+
 functions code:
 	     'coati_function_library_V1.R'
 
@@ -69,8 +68,8 @@ plot scripts:
 	for Figure S4: 'figureS4_subgrouping_overtime_combined.R'
 
 #---------------------------------------------------------------------------------------------------------------
-
-1. Preprocess data:
+How these data were processed to make the output files for review
+Preprocess data:
 
 	a. before R: 
 		
@@ -106,8 +105,9 @@ plot scripts:
         e. level1 data are used for all analysis
 
 #---------------------------------------------------------------------------------------------------------------
+#for review
 
-2. calculate split durations:
+1. calculate split durations:
 	-before calculating split durations, the fission_fusion_galaxy_V1.R and fission_fusion_presedente_V1.R code
 	must be run so the splits_df dataframe is saved and can be loaded into the merge_analysis scripts.
 
@@ -116,8 +116,9 @@ plot scripts:
 	is in merge_analysis_presedente_V1.R
 
 #---------------------------------------------------------------------------------------------------------------
+#for review
 
-3. MRQAP analysis:
+2. MRQAP analysis:
 
 	-To run the MRQAP analysis, you need to save the "ffnet_reorder" matrices for each of the groups which are made in the:
 	'fission_fusion_galaxy_V1.R', 'fission_fusion_presedente_V1.R', and 'fission_fusion_trago_V1.R' scripts for each group respectively.
@@ -126,6 +127,7 @@ plot scripts:
 	-Must make sure the order of ids for each matrices are the same for the mrqap analysis!! - this is organised in the script
 
 #---------------------------------------------------------------------------------------------------------------
+#for review
 
 4. plotting:
 
@@ -158,5 +160,3 @@ Figure S9 and S12 - (a) in fission_fusion_galaxy_V1.R
 
 MRQAP Tables:
 Table 1, S1, and S2 - Galaxy results from genetics_galaxy_V3 and Presidente results from genetics_presedente_V3.R
-
-
