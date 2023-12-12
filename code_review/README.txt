@@ -1,4 +1,4 @@
-steps for the data analysis for the low res fission fusion paper
+steps for the data analysis for the low res coati subgrouping paper
 
 # this paper has analysis on three coati groups (Presedente, Galaxy, and Trago). Because Trago didn't show fission-fusion
 behaviours, they have less code than Galaxy and Presedente.
