@@ -412,7 +412,6 @@ gg <- ggmap(map) +
 
 gg
 
-
 ggsave(filename = paste0(plot_dir, 'ggmap_traj_28_col', '.png'), plot = gg, width = 14, height = 10, dpi = 300)
 
 

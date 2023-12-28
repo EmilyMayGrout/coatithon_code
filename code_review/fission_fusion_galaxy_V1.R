@@ -473,7 +473,7 @@ save(coati_ids_alone_gal, file = "C:/Users/egrout/Dropbox/coatithon/processed/20
 ggsave(filename = paste0(plot_dir, 'prop_time_alone.png'), plot = gg, width = 6, height = 6, dpi = 300)
 
 #-------------------------------------------------------------------------------------
-#Figure 1e -- the following code was written by Alie Ashbury
+#Figure 1e
 
 subgroup_data_wide <- as.data.frame(rbind(subgroup_data$ind_subgroup_membership[,1:1633]))
 #put id into dataframe
