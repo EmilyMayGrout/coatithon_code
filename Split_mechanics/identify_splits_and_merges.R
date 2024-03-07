@@ -31,7 +31,7 @@ source('coati_function_library.R')
 setwd(codedir)
 
 #read in events
-events <- read.csv(paste0('Split_mechanics/',group,'_manual_split_merge_clean.csv'), sep=';')
+events <- read.csv(paste0('C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/',group,'_manual_split_merge_clean.csv'), sep=';')
 
 #read in coati ids
 setwd(groupdir)
@@ -45,10 +45,10 @@ ff_data_50 <- detect_fissions_and_fusions(R_inner = 15, R_outer = 50, xs, ys, ts
 #saving the events_detected dataframe of the ff_data_50 list
 if(group == 'galaxy'){
 gal_events_detected <- ff_data_50$events_detected
-save(gal_events_detected, file = "C:/Users/egrout/Dropbox/coatithon/coatithon_code/FLICA/gal_events_detected.Rda") 
+save(gal_events_detected, file = "C:/Users/egrout/Dropbox/coatithon/processed/FLICA/gal_events_detected.Rda") 
 }else if(group == 'presedente'){
   pres_events_detected <- ff_data_50$events_detected
-      save(pres_events_detected, file = "C:/Users/egrout/Dropbox/coatithon/coatithon_code/FLICA/pres_events_detected.Rda") }
+      save(pres_events_detected, file = "C:/Users/egrout/Dropbox/coatithon/processed/FLICA/pres_events_detected.Rda") }
 
 
 #looking at one event
@@ -57,24 +57,26 @@ analyse_ff_event(12, events = ff_data_50$events_detected, xs, ys, ts, max_time =
 #animate events
 i <- 10
 max_time <- 600
-step <- 5
+step_t <- 5
 
-ti <- events_detected$tidx[i] - max_time
-tf <- events_detected$tidx[i] + max_time
-group_A_idxs <- events_detected$group_A_idxs[i][[1]]
-group_B_idxs <- events_detected$group_B_idxs[i][[1]]
+#change gal to pres if presidente group
+ti <- gal_events_detected$tidx[i] - max_time
+tf <- gal_events_detected$tidx[i] + max_time
+group_A_idxs <- gal_events_detected$group_A_idxs[i][[1]]
+group_B_idxs <- gal_events_detected$group_B_idxs[i][[1]]
 all_idxs <- 1:nrow(xs)
 not_involved_idxs <- setdiff(all_idxs, c(group_A_idxs, group_B_idxs))
-event_type <- events_detected$event_type[i]
+event_type <- gal_events_detected$event_type[i]
 xmin <- min(xs[,ti:tf],na.rm=T)
 xmax <- max(xs[,ti:tf],na.rm=T)
 ymin <- min(ys[,ti:tf],na.rm=T)
 ymax <- max(ys[,ti:tf],na.rm=T)
 quartz()
-tseq <- seq(ti,tf,step)
+tseq <- seq(ti,tf,step_t)
+
 for(t in tseq){
   #clear()
-  if(t >= events_detected$tidx[i]){
+  if(t >= gal_events_detected$tidx[i]){
     points((xmax+xmin)/2,(ymin+ymax)/2,col='orange',cex = 5)
   }
   plot(NULL, xlim=c(xmin,xmax),ylim=c(ymin,ymax),asp=1,xlab='Easting',ylab='Northing',main = event_type)

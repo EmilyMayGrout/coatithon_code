@@ -38,7 +38,7 @@ setwd(codedir)
 
 #read in events
 #events <- read.csv(paste0('Split_mechanics/',group,'_manual_split_merge_clean.csv'), sep=';')
-events <- read.csv(paste0('Split_mechanics/',group,'_manual_split_merge_clean2.csv'),  sep=",", header=TRUE)
+events <- read.csv(paste0('C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/',group,'_manual_split_merge_clean2.csv'),  sep=",", header=TRUE)
 
 
 #if automated events
@@ -259,7 +259,7 @@ events2 <- events
 
 
 #save the events dataframe to be read into markdown
-save(events, file = paste0('C:/Users/egrout/Dropbox/coatithon/coatithon_code/Split_mechanics/',group,'_manual_events_withinfo2.RData'))
+save(events, file = paste0('C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/',group,'_manual_events_withinfo2.RData'))
 
 #save(events, file = paste0('C:/Users/egrout/Dropbox/coatithon/coatithon_code/Split_mechanics/',group,'_auto_events_withinfo.RData'))
 
