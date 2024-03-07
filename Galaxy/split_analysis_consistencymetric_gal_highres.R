@@ -5,11 +5,11 @@
 #TODO: if more than 3 subgroups present, need to generalize
 
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
-code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
+code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
-gps_file <- "galaxy_xy_10min_level1.RData"
+gps_file <- "galaxy_xy_highres_level1.RData"
 
-id_file <- 'coati_ids.RData' 
+id_file <- 'galaxy_coati_ids.RData' 
 
 library(fields)
 library(viridis)
@@ -98,7 +98,7 @@ for(t in 1:(n_times-1)){
   if(n_subgroups_now==1 
      & n_subgroups_later >1
      & singletons_later==0
-     ){
+  ){
     splits <- c(splits, t)
   }
   
@@ -178,15 +178,15 @@ consistency_data <- get_consistency(p_dyad_together)
 n_rands <- 1000
 rando_consistencies <- rep(NA, n_rands)
 for (i in 1:n_rands){
-
+  
   rando <- randomise_splits(splits_df)
   rando_dyad <- get_p_dyad_together(splits_df_local = rando, n_inds_local = n_inds)
   consist <- get_consistency(rando_dyad)
   rando_consistencies[i] <- consist
-
+  
 }
 
-png(height = 600, width = 900, units = 'px', filename = paste0(plot_dir,'consistency_splits_hist.png'))
+png(height = 600, width = 900, units = 'px', filename = paste0(plot_dir,'consistency_splits_hist_highres.png'))
 par(mfrow=c(1,1), mar = c(6,6,3,3))#(bottom, left, top, right)
 hist(rando_consistencies, breaks=seq(0,0.5,0.005), main = "", xlab = "Consistency of random sub-group allocations", col = "slategray4",  cex.lab = 2.5, cex.axis=2.5)
 abline(v=consistency_data, col = 'orange2', lwd=4)
@@ -209,7 +209,7 @@ diag(p_dyad_together) <- NA
 new_order <- c(5,1,11,4,10,2,3,6,7,8,9)
 p_dyad_together_reorder <- p_dyad_together[new_order, new_order]
 
-png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'subgroup_network_splits.png'))
+png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'subgroup_network_splits_highres.png'))
 par(mfrow=c(1,1), mar = c(1,2,1,1))#(bottom, left, top, right)
 visualize_network_matrix_galaxy(p_dyad_together_reorder, coati_ids[new_order,])
 dev.off()

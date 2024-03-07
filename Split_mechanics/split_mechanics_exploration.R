@@ -19,8 +19,10 @@ group <- 'galaxy' #subdirectory where the group data is stored
 
 #for Emily:
 codedir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
+
 groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
+
 #groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
 #plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
 
@@ -35,7 +37,9 @@ source('coati_function_library.R')
 setwd(codedir)
 
 #read in events
-events <- read.csv(paste0('Split_mechanics/',group,'_manual_split_merge_clean.csv'), sep=';')
+#events <- read.csv(paste0('Split_mechanics/',group,'_manual_split_merge_clean.csv'), sep=';')
+events <- read.csv(paste0('Split_mechanics/',group,'_manual_split_merge_clean2.csv'),  sep=",", header=TRUE)
+
 
 #if automated events
 #load('C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/galaxy_auto_ff_events_characterized.RData')
@@ -75,10 +79,20 @@ for (i in 1:nrow(events)){
 events$time_min <- paste0(events$fission_time,events$fusion_time)
 
 #convert to POSIX
-events$datetime <- as.POSIXct(paste(events$date, events$time_min), format = "%Y-%m-%d %H:%M",tz = "UTC")
+#if loading in manual_split_merge_clean:
+#events$datetime <- as.POSIXct(paste(events$date, events$time_min), format = "%Y-%m-%d %H:%M",tz = "UTC")
+
+#if loading in manual_split_merge_clean2:
+events$datetime <- as.POSIXct(paste(events$date, events$time_min), format = "%d.%m.%Y %H:%M",tz = "UTC")
+#also clean2 needs the 25th to be removed
+events <- events[!(events$date == "25.12.2021"),]
+
 
 #match times to get indexes into matrices
 events$tidx <- match(events$datetime, ts)
+
+#remove rows where there is no match (because too late):
+events <- events[!is.na(events$tidx),]
 
 #count up how many individuals are in each group
 events$n_A <- unlist(lapply(events$group_A_idxs,length))
@@ -241,11 +255,13 @@ for (i in 1:nrow(events)){
   }else {print("fail")}
 }
 
+events2 <- events
+
 
 #save the events dataframe to be read into markdown
-#save(events, file = paste0('C:/Users/egrout/Dropbox/coatithon/coatithon_code/Split_mechanics/',group,'_manual_events_withinfo.RData'))
+save(events, file = paste0('C:/Users/egrout/Dropbox/coatithon/coatithon_code/Split_mechanics/',group,'_manual_events_withinfo2.RData'))
 
-save(events, file = paste0('C:/Users/egrout/Dropbox/coatithon/coatithon_code/Split_mechanics/',group,'_auto_events_withinfo.RData'))
+#save(events, file = paste0('C:/Users/egrout/Dropbox/coatithon/coatithon_code/Split_mechanics/',group,'_auto_events_withinfo.RData'))
 
 
 ### FISSION PLOTTING ###
@@ -297,15 +313,15 @@ fission_df$Distance_Larger_Group <- ifelse(fission_df$A_subgroup_size >= fission
 #create column for the distance travelled of the smaller subgroup
 fission_df$Distance_Smaller_Group <- ifelse(fission_df$A_subgroup_size >= fission_df$B_subgroup_size,fission_df$B_during_disp, fission_df$A_during_disp)
 
-png(height = 800, width = 800, units = 'px', filename = paste0(plot_dir,'subgroup_dist_travelled_duringfission_groupsizeorder.png'))
+png(height = 800, width = 800, units = 'px', filename = paste0(plot_dir,'subgroup_dist_travelled_duringfission_groupsizeorder_lm.png'))
 par(mar = c(8,8,2,2))
-plot(fission_df$Distance_Larger_Group, fission_df$Distance_Smaller_Group, pch = 20, xlab = "Distance travelled by larger subgroup (m)", ylab = "Distance travelled by smaller subgroup (m)", main = '', cex = 4, cex.axis = 2.5, cex.lab = 2, col = "darkolivegreen3",mgp=c(5,2,0))
-#abline(lm(fission_df$Distance_Smaller_Group ~ fission_df$Distance_Larger_Group))
+plot(fission_df$Distance_Larger_Group, fission_df$Distance_Smaller_Group, pch = 20, xlab = "Distance travelled by larger subgroup (m)", ylab = "Distance travelled by smaller subgroup (m)", main = '', cex = 4, cex.axis = 2.5, cex.lab = 2, col = "aquamarine3",mgp=c(5,2,0))
+abline(lm(fission_df$Distance_Smaller_Group ~ fission_df$Distance_Larger_Group))
 dev.off()
 
 png(height = 800, width = 800, units = 'px', filename = paste0(plot_dir,'subgroup_dist_travelled_beforefission_groupsizeorder.png'))
 par(mar = c(8,8,2,2), mgp = c(3,0,-1.7))
-hist(fission_df$AB_before_disp, main = '', xlab = "Distance traveled 10 minutes before fission (m)", ylab = '', col = "darkolivegreen",cex.axis = 2.5, cex.lab = 2, cex.main = 3, breaks = 25)
+hist(fission_df$AB_before_disp, main = '', xlab = "Distance traveled 10 minutes before fission (m)", ylab = '', col = "aquamarine4",cex.axis = 2.5, cex.lab = 2, cex.main = 3, breaks = 25)
 dev.off()
 
 
@@ -415,6 +431,24 @@ plot(comb_fus$disp, comb_fus$sub_size, pch = 20, ylim = c(0, 10), xlab = "Distan
 
 #hist(events$split_angle[fus], xlab = "Angle between sub-groups during fusion (degrees)", main = " ",cex.axis = 3, cex.lab = 3, cex.main = 3,col = "hotpink4",mgp=c(5,2,.5))
 
+dev.off()
+
+
+#filter dataframe to columns needed for the distance travelled and order the subgroup by size (so the larger subgroup is on the X axis and the smaller subgroup is on the Y axis)
+
+fusion_df <- data.frame(cbind(events$A_during_disp[fus], events$B_during_disp[fus], events$A_subgroup_size[fus], events$B_subgroup_size[fus]))
+colnames(fusion_df) <- c("A_during_disp", "B_during_disp", "A_subgroup_size", "B_subgroup_size")
+
+#create column for the distance travelled for the larger subgroup
+fusion_df$Distance_Larger_Group <- ifelse(fusion_df$A_subgroup_size >= fusion_df$B_subgroup_size, fusion_df$A_during_disp, fusion_df$B_during_disp)
+#create column for the distance travelled of the smaller subgroup
+fusion_df$Distance_Smaller_Group <- ifelse(fusion_df$A_subgroup_size >= fusion_df$B_subgroup_size,fusion_df$B_during_disp, fusion_df$A_during_disp)
+
+
+png(height = 800, width = 800, units = 'px', filename = paste0(plot_dir,'subgroup_dist_travelled_duringfusion_groupsizeorder.png'))
+par(mar = c(8,8,2,2))
+plot(fusion_df$Distance_Larger_Group, fusion_df$Distance_Smaller_Group, pch = 20, xlab = "Distance travelled by larger subgroup (m)", ylab = "Distance travelled by smaller subgroup (m)", main = '', cex = 4, cex.axis = 2.5, cex.lab = 2, col = "cadetblue3",mgp=c(5,2,0))
+#abline(lm(fusion_df$Distance_Smaller_Group ~ fusion_df$Distance_Larger_Group))
 dev.off()
 
 #for changing the alpha values
