@@ -19,7 +19,7 @@ use_manual_events <- T
 #---PARAMETERS (probably don't modify)---
 
 #events filename - where to get the split/merge events for manually labeled events
-events.filename <- paste0('Split_mechanics/',group,'_manual_split_merge_clean.csv') 
+events.filename <- paste0('C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/',group,'_manual_split_merge_clean.csv') 
 
 #radii to use
 R_inner <- 15
@@ -277,7 +277,7 @@ for (i in 1:nrow(events)){
 }
 
 if(use_manual_events){
-  save(list = c('events'), file = paste0(groupdir, '/', group,'_manual_ff_events_characterized.RData'))
+  save(list = c('events'), file = paste0(groupdir, group,'_manual_ff_events_characterized.RData'))
 } else{
-  save(list = c('events'), file = paste0(groupdir, '/', group,'_auto_ff_events_characterized.RData'))
+  save(list = c('events'), file = paste0(groupdir, group,'_auto_ff_events_characterized.RData'))
 }

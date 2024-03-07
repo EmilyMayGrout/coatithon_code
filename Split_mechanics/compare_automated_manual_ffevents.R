@@ -25,7 +25,7 @@ setwd(codedir)
 
 
 #read in events
-events <- read.csv(paste0('Split_mechanics/',group,'_manual_split_merge_clean.csv'), sep=';')
+events <- read.csv(paste0('C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/',group,'_manual_split_merge_clean.csv'), sep=';')
 
 #read in coati ids
 setwd(groupdir)
@@ -106,7 +106,7 @@ events_aut_txt <- events_aut_detected[, c("tidx", "datetime", "event_type", "n_A
 
 
 #save the events_man and events_aut_detected to txt files 
-setwd('C:/Users/egrout/Dropbox/coatithon/coatithon_code/Split_mechanics/labels/')
+setwd('C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/labels/')
 write.table(events_man_txt, paste0(group, "_events_man.txt"))
 write.table(events_aut_txt, paste0(group, "_events_aut.txt"))
 
