@@ -52,7 +52,7 @@ convert_audition_to_sec <- function(x){
   }else{
     
     #if 1 colons, assume it is in the format h:m:s
-    sec <- hms(x)
+    sec <- as_hms(x)
   }
   
   return(as.numeric(sec))
@@ -61,6 +61,10 @@ convert_audition_to_sec <- function(x){
 #------MAIN-----
 #load synch calls
 synch_dat <- read.csv(path_to_synch_file, stringsAsFactors = F)
+
+#add column for filename_short
+pattern <- "G\\d+_\\d+_FL\\d+" #need to do this incase the collar ID is 5 numbers not 4
+synch_dat$filename_short <- regmatches(synch_dat$filename, regexpr(pattern, synch_dat$filename))
 
 #convert date to Y-M-D
 synch_dat$date <- as.Date(sub("(..)$", "20\\1", synch_dat$date), "%d.%m.%Y")
@@ -209,7 +213,13 @@ offset_table$soroka_id_date <- paste(offset_table$soroka_id, offset_table$date, 
 calls$offset <- offset_table$offset[match(calls$soroka_id_date, offset_table$soroka_id_date)]
 
 #subtract the offset to get the synched time
-calls$datetime_synch <- as.POSIXct(calls$datetime, tz = 'UTC') - calls$offset
+calls$datetime_synch <- as.POSIXct(calls$datetime, tz = 'UTC', format = "%Y-%m-%d %H:%M:%OS") - calls$offset
+#this isn't to the millisecond so it rounds the calls to the same times which they're not...
+
+#trying to get the millisecond into the as.POSIXct but not working:
+calls$time_synch2 <- as_hms(as_hms(calls$time) - calls$offset)
+calls$datetime_synch2 <- paste(calls$date, calls$time_synch2)
+calls$datetime_synch2 <- as.POSIXct(calls$datetime_synch2, format = "%Y-%m-%d %H:%M:%OS6") #this doesn't work sadly....
 
 #save synched calls table
 base <- file_path_sans_ext(path_to_call_labels_file)
