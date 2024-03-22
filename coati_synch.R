@@ -16,8 +16,9 @@
 
 #----PARAMETERS---
 utc_offset <- -5 #local time offset from UTC, in hours - should be negative 5 for panama
-path_to_synch_file <- '~/Downloads/Synch calls coati collar project - Sheet1.csv' #where the synch table is located
-path_to_call_labels_file <- '~/Downloads/all_data_hms.csv'
+#path_to_synch_file <- '~/Downloads/Synch calls coati collar project - Sheet1.csv' #where the synch table is located
+path_to_synch_file <- 'C:/Users/egrout/Dropbox/coatithon/synch_table.csv'
+path_to_call_labels_file <- 'C:/Users/egrout/Dropbox/coaticalls/processed/all_data_hms.csv' #made in calls_around_fission_fusions_galaxy with labels which were cleaned in the cleaning_labels 
 
 #-----SETUP----
 #LIBRARIES
@@ -99,7 +100,7 @@ synch_dat$synch2_UTC <- as.POSIXct(paste(synch_dat$date,
 
 #Convert file start and end times (time in file) to seconds since beginning of file
 synch_dat$filestart_sec <- sapply(synch_dat$time.in.file.of.st, convert_audition_to_sec)
-synch_dat$fileend_sec <- sapply(synch_dat$time.in.file.of.et, convert_audition_to_sec)
+synch_dat$fileend_sec <- sapply(as_hms(synch_dat$time.in.file.of.et), convert_audition_to_sec)
 
 #Convert synch times in file to seconds into the file
 synch_dat$synch1_sec <- sapply(synch_dat$X.1..synch.time.in.file, convert_audition_to_sec)

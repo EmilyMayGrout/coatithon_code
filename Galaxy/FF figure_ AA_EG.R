@@ -179,7 +179,7 @@ p2 <- ggplot() +
   #now choose some nice differentiated colors for each coati
   #scale_color_manual(values =  sample(c('#b2df8a','#fb9a99','#fb9a99','#fb9a99','#1f78b4','#fb9a99','#cab2d6','#cab2d6','#cab2d6','#fb9a99','#fb9a99'), 11, replace = FALSE)) +
   scale_color_manual(values = sample(c('#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a','#b15928'), #these are 11 distinct colors, they will be randomly assigned to the coatis
-                                     11, replace = FALSE)) +
+                                     11, replace = FALSE))+
   theme_classic() +
   #get rid of all the extra stuff (note, this now is for a horizontal plot. if you want a vertical plot,
   # then replace the xs with ys and the ys with xs)
@@ -192,21 +192,22 @@ p2 <- ggplot() +
         axis.text.y =element_blank(),
         #axis.text.x = element_blank(),
         axis.text.x = element_text(size = 20, color = "black"),
-        axis.title.y = element_blank(),
-        axis.title.x = element_blank(),
+        axis.title.y = element_text(size = 20, color = "black"),
+        axis.title.x = element_text(size = 20, color = "black"),
         #axis.line.y = element_line(),
         axis.line.y = element_blank(),
         axis.line.x.bottom=element_line(color="black"),
         axis.ticks.y = element_blank()) +
+  xlab("Time") + ylab("Subgroup membership")+
  #coord_flip() # flip it so that it's vertical
 NULL
   
 p2 #look at it
 
 # save it
-ggsave(filename = "C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/FF line and dot subgroupings_0501022_horz.png",
+ggsave(filename = "C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/FF line and dot subgroupings_0501022_horz_2.png",
        width = 15,
-       height = 3,
+       height = 4,
        units = "in",
        dpi = 350,
        scale = 1)

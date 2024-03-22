@@ -470,12 +470,28 @@ gg <- ggplot(aes(x = prop_alone, y = age_sex), data = coati_ids)+
   guides(color = "none")+  # Remove the legend
   theme( strip.text.y = element_blank())
 
+#change Ardera to Ardern (spelling error)
+
+coati_ids$name[coati_ids$name == "Ardera"] <- "Ardern"
+
+gg <- ggplot(aes(x = prop_alone, y = age_sex, color = name), data = coati_ids) +
+  xlab("Proportion of time alone (%)") +
+  ylab("Age class") +
+  geom_point(aes(color = name), position = position_jitter(width = 0, height = 0.1), size = 3, alpha = 0.7) +
+  facet_grid(vars(age_sex), scales = "free", space = "free") +
+  scale_color_manual(values = c("Ardern" = "#a6cee3", "Castro" = "#1f78b4", "Cleopatra" = "#b2df8a", "Gandhi" = "#33a02c", "Khan" = "#fb9a99", "Gillard" = "#e31a1c", "May" = "#fdbf6f", "Meir" = "#ff7f00", "Merkel" = "#cab2d6", "Moscoso" = "#6a3d9a", "Mujica" = "#b15928", "Obama"= "#EEEE00", "Peron" = "#feb24c", "Torrijos" = "#CD1076", "Truss" = "#bd0026" , "Zelenskyy" = "#006400")) + 
+  theme_classic() +
+  guides(color = guide_legend(title = "Individual"))+  # Add legend title
+  theme( strip.text.y = element_blank())+
+  NULL
+
 gg
+
 
 coati_ids_alone_pres <- coati_ids
 #this dataframe is used in alone_inds_all_groups
 #save(coati_ids_alone_pres, file = "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/pres_alone_inds_level1.Rdata")  
 
-#ggsave(filename = paste0(plot_dir, 'prop_time_alone.png'), plot = gg, width = 6, height = 6, dpi = 300)
+ggsave(filename = paste0(plot_dir, 'prop_time_alone.png'), plot = gg, width = 6, height = 6, dpi = 300)
 
 

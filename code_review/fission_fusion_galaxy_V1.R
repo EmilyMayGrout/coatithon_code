@@ -463,11 +463,22 @@ gg <- ggplot(aes(x = prop_alone, y = age_sex), data = coati_ids)+
   guides(color = "none")+  # Remove the legend
   theme( strip.text.y = element_blank())
 
+gg <- ggplot(aes(x = prop_alone, y = age_sex, color = name), data = coati_ids) +
+  xlab("Proportion of time alone (%)") +
+  ylab("Age class") +
+  geom_point(aes(color = name), position = position_jitter(width = 0, height = 0.1), size = 3, alpha = 0.7) +
+  facet_grid(vars(age_sex), scales = "free", space = "free") +
+  scale_color_manual(values = c("Cometa" = "#a6cee3", "Estrella" = "#1f78b4", "Gus" = "#b2df8a", "Lucero" = "#33a02c", "Luna" = "#fb9a99", "Orbita" = "#e31a1c", "Planeta" = "#fdbf6f", "Pluto" = "#ff7f00", "Quasar" = "#cab2d6", "Saturno" = "#6a3d9a", "Venus" = "#b15928")) + 
+  theme_classic() +
+  guides(color = guide_legend(title = "Individual"))+  # Add legend title
+  theme( strip.text.y = element_blank())+
+  NULL
+  
 gg
 
 coati_ids_alone_gal <- coati_ids
 #this dataframe is used in alone_inds_all_groups
-save(coati_ids_alone_gal, file = "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/gal_alone_inds_level1.Rdata")  
+save(coati_ids_alone_gal, file = "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/gal_alone_inds_level1_ind.Rdata")  
 
 
 ggsave(filename = paste0(plot_dir, 'prop_time_alone.png'), plot = gg, width = 6, height = 6, dpi = 300)
@@ -624,10 +635,6 @@ ggsave(filename = "C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/FF l
        units = "in",
        dpi = 350,
        scale = 1)
-
-
-
-
 
 
 

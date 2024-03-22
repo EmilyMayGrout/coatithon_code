@@ -298,7 +298,7 @@ df_subset <- subset(df_subset, id != 5)
 map = get_map(location = c(lon =-79.700063, lat=9.123001), zoom=15, maptype = "satellite")
 #getting max and min lat lons for a buffer for the map
 min_lat <- (min(df_subset$lat, na.rm = TRUE) - 0.0001)
-max_lat <- (max(df_subset$lat, na.rm = TRUE) + 0.0020)
+max_lat <- (max(df_subset$lat, na.rm = TRUE) + 0.0000) #changed from 0.0020
 min_lon <- (min(df_subset$lon, na.rm = TRUE) - 0.0005)
 max_lon <- (max(df_subset$lon, na.rm = TRUE) + 0.0005)
 #for making a scale bar
@@ -412,7 +412,7 @@ gg <- ggmap(map) +
 
 gg
 
-ggsave(filename = paste0(plot_dir, 'ggmap_traj_28_col', '.png'), plot = gg, width = 14, height = 10, dpi = 300)
+ggsave(filename = paste0(plot_dir, 'ggmap_traj_28_col_cut', '.png'), plot = gg, width = 13, height = 6, dpi = 300)
 
 
 
