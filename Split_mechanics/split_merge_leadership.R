@@ -194,6 +194,123 @@ ind_crossing_thresh_times_along_group_path <- function(moving_inds, xs, ys, t0, 
   
 }
 
+#FUNCTION for calculating the order in which each individual passes its individual "finish line". The finish line is x distance from their starting point, so each individuals threshold will be at a different location, but the distance travelled is the same.
+
+#INPUTS:
+#moving_inds: indexes of the individuals in the moving subgroup
+#xs, ys: matrices of positions
+#t0: start time index of event 
+#tf: end time index of event - used for computing group direction of movement
+#dist_frac_thresh: threshold fractional distance along group trajectory from start point to compute passing time for each individual
+ind_crossing_thresh_times_along_ind_path <- function(moving_inds, xs, ys, t0, tf, dist_frac_thresh = 0.5){
+  
+  #if times are missing, return NAs for ranks and crossing times
+  if(is.na(t0) | is.na(tf)){
+    out <- list()
+    out$first_crossing_times <- rep(NA, length(moving_inds))
+    out$ranks <- rep(NA, length(moving_inds))
+    out$norm_ranks <- rep(NA, length(moving_inds))
+    return(out)
+  }
+  
+  #get individual initial location
+  xc0 <- xs[moving_inds,t0]
+  yc0 <- ys[moving_inds,t0]
+  
+  #individual "finish line" location
+  xcf <- xs[moving_inds,tf], na.rm = T)
+  ycf <- mean(ys[moving_inds,tf], na.rm = T)
+  
+  #centroid displacement vector
+  dxc <- xcf - xc0
+  dyc <- ycf - yc0
+  
+  #centroid total distance traveled
+  distc <- sqrt(dxc^2 + dyc^2)
+  
+  #if distance moved was zero, return NAs
+  if(distc == 0){
+    out <- list()
+    out$first_crossing_times <- rep(NA, length(moving_inds))
+    out$ranks <- rep(NA, length(moving_inds))
+    out$norm_ranks <- rep(NA, length(moving_inds))
+    return(out)
+  }
+  
+  #get the distance threshold (along group trajectory) used to determine order of crossing
+  dist_thresh <- dist_frac_thresh * distc
+  
+  #get individual end points
+  xi <- xs[moving_inds, t0:ncol(xs)]
+  yi <- ys[moving_inds, t0:ncol(xs)]
+  
+  #get individual displacement vectors (their end point to the group start point)
+  dxi <- xi - xc0
+  dyi <- yi - yc0
+  
+  #project individual displacement vectors onto the group displacement vector
+  disp_i <- (dxi*dxc + dyi*dyc) / sqrt(dxc^2 + dyc^2)
+  
+  #get times of each individual crossing the threshold
+  first_crossing_times <- rep(NA, length(moving_inds))
+  for(ind in 1:length(moving_inds)){
+    
+    if(is.matrix(disp_i)){
+      crossing_times <- which(disp_i[ind,] > dist_thresh)
+    } else{
+      crossing_times <- which(disp_i > dist_thresh)
+    }
+    
+    #if it never crosses, then give infinity for the crossing time and throw a warning
+    if(length(crossing_times)==0){
+      first_crossing_times[ind] <- Inf
+      
+      stop('Individual never crossed the distance threshold - crossing time set to Inf')
+    }else{
+      first_crossing_times[ind] <- min(crossing_times)
+    }
+  }
+  
+  #get ranks
+  if(sum(is.na(first_crossing_times))==0){
+    ranks <- rank(-first_crossing_times) #rank negative value so that higher ranks are higher leadership
+  } else{
+    ranks <- rep(NA, length(first_crossing_times))
+  }
+  
+  #get normalized ranks
+  if(length(first_crossing_times)==1){
+    norm_ranks <- c(NA)
+  } else{
+    min_rank <- min(ranks)
+    max_rank <- max(ranks)
+    norm_ranks <- (ranks - min_rank) / (max_rank - min_rank)
+  }
+  
+  #return ind displacement along group vector, ranks, and normalized ranks
+  out <- list()
+  out$first_crossing_times <- first_crossing_times
+  out$ranks <- ranks
+  out$norm_ranks <- norm_ranks
+  
+  return(out) 
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #Compute entropy from a set of measurements
 #histo is a vector of frequencies or probabilities to take the entropy of
 compute_entropy <- function(histo){
