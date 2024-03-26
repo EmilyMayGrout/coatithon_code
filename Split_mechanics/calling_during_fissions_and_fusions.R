@@ -72,6 +72,8 @@ load(ff_file)
 group_events_data <- events
 rm('events')
 
+#Ari's script for creating the df with call rates before, during, and after event. Cini's version starts below commented code
+
 # #create a new data frame with data at the individual level
 # ind_events_data <- data.frame()
 # for(i in 1:nrow(group_events_data)){
@@ -181,6 +183,8 @@ rm('events')
 # ind_events_data$agg_call_rate <- ind_events_data$agg_calls / ind_events_data$duration
 # ind_events_data$contact_call_rate <- ind_events_data$contact_calls / ind_events_data$duration
 
+
+#Cini's script for creating the df with call rates before, during, and after event.
 
 # get times to posix format and to UTC time zone
 calls$datetime_synch_pos<-as.POSIXct(calls$datetime_synch, format = "%Y-%m-%d %H:%M:%OS", tz = "UTC") + 5*60*60
