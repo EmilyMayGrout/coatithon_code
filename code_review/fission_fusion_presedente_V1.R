@@ -455,6 +455,7 @@ coati_ids$inds_alone <- rowSums(df, na.rm = TRUE)
 coati_ids$total_gps <- ncol(inds_subgroup) - rowSums(is.na(inds_subgroup))
 #get proportion of time alone
 coati_ids$prop_alone <- coati_ids$inds_alone/coati_ids$total_gps
+coati_ids$prop_alone <- coati_ids$prop_alone*100
 
 coati_ids$age_sex <- paste(coati_ids$age, coati_ids$sex, sep = " ")
 
@@ -476,8 +477,9 @@ coati_ids$name[coati_ids$name == "Ardera"] <- "Ardern"
 
 gg <- ggplot(aes(x = prop_alone, y = age_sex, color = name), data = coati_ids) +
   xlab("Proportion of time alone (%)") +
-  ylab("Age class") +
-  geom_point(aes(color = name), position = position_jitter(width = 0, height = 0.1), size = 3, alpha = 0.7) +
+  ylab("Age class") + 
+  scale_x_continuous(limits = c(0, 40))+
+  geom_point(aes(color = name), position = position_jitter(width = 0, height = 0.3), size = 3, alpha = 0.7) +
   facet_grid(vars(age_sex), scales = "free", space = "free") +
   scale_color_manual(values = c("Ardern" = "#a6cee3", "Castro" = "#1f78b4", "Cleopatra" = "#b2df8a", "Gandhi" = "#33a02c", "Khan" = "#fb9a99", "Gillard" = "#e31a1c", "May" = "#fdbf6f", "Meir" = "#ff7f00", "Merkel" = "#cab2d6", "Moscoso" = "#6a3d9a", "Mujica" = "#b15928", "Obama"= "#EEEE00", "Peron" = "#feb24c", "Torrijos" = "#CD1076", "Truss" = "#bd0026" , "Zelenskyy" = "#006400")) + 
   theme_classic() +
@@ -492,6 +494,6 @@ coati_ids_alone_pres <- coati_ids
 #this dataframe is used in alone_inds_all_groups
 #save(coati_ids_alone_pres, file = "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/pres_alone_inds_level1.Rdata")  
 
-ggsave(filename = paste0(plot_dir, 'prop_time_alone.png'), plot = gg, width = 6, height = 6, dpi = 300)
+ggsave(filename = paste0(plot_dir, 'prop_time_alone.png'), plot = gg, width = 4, height = 5, dpi = 300)
 
 
