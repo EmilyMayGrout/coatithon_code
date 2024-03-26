@@ -25,6 +25,7 @@ path_to_call_labels_file <- 'C:/Users/egrout/Dropbox/coaticalls/processed/all_da
 library(lubridate)
 library(stringr)
 library(tools)
+library(hms)
 
 #FUNCTIONS
 #---Convert audition label to seconds into the file
@@ -131,12 +132,13 @@ synch_dat$offset_2 <- offsets_start_to_synch2
 synch_dat$soroka_id <- paste(synch_dat$id, synch_dat$soroka_num, sep='_')
 soroka_ids <- unique(synch_dat$soroka_id)
 plot(NULL, xlim = c(min(synch_dat$synch1_UTC,na.rm=T), max(synch_dat$synch1_UTC,na.rm=T)), ylim = c(-120,0))
+colors <- rainbow(length(soroka_ids))
 for(i in 1:length(soroka_ids)){
   soroka_id <- soroka_ids[i]
   idxs <- which(synch_dat$soroka_id == soroka_id)
   times_UTC <- c(synch_dat$synch1_UTC[idxs], synch_dat$synch2_UTC[idxs])
   offsets <- c(synch_dat$offset_1[idxs], synch_dat$offset_2[idxs])
-  points(times_UTC, offsets)
+  points(times_UTC, col = colors[i],pch =i, offsets)
 }
 
 #run fits for collars with at least 2 points and get coeffs
@@ -214,12 +216,8 @@ calls$offset <- offset_table$offset[match(calls$soroka_id_date, offset_table$sor
 
 #subtract the offset to get the synched time
 calls$datetime_synch <- as.POSIXct(calls$datetime, tz = 'UTC', format = "%Y-%m-%d %H:%M:%OS") - calls$offset
-#this isn't to the millisecond so it rounds the calls to the same times which they're not...
+#the milliseconds are not displayed but they are there: format(calls$datetime_synch, "%Y-%m-%d %H:%M:%OS3" )
 
-#trying to get the millisecond into the as.POSIXct but not working:
-calls$time_synch2 <- as_hms(as_hms(calls$time) - calls$offset)
-calls$datetime_synch2 <- paste(calls$date, calls$time_synch2)
-calls$datetime_synch2 <- as.POSIXct(calls$datetime_synch2, format = "%Y-%m-%d %H:%M:%OS6") #this doesn't work sadly....
 
 #save synched calls table
 base <- file_path_sans_ext(path_to_call_labels_file)
