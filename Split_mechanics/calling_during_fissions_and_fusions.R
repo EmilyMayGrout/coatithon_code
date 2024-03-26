@@ -260,3 +260,31 @@ ind_events_data$agg_call_rate<-ind_events_data$agg_calls / ind_events_data$durat
 ind_events_data$contact_call_rate<-ind_events_data$contact_calls / ind_events_data$duration
 #TODO check events where the before and start time are the same
 
+
+ind_events_data_long <- ind_events_data %>%
+  pivot_longer(c(agg_call_rate, contact_call_rate), names_to = "call", values_to = "rate")
+
+#change factor levels so before is shown before after in plot
+ind_events_data_long$period <- factor(ind_events_data_long$period, levels = c("before","during" ,"after"))
+
+#get the points to correspond to the period
+
+g <- ggplot(data = ind_events_data_long[ind_events_data_long$event_type == "fission",], aes(x = call, y = rate))+
+  geom_violin(aes(fill = period))+ 
+  ylim(c(0,0.75))+
+  geom_point(position=position_jitterdodge(), size = 0.5, color = "gray3", aes(fill=bef_aft, alpha = 0.8))+
+  #scale_fill_manual(values=c("indianred1", "indianred3", "indianred4"))+
+  #theme(legend.title=element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.text=element_text(size=14), axis.title = element_text(size = 14), legend.text = element_text(size = 14))+ 
+  xlab(" ") +
+  ylab("Call rate (per minute)")+
+  scale_alpha(guide = 'none')+
+facet_wrap(~event_idx)
+
+g
+
+
+
+
+
+
+
