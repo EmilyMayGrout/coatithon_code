@@ -1,5 +1,10 @@
 #This script is for looking at how call rates relate to fission-fusion dynamics in coatis
 
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+
+
 #directory holding all the data
 #datadir <- '~/Dropbox/coatithon/calling_during_fissions_and_fusions/data'
 datadir <- "C:/Users/egrout/Dropbox/coatithon/calling_during_fissions_and_fusions/data"
@@ -255,10 +260,65 @@ for(i in 1:nrow(group_events_data)){
     }
   }
 }
-rm(list = setdiff(ls(),c("ind_events_data","calls","group_events_data")))
+# rm(list = setdiff(ls(),c("ind_events_data","calls","group_events_data")))
 ind_events_data$agg_call_rate<-ind_events_data$agg_calls / ind_events_data$duration
 ind_events_data$contact_call_rate<-ind_events_data$contact_calls / ind_events_data$duration
 #TODO check events where the before and start time are the same
+
+
+## figure out a way to define fission types
+#look at the difference in travel distance 
+
+event<-data.frame()
+for(i in 1:nrow(group_events_data)){
+  event.times<-group_events_data[i,c(10:14)]
+  times<-ts[as.numeric(event.times[,c(2:5)])]  # start - end backwards
+  event_<-group_events_data[i,c("event_idx","event_type")] 
+  event_$b.duration<-as.numeric(difftime(times[3],times[4], units = "secs"))
+  event_$d.duration<-as.numeric(difftime(times[2],times[3], units = "secs"))                         
+  event<-rbind(event,event_)
+}
+
+dist_travel_df <- group_events_data[, c("event_type", "event_idx", "B_during_disp", "A_during_disp", "AB_before_disp" )]
+
+dist_travel_df<-merge(dist_travel_df, event, by = c("event_idx","event_type"), all = T)
+
+fission_dist <- dist_travel_df[dist_travel_df$event_type == "fission",]
+
+fission_dist <- fission_dist[!is.na(fission_dist$B_during_disp),]
+
+fission_dist$move_diff <- abs(fission_dist$B_during_disp - fission_dist$A_during_disp)
+fission_dist$B_move_diff <- fission_dist$B_during_disp - fission_dist$AB_before_disp
+fission_dist$A_move_diff <- fission_dist$A_during_disp - fission_dist$AB_before_disp
+
+fission_dist$B_speed <- fission_dist$B_during_disp / fission_dist$d.duration
+fission_dist$A_speed <- fission_dist$A_during_disp / fission_dist$d.duration
+fission_dist$AB_speed <- fission_dist$AB_before_disp / fission_dist$b.duration
+
+hist(fission_dist$A_speed, breaks = 20)
+
+#for error checking, should remove the fissions where speed is incredibly high (e.g. more than 2.5m/second) in a short duration (6 seconds)
+#for now, we remove these events here
+fission_dist <- fission_dist[fission_dist$B_speed < 2.5,]
+fission_dist <- fission_dist[fission_dist$A_speed < 2.5,]
+
+#removing rows where the before speed is 0
+fission_dist <- fission_dist[which(fission_dist$b.duration > 0),]
+
+#calculate speed diff
+fission_dist$speed_diff <- abs(fission_dist$B_speed - fission_dist$A_speed)
+fission_dist$B_speed_diff <- fission_dist$B_speed - fission_dist$AB_speed
+fission_dist$A_speed_diff <- fission_dist$A_speed - fission_dist$AB_speed
+
+plot(fission_dist$AB_speed*60, fission_dist$speed_diff)
+
+
+
+plot(fission_dist$AB_before_disp, fission_dist$move_diff)
+points(move_diff~AB_before_disp, fission_dist[fission_dist$move_diff >20 & fission_dist$AB_before_disp > 25,], col = "steelblue2", pch = 19)
+points(move_diff~AB_before_disp, fission_dist[fission_dist$move_diff >20 & fission_dist$AB_before_disp <= 25,], col = "indianred", pch = 19)
+points(move_diff~AB_before_disp, fission_dist[fission_dist$move_diff <20 & fission_dist$AB_before_disp <= 25,], col = "gold2", pch = 19)
+
 
 
 ind_events_data_long <- ind_events_data %>%
@@ -269,18 +329,22 @@ ind_events_data_long$period <- factor(ind_events_data_long$period, levels = c("b
 
 #get the points to correspond to the period
 
-g <- ggplot(data = ind_events_data_long[ind_events_data_long$event_type == "fission",], aes(x = call, y = rate))+
-  geom_violin(aes(fill = period))+ 
+ggplot(data = ind_events_data_long[ind_events_data_long$event_type == "fission",], 
+            aes(x = call, y = rate, fill = period))+
+  geom_boxplot(outlier.shape = NA)+ 
+  geom_jitter(position = position_dodge(width = 0.75), size = 0.5, color = "gray3", aes(group = interaction(call, period))) +
   ylim(c(0,0.75))+
-  geom_point(position=position_jitterdodge(), size = 0.5, color = "gray3", aes(fill=bef_aft, alpha = 0.8))+
+  
   #scale_fill_manual(values=c("indianred1", "indianred3", "indianred4"))+
-  #theme(legend.title=element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.text=element_text(size=14), axis.title = element_text(size = 14), legend.text = element_text(size = 14))+ 
+  #theme(legend.title=element_blank(), panel.grid.major = element_blank(), panel.grid.minor =     element_blank(), panel.background = element_blank(), axis.text=element_text(size=14), axis.title = element_text(size = 14), legend.text = element_text(size = 14))+ 
   xlab(" ") +
   ylab("Call rate (per minute)")+
   scale_alpha(guide = 'none')+
-facet_wrap(~event_idx)
+  #facet_wrap(~event_idx)
 
-g
+  NULL
+
+
 
 
 
