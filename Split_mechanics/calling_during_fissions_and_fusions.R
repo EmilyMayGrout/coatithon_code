@@ -321,7 +321,17 @@ ggplot(data = ind_events_data_merge[ind_events_data_merge$event_type == event_ty
   ggtitle(paste(event_type, "contact",leadership_metric[n]))+
   facet_wrap(~event_idx) 
 
-rm(ind_events_data_merge)
+
+
+#TODO get the lm line to work!! Add color for moving group
+event_type<-"fission"
+ggplot(data = ind_events_data_merge[ind_events_data_merge$event_type == event_type,],  
+       aes(x = leader_rank, y = agg_call_rate, group = as.factor(ind_idx)))+ 
+  geom_point(size = 1.5)+
+  # geom_line(aes(contact_call_rate~leader_rank))+
+  labs(color = "Leader rank")+
+  ggtitle(paste(event_type, "aggression",leadership_metric[n]))+
+  facet_wrap(~period) 
 
 
 

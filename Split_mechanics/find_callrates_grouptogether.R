@@ -174,6 +174,9 @@ for(together_bout in ttsl){
 par(mar = c(14,4,1,1))
 boxplot(call_rate ~ name*call_type, data = call_rates_together[call_rates_together$n_ind_in_bout > 5,], las = 2, xlab = "")
 
+#TODO
+#need to remove times that are in the before and after the event
+
 #could make aggression calls binary
 
 
