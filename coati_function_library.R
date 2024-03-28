@@ -436,19 +436,8 @@ match_coati_names <- function(subgroup_names, coati_ids){
 #subtlety 1 below).
 #---How are the before and after times identified?---
 #The before time is defined as the time point tidx - time_window (default 
-#time_window = 300s), unless the two groups are not sufficiently together (for
-#a fission) or apart (for a fusion) at that time. If the latter, the before_time
-#is identified as the point just before the two subgroups cross a threshold midway
-#between thresh_l and thresh_h (i.e. at (thresh_l + thresh_h) / 2). The logic here
-#is that, for a fusion we are looking for what the full group (combination of the
-#two eventual subgroups) was doing before they began to split. However, we do not
-#want this point to fall during a prior fusion event, so we require the centroids
-#of the two subgroups to be less than (thresh_l + thresh_h) / 2 distance apart.
-#The after time is defined in a parallel way, but using the time period after the
-#event. It is usually set to tidx + time_window, unless the subgroups come back too
-#close together (for a fission) or go too far apart (for a fusion). Again, we use
-#the time just prior to crossing the midway point between the two thresholds as
-#the end time, if this threshold is crossed before time_window seconds has elapsed.
+#time_window = 300s) and the after time is defined as the time point 
+#tidx + time_window
 #---How are the displacements defined?---
 #We compute the displacement of the centroid of each subgroup (group A and group B)
 #as well as the displacement of the centroid of the combined group (group AB) during
@@ -517,15 +506,11 @@ match_coati_names <- function(subgroup_names, coati_ids){
 #the centroid calculation.
 #If no start and end times are found, nothing else is computed (all vaules are
 #filled in with NAs or NULL for matrices).
-#--For finding the before_time and after_time, if an NA is hit in the forward or
-#backward direction, the before_time (or respectively, the after_time) is marked
-#as NA. Metrics involving that time point can then not be computed and are also 
-#NA. 
 #--If the start and end time are on different days, then both are given NA.
 #--If the before and start time, or after and end time, are on different days, then
 #both are given NA. 
 #--If the before or after time are NA, then other metrics stemming from those times get NA
-analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 600, thresh_h = 50, thresh_l = 15, time_window = 300, plot = T){
+analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 600, thresh_h = 50, thresh_l = 15, time_window = 120, plot = T){
   t_event <- events$tidx[i] #time of the event
   group_A <- events$group_A_idxs[i][[1]] #group A individual idxs
   group_B <- events$group_B_idxs[i][[1]] #group B individual idxs
@@ -691,15 +676,11 @@ analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 600, thresh_h = 5
   end_time <- event_loc$end_time
   
   #if there is more than one start time, go with the closest to the identified fission or fusion point
+  #then also use the associated end time
   if(length(start_time)>1){
     ff_time <- events$tidx[i]
     time_diff <- abs(start_time-ff_time)
     start_time <- start_time[which(time_diff==min(time_diff))]
-  }
-  #same for end time
-  if(length(end_time)>1){
-    ff_time <- events$tidx[i]
-    time_diff <- abs(end_time-ff_time)
     end_time <- end_time[which(time_diff==min(time_diff))]
   }
   
@@ -722,31 +703,8 @@ analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 600, thresh_h = 5
     #GET BEFORE AND AFTER TIMES
     #find the before_time and after_time (times before the start time and after 
     #the end time of the event)
-    min_before_time <- start_time - time_window
-    max_after_time <- end_time + time_window
-    thresh_m <- (thresh_h + thresh_l)/2 #middle threshold is average of upper and lower
-    #go backward in time until the two groups cross thresh_m or until the time window has elapsed 
-    for(t in seq(start_time, min_before_time, -1)){
-      xc_A <- mean(xs[events$group_A_idxs[i][[1]], t], na.rm=T)
-      yc_A <- mean(ys[events$group_A_idxs[i][[1]], t], na.rm=T)
-      xc_B <- mean(xs[events$group_B_idxs[i][[1]], t], na.rm=T)
-      yc_B <- mean(ys[events$group_B_idxs[i][[1]], t], na.rm=T)
-      dist_apart <- sqrt((xc_A - xc_B)^2 + (yc_A - yc_B)^2)
-      #if you hit an NA, then the before time is undefined - t <- NA and break
-      if(is.na(dist_apart)){
-        t <- NA
-        break
-      }
-      if(events$event_type[i] == 'fission' & dist_apart > thresh_m){
-        break
-      }
-      if(events$event_type[i] == 'fusion' & dist_apart < thresh_m){
-        break
-      }
-    }
-    #store the time, which will either be determined by the time window or by the 
-    #groups crossing the threshold
-    before_time <- t
+    before_time <- start_time - time_window
+    after_time <- end_time + time_window
     
     #if the before time is on a different date, make it NA
     if(!is.na(before_time)){
@@ -754,28 +712,6 @@ analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 600, thresh_h = 5
         before_time <- NA
       }
     }
-    
-    #same thing for the after times
-    for(t in seq(end_time, max_after_time, 1)){
-      xc_A <- mean(xs[events$group_A_idxs[i][[1]], t], na.rm=T)
-      yc_A <- mean(ys[events$group_A_idxs[i][[1]], t], na.rm=T)
-      xc_B <- mean(xs[events$group_B_idxs[i][[1]], t], na.rm=T)
-      yc_B <- mean(ys[events$group_B_idxs[i][[1]], t], na.rm=T)
-      dist_apart <- sqrt((xc_A - xc_B)^2 + (yc_A - yc_B)^2)
-      #if you hit an NA, then the after time is undefined - t <- NA and break
-      if(is.na(dist_apart)){
-        t <- NA
-        break
-      }
-      if(events$event_type[i] == 'fission' & dist_apart < thresh_m){
-        break
-      }
-      if(events$event_type[i] == 'fusion' & dist_apart > thresh_m){
-        break
-      }
-    }
-    
-    after_time <- t
     
     #if the after time is on a different date, make it NA
     if(!is.na(after_time)){

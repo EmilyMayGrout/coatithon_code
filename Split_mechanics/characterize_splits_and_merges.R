@@ -11,10 +11,10 @@ library(scales)
 group <- 'galaxy'
 
 #who is using (ari or emily)
-user <- 'emily'
+user <- 'ari'
 
 #whether to identify splits and merges automatically (if F) or use manually identified events (if T)
-use_manual_events <- T
+use_manual_events <- F
 
 #---PARAMETERS (probably don't modify)---
 
@@ -281,3 +281,67 @@ if(use_manual_events){
 } else{
   save(list = c('events'), file = paste0(groupdir, group,'_auto_ff_events_characterized.RData'))
 }
+
+#Check whether the before period overlaps with a preceding event involving some of the same individuals
+events$ovlp_before <- events$ovlp_during <- events$ovlp_after <- list(c(0))
+events$n_ovlp_before <- events$n_ovlp_during <- events$n_ovlp_after <- NA
+for(i in 1:nrow(events)){
+  
+  #before time and after time of the current event
+  before_time_curr <- events$before_time[i]
+  start_time_curr <- events$start_time[i]
+  end_time_curr <- events$end_time[i]
+  after_time_curr <- events$after_time[i]
+  
+  #individuals
+  inds_in_event <- c(events$group_A_idxs[i][[1]], events$group_B_idxs[i][[1]])
+  
+  #lists of overlapping events - set to empty lists initially
+  ovlp_before <- ovlp_during <- ovlp_after <- list()
+  #loop through other events to see if they overlap
+  for(j in 1:nrow(events)){
+    
+    #skip the current event
+    if(i==j){
+      next
+    }
+    
+    #if the events don't involve any of the same individuals, skip
+    inds_in_other_event <- c(events$group_A_idxs[j][[1]], events$group_B_idxs[j][[1]])
+    if(length(intersect(inds_in_event, inds_in_other_event))==0){
+      next
+    }
+    
+    #get start and end time of the other event
+    start_time_other <- events$start_time[j]
+    end_time_other <- events$end_time[j]
+    
+    #check if another event (start - end period) falls within before_time and start_time of the current event
+    if(!is.na(before_time_curr) & !is.na(start_time_curr) & !is.na(end_time_other) & !is.na(start_time_other)){
+      if(before_time_curr <= end_time_other & start_time_curr >= start_time_other){
+        ovlp_before <- c(ovlp_before, j)
+      }
+    }
+    #check if another event (start - end period) falls within start_time and end_time of the current event
+    if(!is.na(start_time_curr) & !is.na(end_time_curr) & !is.na(end_time_other) & !is.na(start_time_other)){
+      if(start_time_curr <= end_time_other & end_time_curr >= start_time_other){
+        ovlp_during <- c(ovlp_during, j)
+      }
+    }
+    #check if another event (start - end period) falls within end_time and after_time of the current event
+    if(!is.na(end_time_curr) & !is.na(after_time_curr) & !is.na(end_time_other) & !is.na(start_time_other)){
+      if(end_time_curr <= end_time_other & after_time_curr >= start_time_other){
+        ovlp_after <- c(ovlp_after, j)
+      }
+    }
+  }
+  events$ovlp_before[i] <- list(ovlp_before)
+  events$ovlp_during[i] <- list(ovlp_during)
+  events$ovlp_after[i] <- list(ovlp_after)
+  
+}
+
+events$n_ovlp_before <- sapply(events$ovlp_before, length)
+events$n_ovlp_during <- sapply(events$ovlp_during, length)
+events$n_ovlp_after <- sapply(events$ovlp_after, length)
+
