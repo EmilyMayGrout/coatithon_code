@@ -3,6 +3,7 @@
 library(dplyr)
 library(ggplot2)
 library(tidyverse)
+library(reshape2)
 
 
 #directory holding all the data
@@ -264,6 +265,56 @@ for(i in 1:nrow(group_events_data)){
 ind_events_data$agg_call_rate<-ind_events_data$agg_calls / ind_events_data$duration
 ind_events_data$contact_call_rate<-ind_events_data$contact_calls / ind_events_data$duration
 #TODO check events where the before and start time are the same
+
+load("C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/leaders_fission_fusion_galaxy.RData") 
+
+fission_leaders_rank <- as.data.frame(out$fission_leaders) 
+fission_leaders_rank<-as.data.frame(t(fission_leaders_rank)) 
+names(fission_leaders_rank)<-1:length(fission_leaders_rank) 
+fission_leaders_rank$event_idx<-1:nrow(fission_leaders_rank)
+fission_leaders_rank<-melt(fission_leaders_rank, id.vars = "event_idx")
+colnames(fission_leaders_rank) <- c("event_idx", "ind_idx", "leader_rank") 
+fission_leaders_rank$event_type<-"fission"
+fission_leaders_rank<-fission_leaders_rank[!is.na(fission_leaders_rank$leader_rank),]
+
+fusion_leaders_rank <- as.data.frame(out$fusion_leaders) 
+fusion_leaders_rank<-as.data.frame(t(fusion_leaders_rank)) 
+names(fusion_leaders_rank)<-1:length(fusion_leaders_rank) 
+fusion_leaders_rank$event_idx<-1:nrow(fusion_leaders_rank)
+fusion_leaders_rank<-melt(fusion_leaders_rank, id.vars = "event_idx")
+colnames(fusion_leaders_rank) <- c("event_idx", "ind_idx", "leader_rank") 
+fusion_leaders_rank$event_type<-"fusion"
+fusion_leaders_rank<-fusion_leaders_rank[!is.na(fusion_leaders_rank$leader_rank),]
+
+
+leader_ranks<-rbind(fission_leaders_rank,fusion_leaders_rank)
+
+ind_events_data <- merge(ind_events_data, leader_ranks, by = c("event_idx","event_type","ind_idx"), all.x = T) 
+
+
+#change factor levels so before is shown before after in plot 
+ind_events_data$period <- factor(ind_events_data$period, levels = c("before","during" ,"after")) 
+
+#removing events where there more than 2 individuals are in the event 
+ind_events_data <- ind_events_data[ind_events_data$n_ind_labeled >2, ] 
+
+#rounding the leader rank for plotting 
+ind_events_data$rounded_leader_rank <- round(ind_events_data$leader_rank, 1) 
+
+event_type<-"fusion"
+ggplot(data = ind_events_data[ind_events_data$event_type == event_type,],  
+       aes(x = period, y = agg_call_rate, col = as.factor(rounded_leader_rank), group = as.factor(ind_idx)))+ 
+  geom_line(size = 1.5)+
+  labs(color = "Leader rank")+
+  ggtitle(paste(event_type, "aggression"))+
+  facet_wrap(~event_idx) 
+
+ggplot(data = ind_events_data[ind_events_data$event_type == event_type,],  
+       aes(x = period, y = contact_call_rate, col = as.factor(rounded_leader_rank), group = as.factor(ind_idx)))+ 
+  geom_line(size = 1.5)+
+  labs(color = "Leader rank")+
+  ggtitle(paste(event_type, "contact"))+
+  facet_wrap(~event_idx) 
 
 
 ## figure out a way to define fission types
