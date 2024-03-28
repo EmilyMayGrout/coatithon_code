@@ -270,13 +270,13 @@ get_fission_fusion_leadership <- function(events, n_inds, leadership_type = 'pos
         inds <- events$group_A_idxs[i][[1]]
         if(leadership_type=='position'){
           if(meas_time == 'start'){
-            norm_ranks <- events$group_A_lead_norm_rank_start[i][[1]] 
+            norm_ranks <- events$group_A_lead_pos_norm_rank_start[i][[1]] 
           } 
           if(meas_time == 'mid'){
-            norm_ranks <- events$group_A_lead_norm_rank_mid[i][[1]] 
+            norm_ranks <- events$group_A_lead_pos_norm_rank_mid[i][[1]] 
           }
           if(meas_time == 'end'){
-            norm_ranks <- events$group_A_lead_norm_rank_end[i][[1]] 
+            norm_ranks <- events$group_A_lead_pos_norm_rank_end[i][[1]] 
           }
         } else if(leadership_type == 'crosstime'){
           norm_ranks <- events$group_A_lead_crosstime_norm_rank[i][[1]]
@@ -297,13 +297,13 @@ get_fission_fusion_leadership <- function(events, n_inds, leadership_type = 'pos
         inds <- events$group_B_idxs[i][[1]]
         if(leadership_type == 'position'){
           if(meas_time == 'start'){
-            norm_ranks <- events$group_B_lead_norm_rank_start[i][[1]] 
+            norm_ranks <- events$group_B_lead_pos_norm_rank_start[i][[1]] 
           } 
           if(meas_time == 'mid'){
-            norm_ranks <- events$group_B_lead_norm_rank_mid[i][[1]] 
+            norm_ranks <- events$group_B_lead_pos_norm_rank_mid[i][[1]] 
           }
           if(meas_time == 'end'){
-            norm_ranks <- events$group_B_lead_norm_rank_end[i][[1]] 
+            norm_ranks <- events$group_B_lead_pos_norm_rank_end[i][[1]] 
           }
         } else if(leadership_type =='crosstime'){
           norm_ranks <- events$group_B_lead_crosstime_norm_rank[i][[1]]
