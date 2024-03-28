@@ -4,14 +4,14 @@
 
 #-----PARAMETERS-------
 
-user <- 'emily'
+user <- 'ari'
 group <- 'galaxy'
 use_manual_events <- F
 dist_moved_thresh <- 15 #minimum distance moved by a subgroup to count it as having moved (i.e. left or joined)
 make_plots <- F
 dist_frac_thresh <- 0.5
 n_rands <- 1000
-own_finish_line <- 5
+own_finish_line <- T
 
 #bins for the normalized ranks in the entropy computation
 #default is seq(0,1,.2) which is 5 bins of size 0.2
@@ -100,10 +100,10 @@ ind_disp_along_group_path <- function(moving_inds, xs, ys, t0, tf, tmeas){
 #t0: start time index of event 
 #tf: end time index of event - used for computing group direction of movement
 #dist_frac_thresh: threshold fractional distance along group trajectory from start point to compute passing time for each individual
-#own_finish_line: defaults to NULL, in which case the individual ranks are computed in the normal way. If a non-NULL value is given, 
+#own_finish_line: defaults to F, in which case the individual ranks are computed in the normal way. If T, 
 # then use the "everyone has their own finish line" version, where we check the times at which each individual has moved a distance of
-# own_finish_line along the group trajectory, relative to their initial starting location
-ind_crossing_thresh_times_along_group_path <- function(moving_inds, xs, ys, t0, tf, dist_frac_thresh = 0.5, own_finish_line = NULL){
+# dist_frac_thresh*total group displacement along the group trajectory, relative to their initial starting location
+ind_crossing_thresh_times_along_group_path <- function(moving_inds, xs, ys, t0, tf, dist_frac_thresh = 0.5, own_finish_line = F){
   
   #if times are missing, return NAs for ranks and crossing times
   if(is.na(t0) | is.na(tf)){
@@ -152,17 +152,16 @@ ind_crossing_thresh_times_along_group_path <- function(moving_inds, xs, ys, t0, 
   #project individual displacement vectors onto the group displacement vector
   disp_i <- (dxi*dxc + dyi*dyc) / sqrt(dxc^2 + dyc^2)
   
-  #if own_finish_line is NULL, use the normal metric - we get the order in which each individaul
+  #if own_finish_line is F, use the normal metric - we get the order in which each individaul
   #crossed a (shared) threshold line along the group displacement trajectory
-  #if own_finish_line is not NULL (has a numeric value), we get the order in which each individual
-  #has moved a distance of own_finish_line along the group direction, from its original starting point
-  if(!is.null(own_finish_line)){
+  #if own_finish_line is T, we get the order in which each individual
+  #has moved a distance of dist_thresh along the group direction, from its original starting point
+  if(own_finish_line){
     if(length(moving_inds) > 1){
       disp_i <- disp_i - disp_i[,1]
     } else{
       disp_i <- disp_i - disp_i[1]
     }
-    dist_thresh <- own_finish_line
   }
   
   #get times of each individual crossing the threshold
