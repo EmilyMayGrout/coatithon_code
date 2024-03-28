@@ -4,7 +4,7 @@
 
 #-----PARAMETERS-------
 
-user <- 'ari'
+user <- 'emily'
 group <- 'galaxy'
 use_manual_events <- F
 dist_moved_thresh <- 15 #minimum distance moved by a subgroup to count it as having moved (i.e. left or joined)
@@ -531,14 +531,25 @@ out <- get_fission_fusion_leadership(events, n_inds, leadership_type = 'position
 fission_leaders_pos <- out$fission_leaders
 fusion_leaders_pos <- out$fusion_leaders
 
+filename <- paste0(groupdir, group, "_LeaderRank_position.RData")
+save(out, file = filename)
+
 #crosstime
 out <- get_fission_fusion_leadership(events, n_inds, leadership_type = 'crosstime', meas_time = 'mid', norm_rank_bins = norm_rank_bins)
 fission_leaders_crosstime <- out$fission_leaders
 fusion_leaders_crosstime <- out$fusion_leaders
 
+filename <- paste0(groupdir, group, "_LeaderRank_crosstime.RData")
+save(out, file = filename)
+
+
 out <- get_fission_fusion_leadership(events, n_inds, leadership_type = 'crosstime_ownfinishline', meas_time = 'mid', norm_rank_bins = norm_rank_bins)
 fission_leaders_crosstime_ownfinishline <- out$fission_leaders
 fusion_leaders_crosstime_ownfinishline <- out$fusion_leaders
+
+filename <- paste0(groupdir, group, "_LeaderRank_crosstime_ownfinishline.RData")
+save(out, file = filename)
+
 
 #----------PLOTTING-------
 
