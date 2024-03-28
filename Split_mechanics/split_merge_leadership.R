@@ -4,13 +4,14 @@
 
 #-----PARAMETERS-------
 
-user <- 'emily'
+user <- 'ari'
 group <- 'galaxy'
 use_manual_events <- F
 dist_moved_thresh <- 15 #minimum distance moved by a subgroup to count it as having moved (i.e. left or joined)
 make_plots <- F
 dist_frac_thresh <- 0.5
 n_rands <- 1000
+own_finish_line <- 5
 
 #bins for the normalized ranks in the entropy computation
 #default is seq(0,1,.2) which is 5 bins of size 0.2
@@ -99,7 +100,10 @@ ind_disp_along_group_path <- function(moving_inds, xs, ys, t0, tf, tmeas){
 #t0: start time index of event 
 #tf: end time index of event - used for computing group direction of movement
 #dist_frac_thresh: threshold fractional distance along group trajectory from start point to compute passing time for each individual
-ind_crossing_thresh_times_along_group_path <- function(moving_inds, xs, ys, t0, tf, dist_frac_thresh = 0.5){
+#own_finish_line: defaults to NULL, in which case the individual ranks are computed in the normal way. If a non-NULL value is given, 
+# then use the "everyone has their own finish line" version, where we check the times at which each individual has moved a distance of
+# own_finish_line along the group trajectory, relative to their initial starting location
+ind_crossing_thresh_times_along_group_path <- function(moving_inds, xs, ys, t0, tf, dist_frac_thresh = 0.5, own_finish_line = NULL){
   
   #if times are missing, return NAs for ranks and crossing times
   if(is.na(t0) | is.na(tf)){
@@ -148,6 +152,19 @@ ind_crossing_thresh_times_along_group_path <- function(moving_inds, xs, ys, t0, 
   #project individual displacement vectors onto the group displacement vector
   disp_i <- (dxi*dxc + dyi*dyc) / sqrt(dxc^2 + dyc^2)
   
+  #if own_finish_line is NULL, use the normal metric - we get the order in which each individaul
+  #crossed a (shared) threshold line along the group displacement trajectory
+  #if own_finish_line is not NULL (has a numeric value), we get the order in which each individual
+  #has moved a distance of own_finish_line along the group direction, from its original starting point
+  if(!is.null(own_finish_line)){
+    if(length(moving_inds) > 1){
+      disp_i <- disp_i - disp_i[,1]
+    } else{
+      disp_i <- disp_i - disp_i[1]
+    }
+    dist_thresh <- own_finish_line
+  }
+  
   #get times of each individual crossing the threshold
   first_crossing_times <- rep(NA, length(moving_inds))
   for(ind in 1:length(moving_inds)){
@@ -162,12 +179,11 @@ ind_crossing_thresh_times_along_group_path <- function(moving_inds, xs, ys, t0, 
     if(length(crossing_times)==0){
       first_crossing_times[ind] <- Inf
       
-      stop('Individual never crossed the distance threshold - crossing time set to Inf')
+      warning('Individual never crossed the distance threshold - crossing time set to Inf')
     }else{
       first_crossing_times[ind] <- min(crossing_times)
     }
   }
-  
   #get ranks
   if(sum(is.na(first_crossing_times))==0){
     ranks <- rank(-first_crossing_times) #rank negative value so that higher ranks are higher leadership
@@ -193,123 +209,6 @@ ind_crossing_thresh_times_along_group_path <- function(moving_inds, xs, ys, t0, 
   return(out) 
   
 }
-
-#FUNCTION for calculating the order in which each individual passes its individual "finish line". The finish line is x distance from their starting point, so each individuals threshold will be at a different location, but the distance travelled is the same.
-
-#INPUTS:
-#moving_inds: indexes of the individuals in the moving subgroup
-#xs, ys: matrices of positions
-#t0: start time index of event 
-#tf: end time index of event - used for computing group direction of movement
-#dist_frac_thresh: threshold fractional distance along group trajectory from start point to compute passing time for each individual
-ind_crossing_thresh_times_along_ind_path <- function(moving_inds, xs, ys, t0, tf, dist_frac_thresh = 0.5){
-  
-  #if times are missing, return NAs for ranks and crossing times
-  if(is.na(t0) | is.na(tf)){
-    out <- list()
-    out$first_crossing_times <- rep(NA, length(moving_inds))
-    out$ranks <- rep(NA, length(moving_inds))
-    out$norm_ranks <- rep(NA, length(moving_inds))
-    return(out)
-  }
-  
-  #get individual initial location
-  xc0 <- xs[moving_inds,t0]
-  yc0 <- ys[moving_inds,t0]
-  
-  #individual "finish line" location
-  xcf <- xs[moving_inds,tf], na.rm = T)
-  ycf <- mean(ys[moving_inds,tf], na.rm = T)
-  
-  #centroid displacement vector
-  dxc <- xcf - xc0
-  dyc <- ycf - yc0
-  
-  #centroid total distance traveled
-  distc <- sqrt(dxc^2 + dyc^2)
-  
-  #if distance moved was zero, return NAs
-  if(distc == 0){
-    out <- list()
-    out$first_crossing_times <- rep(NA, length(moving_inds))
-    out$ranks <- rep(NA, length(moving_inds))
-    out$norm_ranks <- rep(NA, length(moving_inds))
-    return(out)
-  }
-  
-  #get the distance threshold (along group trajectory) used to determine order of crossing
-  dist_thresh <- dist_frac_thresh * distc
-  
-  #get individual end points
-  xi <- xs[moving_inds, t0:ncol(xs)]
-  yi <- ys[moving_inds, t0:ncol(xs)]
-  
-  #get individual displacement vectors (their end point to the group start point)
-  dxi <- xi - xc0
-  dyi <- yi - yc0
-  
-  #project individual displacement vectors onto the group displacement vector
-  disp_i <- (dxi*dxc + dyi*dyc) / sqrt(dxc^2 + dyc^2)
-  
-  #get times of each individual crossing the threshold
-  first_crossing_times <- rep(NA, length(moving_inds))
-  for(ind in 1:length(moving_inds)){
-    
-    if(is.matrix(disp_i)){
-      crossing_times <- which(disp_i[ind,] > dist_thresh)
-    } else{
-      crossing_times <- which(disp_i > dist_thresh)
-    }
-    
-    #if it never crosses, then give infinity for the crossing time and throw a warning
-    if(length(crossing_times)==0){
-      first_crossing_times[ind] <- Inf
-      
-      stop('Individual never crossed the distance threshold - crossing time set to Inf')
-    }else{
-      first_crossing_times[ind] <- min(crossing_times)
-    }
-  }
-  
-  #get ranks
-  if(sum(is.na(first_crossing_times))==0){
-    ranks <- rank(-first_crossing_times) #rank negative value so that higher ranks are higher leadership
-  } else{
-    ranks <- rep(NA, length(first_crossing_times))
-  }
-  
-  #get normalized ranks
-  if(length(first_crossing_times)==1){
-    norm_ranks <- c(NA)
-  } else{
-    min_rank <- min(ranks)
-    max_rank <- max(ranks)
-    norm_ranks <- (ranks - min_rank) / (max_rank - min_rank)
-  }
-  
-  #return ind displacement along group vector, ranks, and normalized ranks
-  out <- list()
-  out$first_crossing_times <- first_crossing_times
-  out$ranks <- ranks
-  out$norm_ranks <- norm_ranks
-  
-  return(out) 
-  
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #Compute entropy from a set of measurements
 #histo is a vector of frequencies or probabilities to take the entropy of
@@ -337,12 +236,13 @@ compute_entropy <- function(histo){
   return(entropy)
 }
 
-
 #Function to get information about leadership (determined by position) during fissions and fusions
 #INPUTS:
 # events data frame
 # n_inds: number of individuals
-# leadership_type: 'position' for using position along group movement vector at a particular time or 'crosstime' for using crossing times
+# leadership_type: 'position' for using position along group movement vector at a particular time 
+#     or 'crosstime' for using crossing times
+#     or 'crosstime_ownfinishline' for using the crossing times where each individual has its own finish line
 # meas_time: where to measure leadership, at the start, midpoint (mid) or end of the event
 #OUTPUT:
 # out: list containing
@@ -357,8 +257,8 @@ get_fission_fusion_leadership <- function(events, n_inds, leadership_type = 'pos
     stop('meas_time not specified as start, mid, or end')
   }
   
-  if(!(leadership_type %in% c('position','crosstime'))){
-    stop('leadership_type not specified as position or crosstime')
+  if(!(leadership_type %in% c('position','crosstime','crosstime_ownfinishline'))){
+    stop('leadership_type not specified as position or crosstime or crosstime_ownfinishline')
   }
   
   #get normalized ranks for individuals during fissions and fusions
@@ -380,13 +280,15 @@ get_fission_fusion_leadership <- function(events, n_inds, leadership_type = 'pos
           }
         } else if(leadership_type == 'crosstime'){
           norm_ranks <- events$group_A_lead_crosstime_norm_rank[i][[1]]
-        }
+        } else if(leadership_type == 'crosstime_ownfinishline'){
+          norm_ranks <- events$group_A_lead_crosstime_ownfinishline_norm_rank[i][[1]]
+        } 
         if(events$event_type[i] == 'fission'){
           fission_leaders[inds,i] <- norm_ranks
         }
         if(events$event_type[i] == 'fusion'){
           fusion_leaders[inds,i] <- norm_ranks
-        }
+        } 
       }
     }
     
@@ -405,13 +307,15 @@ get_fission_fusion_leadership <- function(events, n_inds, leadership_type = 'pos
           }
         } else if(leadership_type =='crosstime'){
           norm_ranks <- events$group_B_lead_crosstime_norm_rank[i][[1]]
+        } else if(leadership_type =='crosstime_ownfinishline'){
+          norm_ranks <- events$group_B_lead_crosstime_ownfinishline_norm_rank[i][[1]]
         }
         if(events$event_type[i] == 'fission'){
           fission_leaders[inds,i] <- norm_ranks
         }
         if(events$event_type[i] == 'fusion'){
           fusion_leaders[inds,i] <- norm_ranks
-        }
+        } 
       }
     }
   }
@@ -573,12 +477,21 @@ for(i in 1:nrow(events)){
   events$group_A_lead_crosstime_norm_rank[i] <- list(lead_crosstime_A$norm_ranks)
   events$group_B_lead_crosstime_norm_rank[i] <- list(lead_crosstime_B$norm_ranks)
   
+  #LEADERSHIP BASED ON TIME OF CROSSING YOUR OWN FINISH LINE ALONG GROUP TRAJECTORY
+  #compute 
+  lead_crosstime_ownfinishline_A <- ind_crossing_thresh_times_along_group_path(events$group_A_idxs[i][[1]], xs, ys, events$start_time[i], events$end_time[i], dist_frac_thresh = dist_frac_thresh, own_finish_line = own_finish_line)
+  lead_crosstime_ownfinishline_B <- ind_crossing_thresh_times_along_group_path(events$group_B_idxs[i][[1]], xs, ys, events$start_time[i], events$end_time[i], dist_frac_thresh = dist_frac_thresh, own_finish_line = own_finish_line)
+  
+  #store in the data frame
+  events$group_A_lead_crosstime_ownfinishline_norm_rank[i] <- list(lead_crosstime_ownfinishline_A$norm_ranks)
+  events$group_B_lead_crosstime_ownfinishline_norm_rank[i] <- list(lead_crosstime_ownfinishline_B$norm_ranks)
+  
 }
 
 #Compute entropies for real data vs permuted data
 
 #real data
-out <- get_fission_fusion_leadership(events, n_inds, leadership_type = 'crosstime', meas_time = 'end', norm_rank_bins = norm_rank_bins)
+out <- get_fission_fusion_leadership(events, n_inds, leadership_type = 'crosstime_ownfinishline', meas_time = 'end', norm_rank_bins = norm_rank_bins)
 fission_entropies_data <- out$fission_leadership_entropies
 fusion_entropies_data <- out$fusion_leadership_entropies
 fission_leaders <- out$fission_leaders
@@ -603,7 +516,7 @@ for(n in 1:n_rands){
     
   }
   
-  out <- get_fission_fusion_leadership(events_rand, n_inds, leadership_type = 'crosstime', meas_time = 'end', norm_rank_bins = norm_rank_bins)
+  out <- get_fission_fusion_leadership(events_rand, n_inds, leadership_type = 'crosstime_ownfinishline', meas_time = 'end', norm_rank_bins = norm_rank_bins)
   fission_entropies_rand[,n] <- out$fission_leadership_entropies
   fusion_entropies_rand[,n] <- out$fusion_leadership_entropies
   
@@ -612,6 +525,21 @@ for(n in 1:n_rands){
 fission_leaders_rand <- out$fission_leaders
 fusion_leaders_rand <- out$fusion_leaders
 
+
+#----------CORRELATIONS ACROSS LEADERSHIP METRICS---------
+#position
+out <- get_fission_fusion_leadership(events, n_inds, leadership_type = 'position', meas_time = 'mid', norm_rank_bins = norm_rank_bins)
+fission_leaders_pos <- out$fission_leaders
+fusion_leaders_pos <- out$fusion_leaders
+
+#crosstime
+out <- get_fission_fusion_leadership(events, n_inds, leadership_type = 'crosstime', meas_time = 'mid', norm_rank_bins = norm_rank_bins)
+fission_leaders_crosstime <- out$fission_leaders
+fusion_leaders_crosstime <- out$fusion_leaders
+
+out <- get_fission_fusion_leadership(events, n_inds, leadership_type = 'crosstime_ownfinishline', meas_time = 'mid', norm_rank_bins = norm_rank_bins)
+fission_leaders_crosstime_ownfinishline <- out$fission_leaders
+fusion_leaders_crosstime_ownfinishline <- out$fusion_leaders
 
 #----------PLOTTING-------
 
