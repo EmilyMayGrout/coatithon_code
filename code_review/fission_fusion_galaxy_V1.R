@@ -100,6 +100,14 @@ axis(2, at = c(0,0.3,0.6), cex.axis = 3, las = 1)
 
 dev.off()
 
+#calculate proportion of times the group were either together or split into two, or three subgroups
+all <- as.data.frame(table(subgroup_data$n_subgroups[all_tracked_idxs]))
+sum_2.3 <- sum(all[c(2:3),2])
+sum_4.5 <- sum(all[c(4:5),2])
+sum_all <- sum(all[-1,2])
+prop_2.3 <- (sum_2.3/ sum_all)*100
+
+
 #-----------------------------------------------------------
 
 #Figure S1a: Number of sub groups when the radius is changed (graph put in dropbox results folder)
