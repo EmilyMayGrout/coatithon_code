@@ -11,7 +11,7 @@ library(scales)
 group <- 'galaxy'
 
 #who is using (ari or emily)
-user <- 'ari'
+user <- 'emily'
 
 #whether to identify splits and merges automatically (if F) or use manually identified events (if T)
 use_manual_events <- F

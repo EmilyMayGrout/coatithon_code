@@ -37,18 +37,18 @@ events <- read.csv(paste0('C:/Users/egrout/Dropbox/coatithon/processed/split_ana
 setwd(groupdir)
 load(file=paste0(group,'_coati_ids.RData'))
 
-#read in timestamp data
-load(file=paste0(group,'_xy_highres_level1.RData'))
+#read in timestamp data - notice the level number, if 2, then its not got GPS speed errors
+load(file=paste0(group,'_xy_highres_level2.RData'))
 
 ff_data_50 <- detect_fissions_and_fusions(R_inner = 15, R_outer = 50, xs, ys, ts, coati_ids)
 
 #saving the events_detected dataframe of the ff_data_50 list
 if(group == 'galaxy'){
 gal_events_detected <- ff_data_50$events_detected
-save(gal_events_detected, file = "C:/Users/egrout/Dropbox/coatithon/processed/FLICA/gal_events_detected.Rda") 
+save(gal_events_detected, file = "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/gal_events_detected.Rda") 
 }else if(group == 'presedente'){
   pres_events_detected <- ff_data_50$events_detected
-      save(pres_events_detected, file = "C:/Users/egrout/Dropbox/coatithon/processed/FLICA/pres_events_detected.Rda") }
+      save(pres_events_detected, file = "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/pres_events_detected.Rda") }
 
 
 #looking at one event

@@ -4,7 +4,7 @@
 #She likely found the group after the 1Hz period on the 28.12.21. So we should add NA's from the start of capture (24.12.21) to 29.12.21 11:00 (when she was moving with the group)
 
 
-#output of this code will make a new gps_file called "presedente_xy_10min_level1.RData"
+#output of this code will make a new gps_file called "presedente_xy_highres_level1.RData"
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/'
