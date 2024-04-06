@@ -4,7 +4,7 @@
 #--------PARAMS-------
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/'
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level2/'
 gps_file <- "galaxy_xy_highres_level1.RData" #level0 is when Venus is not removed
 id_file <- 'galaxy_coati_ids.RData'
 
@@ -63,9 +63,9 @@ for(i in 2:nrow(together_times)){
 }
 
 # now get the start and stop time of each together bout
-tts<-split(together_times,together_times$bout)
-ttsl<-lapply(tts, function(tts_){
-  tts_ss<-tts_[c(1, nrow(tts_)),"time"]
+tts <- split(together_times,together_times$bout)
+ttsl <- lapply(tts, function(tts_){
+  tts_ss <- tts_[c(1, nrow(tts_)),"time"]
   
   return(tts_ss)
 })
@@ -140,39 +140,41 @@ calls$datetime_synch_pos<-as.POSIXct(calls$datetime_synch, format = "%Y-%m-%d %H
 calls$datetime_synch_pos<-as.POSIXct(calls$datetime_synch, format = "%Y-%m-%d %H:%M:%S", tz = "UTC")
 together_times$time_pos<-as.POSIXct(together_times$time, format = "%Y-%m-%d %H:%M:%S", tz = "UTC")
 
-calling_together<-calls[which(calls$datetime_synch_pos %in% together_times$time),]
-
-
-
-
+calling_together <- calls[which(calls$datetime_synch_pos %in% together_times$time),]
 
 # calculate call rate for each together bout
 # get the duration of the bout
 
 # together_bout<-ttsl[[34]]
-crt_<-as.data.frame(coati_ids[,1]); names(crt_)<-"name"
+crt_ <- as.data.frame(coati_ids[,1]); names(crt_)<-"name"
 crt_$ind_idx <- 1:nrow(crt_)
-call_rates_together<-data.frame()
+call_rates_together <- data.frame()
 n = 1
 for(together_bout in ttsl){
-  ct_<-calling_together[which(calling_together$datetime_synch_pos >= together_bout[1] & calling_together$datetime_synch_pos <= together_bout[2]), ]
-  ct_<-ct_[!is.na(ct_$calltype),]
+  ct_ <- calling_together[which(calling_together$datetime_synch_pos >= together_bout[1] & calling_together$datetime_synch_pos <= together_bout[2]), ]
+  ct_ <- ct_[!is.na(ct_$calltype),]
   
-  if(nrow(ct_)> 0){
-    calls_ind<-as.data.frame(table(ct_$name, ct_$calltype)); names(calls_ind)<-c("name","call_type","count")
-    calls_all<-merge(calls_ind,crt_,by = "name")
-    calls_all$bout_dur<-as.numeric(difftime(together_bout[2], together_bout[1], units = "secs"))
-    calls_all$call_rate<-calls_all$count / calls_all$bout_dur
-    calls_all$n_ind_in_bout<-length(unique(calls_all$name))
-    calls_all$bout <-n
-    call_rates_together<-rbind(call_rates_together, calls_all)
+  if(nrow(ct_) > 0){
+    calls_ind <- as.data.frame(table(ct_$name, ct_$calltype)); names(calls_ind)<-c("name","call_type","count")
+    calls_all <- merge(calls_ind,crt_,by = "name")
+    calls_all$bout_dur <- as.numeric(difftime(together_bout[2], together_bout[1], units = "secs"))
+    calls_all$call_rate <- calls_all$count/calls_all$bout_dur
+    calls_all$n_ind_in_bout <- length(unique(calls_all$name))
+    calls_all$bout <- n
+    call_rates_together <- rbind(call_rates_together, calls_all)
     
     n = n+1
   }
 }
 
+
+
 par(mar = c(14,4,1,1))
-boxplot(call_rate ~ name*call_type, data = call_rates_together[call_rates_together$n_ind_in_bout > 5,], las = 2, xlab = "")
+boxplot(call_rate ~ name*call_type, data = call_rates_together[call_rates_together$n_ind_in_bout > 5,], las = 2, xlab = "", ylim = c(0, 0.6))
+
+
+#now want to compare the call rates when the group isn't together to see if the call rates are higher than baseline during a fission event
+
 
 #TODO
 #need to remove times that are in the before and after the event

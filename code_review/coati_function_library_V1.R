@@ -2,7 +2,7 @@
 
 #LIBRARIES
 library(dbscan)
-library(rgdal)
+#library(rgdal)
 library(sp)
 library(lubridate)
 library(stringr)
