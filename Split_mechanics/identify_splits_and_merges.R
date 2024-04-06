@@ -9,17 +9,17 @@ R_outer <- 50
 
 codedir <- '~/Dropbox/code_ari/coatithon_code/'
 dir <- '~/Dropbox/coati/processed/' #directory where all data is stored
-group <- 'galaxy' #subdirectory where the group data is stored
+group <- 'presedente' #subdirectory where the group data is stored
 
 #get directory to group data
 groupdir <- paste0(dir,group)
 
 #for Emily:
 codedir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
-#groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
-#plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
+#groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
+#plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level2/'
+groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level2/'
 
 
 #SOURCE FUNCTIONS
@@ -71,22 +71,22 @@ xmin <- min(xs[,ti:tf],na.rm=T)
 xmax <- max(xs[,ti:tf],na.rm=T)
 ymin <- min(ys[,ti:tf],na.rm=T)
 ymax <- max(ys[,ti:tf],na.rm=T)
-quartz()
-tseq <- seq(ti,tf,step_t)
-
-for(t in tseq){
-  #clear()
-  if(t >= gal_events_detected$tidx[i]){
-    points((xmax+xmin)/2,(ymin+ymax)/2,col='orange',cex = 5)
-  }
-  plot(NULL, xlim=c(xmin,xmax),ylim=c(ymin,ymax),asp=1,xlab='Easting',ylab='Northing',main = event_type)
-  if(length(not_involved_idxs)>0){
-    points(xs[not_involved_idxs,t],ys[not_involved_idxs,t],col='#00000033',pch=19)
-  }
-  points(xs[group_A_idxs,t],ys[group_A_idxs,t],pch=19, col = 'red')
-  points(xs[group_B_idxs,t],ys[group_B_idxs,t],pch=19, col = 'blue')
-  Sys.sleep(.01)
-}
+#quartz()
+# tseq <- seq(ti,tf,step_t)
+# 
+# for(t in tseq){
+#   #clear()
+#   if(t >= gal_events_detected$tidx[i]){
+#     points((xmax+xmin)/2,(ymin+ymax)/2,col='orange',cex = 5)
+#   }
+#   plot(NULL, xlim=c(xmin,xmax),ylim=c(ymin,ymax),asp=1,xlab='Easting',ylab='Northing',main = event_type)
+#   if(length(not_involved_idxs)>0){
+#     points(xs[not_involved_idxs,t],ys[not_involved_idxs,t],col='#00000033',pch=19)
+#   }
+#   points(xs[group_A_idxs,t],ys[group_A_idxs,t],pch=19, col = 'red')
+#   points(xs[group_B_idxs,t],ys[group_B_idxs,t],pch=19, col = 'blue')
+#   Sys.sleep(.01)
+# }
 
 
 

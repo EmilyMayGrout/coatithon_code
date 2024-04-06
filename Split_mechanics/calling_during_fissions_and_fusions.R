@@ -6,13 +6,12 @@ library(ggplot2)
 library(tidyverse)
 library(reshape2)
 
-
 #directory holding all the data
 #datadir <- '~/Dropbox/coatithon/calling_during_fissions_and_fusions/data'
 datadir <- "C:/Users/egrout/Dropbox/coatithon/calling_during_fissions_and_fusions/data"
 callfile <- 'all_data_hms_synched.csv'
-ff_file <- 'galaxy_auto_ff_events_characterized.RData' #need to rerun to get this with level2 in characterize_splits_and_merges
-gps_file <- 'galaxy_xy_highres_level1.RData'
+ff_file <- 'galaxy_auto_ff_events_characterized.RData' #this has been rerun with level2 data
+gps_file <- 'galaxy_xy_highres_level2.RData'
 id_file <- 'galaxy_coati_ids.RData'
 
 #LOAD DATA
@@ -78,120 +77,6 @@ calls$name[calls$id == "G9467"] <- "Gus"
 load(ff_file)
 group_events_data <- events
 rm('events')
-
-#Ari's script for creating the df with call rates before, during, and after event. Cini's version starts below commented code
-
-# #create a new data frame with data at the individual level
-# ind_events_data <- data.frame()
-# for(i in 1:nrow(group_events_data)){
-#   event_idx <- group_events_data$event_idx[i]
-#   ind_idxs <- 1:nrow(coati_ids)
-#   rows <- data.frame(event_idx = rep(event_idx, length(ind_idxs)),
-#                      ind_idx = ind_idxs)
-#   rows_all <- rbind(rows, rows, rows)
-#   rows_all$period <- c(rep('before',length(ind_idxs)), 
-#                        rep('during',length(ind_idxs)),
-#                        rep('after',length(ind_idxs)))
-#   ind_events_data <- rbind(ind_events_data, rows_all)
-# }
-# 
-#
-# #compute the call rate during an event period for a given individual
-# get_call_rates_for_event <- function(ind_idx, event_idx, period, group_events_data_tmp = group_events_data, labeled_periods_tmp = labeled_periods){
-#   event_data_curr <- group_events_data_tmp[which(group_events_data$event_idx == event_idx),]
-#   before_time <- ts[event_data_curr$before_time]
-#   start_time <- ts[event_data_curr$start_time]
-#   end_time <- ts[event_data_curr$end_time]
-#   after_time <- ts[event_data_curr$after_time]
-#   
-#   if(period == 'before'){
-#     t0 <- before_time
-#     tf <- start_time
-#   } 
-#   if(period == 'during'){
-#     t0 <- start_time
-#     tf <- end_time
-#   }
-#   if(period == 'after'){
-#     t0 <- end_time
-#     tf <- after_time
-#   }
-#   
-#   #duration of event
-#   dur <- as.numeric(difftime(tf, t0, units = 'secs'))
-#   
-#   #check that t0 and tf exist, if not return NA
-#   if(is.na(t0) | is.na(tf)){
-#     out <- list()
-#     out$calls_contact <- NA
-#     out$calls_agg <- NA
-#     out$duration <- dur
-#     return(out)
-#   }
-#   #check whether that individual has calls labeled within that time window, if not, return NA
-#   labeled_periods_ind <- labeled_periods_tmp[which(labeled_periods_tmp$ind_idx == ind_idx),]
-#   if(sum(labeled_periods_ind$starttime <= t0 & labeled_periods_ind$stoptime >= tf) == 0){
-#     out <- list()
-#     out$calls_contact <- NA
-#     out$calls_agg <- NA
-#     out$duration <- dur
-#     return(out)
-#   } 
-#   
-#   #get call rates
-#   calls_agg <- sum(calls$calltype == 'aggression call' & 
-#                      calls$name == coati_ids$name[ind_idx] &
-#                      calls$datetime_synch >= t0 &
-#                      calls$datetime_synch < tf, na.rm=T)
-#   calls_contact <- sum(calls$calltype == 'contact call' & 
-#                          calls$name == coati_ids$name[ind_idx] &
-#                          calls$datetime_synch >= t0 &
-#                          calls$datetime_synch < tf, na.rm=T)
-#   
-#   out <- list()
-#   out$calls_contact <- calls_contact
-#   out$calls_agg <- calls_agg
-#   out$duration <- dur
-#   
-#   return(out)
-# }
-# 
-# ind_events_data$agg_calls <- ind_events_data$contact_calls <- ind_events_data$duration <- ind_events_data$event_type <- ind_events_data$subgroup <-  NA
-# for(i in 1:nrow(ind_events_data)){
-#   calls_out <- get_call_rates_for_event(ind_idx = ind_events_data$ind_idx[i], 
-#                                         event_idx = ind_events_data$event_idx[i],
-#                                         period = ind_events_data$period[i],
-#                                         group_events_data_tmp = group_events_data,
-#                                         labeled_periods_tmp = labeled_periods)
-#   ind_events_data$contact_calls[i] <- calls_out$calls_contact
-#   ind_events_data$agg_calls[i] <- calls_out$calls_agg
-#   ind_events_data$duration[i] <- calls_out$duration
-#   
-#   #info from the group table to transfer to the individual table
-#   group_events_data_tmp <- group_events_data[which(group_events_data$event_idx==ind_events_data$event_idx[i]),]
-#   
-#   #event type (fission or fusion)
-#   ind_events_data$event_type[i] <- group_events_data_tmp$event_type
-#   
-#   #subgroup 
-#   subA <- group_events_data_tmp$group_A_idxs[[1]]
-#   subB <- group_events_data_tmp$group_B_idxs[[1]]
-#   ind_events_data$subgroup[i] <- NA
-#   if(ind_events_data$ind_idx[i] %in% subA){
-#     ind_events_data$subgroup[i] <- 'A'
-#   } 
-#   if(ind_events_data$ind_idx[i] %in% subB){
-#     ind_events_data$subgroup[i] <- 'B'
-#   }
-#   
-# }
-# 
-# #get call rates by dividing by duration
-# ind_events_data$agg_call_rate <- ind_events_data$agg_calls / ind_events_data$duration
-# ind_events_data$contact_call_rate <- ind_events_data$contact_calls / ind_events_data$duration
-
-
-#Cini's script for creating the df with call rates before, during, and after event.
 
 # get times to posix format and to UTC time zone
 calls$datetime_synch_pos<-as.POSIXct(calls$datetime_synch, format = "%Y-%m-%d %H:%M:%OS", tz = "UTC") 
@@ -262,38 +147,41 @@ for(i in 1:nrow(group_events_data)){
     }
   }
 }
+
 rm(list = setdiff(ls(),c("ind_events_data","calls","group_events_data", "ts")))
-ind_events_data$agg_call_rate<-ind_events_data$agg_calls / ind_events_data$duration
-ind_events_data$contact_call_rate<-ind_events_data$contact_calls / ind_events_data$duration
+
+ind_events_data$agg_call_rate <- ind_events_data$agg_calls/ind_events_data$duration
+ind_events_data$contact_call_rate <- ind_events_data$contact_calls/ind_events_data$duration
 #TODO check events where the before and start time are the same - because overlap with previous event
 
-leadership_metric<-c("position","crosstime","crosstime_ownfinishline")
-n = 2
-filename<-paste0("C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/galaxy_LeaderRank_",leadership_metric[n],".RData")
 
+leadership_metric <- c("position","crosstime","crosstime_ownfinishline")
+
+n = 2
+filename <- paste0("C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/galaxy_LeaderRank_",leadership_metric[n],".RData")
 load(filename) 
 
+
 fission_leaders_rank <- as.data.frame(out$fission_leaders) 
-fission_leaders_rank<-as.data.frame(t(fission_leaders_rank)) 
-names(fission_leaders_rank)<-1:length(fission_leaders_rank) 
-fission_leaders_rank$event_idx<-1:nrow(fission_leaders_rank)
-fission_leaders_rank<-melt(fission_leaders_rank, id.vars = "event_idx")
+fission_leaders_rank <- as.data.frame(t(fission_leaders_rank)) 
+names(fission_leaders_rank) <- 1:length(fission_leaders_rank) 
+fission_leaders_rank$event_idx <- 1:nrow(fission_leaders_rank)
+fission_leaders_rank <- melt(fission_leaders_rank, id.vars = "event_idx")
 colnames(fission_leaders_rank) <- c("event_idx", "ind_idx", "leader_rank") 
-fission_leaders_rank$event_type<-"fission"
-fission_leaders_rank<-fission_leaders_rank[!is.na(fission_leaders_rank$leader_rank),]
+fission_leaders_rank$event_type <- "fission"
+fission_leaders_rank <- fission_leaders_rank[!is.na(fission_leaders_rank$leader_rank),]
 
 fusion_leaders_rank <- as.data.frame(out$fusion_leaders) 
-fusion_leaders_rank<-as.data.frame(t(fusion_leaders_rank)) 
-names(fusion_leaders_rank)<-1:length(fusion_leaders_rank) 
-fusion_leaders_rank$event_idx<-1:nrow(fusion_leaders_rank)
-fusion_leaders_rank<-melt(fusion_leaders_rank, id.vars = "event_idx")
+fusion_leaders_rank <- as.data.frame(t(fusion_leaders_rank)) 
+names(fusion_leaders_rank) <- 1:length(fusion_leaders_rank) 
+fusion_leaders_rank$event_idx <- 1:nrow(fusion_leaders_rank)
+fusion_leaders_rank <- melt(fusion_leaders_rank, id.vars = "event_idx")
 colnames(fusion_leaders_rank) <- c("event_idx", "ind_idx", "leader_rank") 
-fusion_leaders_rank$event_type<-"fusion"
-fusion_leaders_rank<-fusion_leaders_rank[!is.na(fusion_leaders_rank$leader_rank),]
+fusion_leaders_rank$event_type <- "fusion"
+fusion_leaders_rank <- fusion_leaders_rank[!is.na(fusion_leaders_rank$leader_rank),]
 
 
-leader_ranks<-rbind(fission_leaders_rank,fusion_leaders_rank)
-
+leader_ranks <- rbind(fission_leaders_rank, fusion_leaders_rank)
 ind_events_data_merge <- merge(ind_events_data, leader_ranks, by = c("event_idx","event_type","ind_idx"), all.x = T) 
 
 
@@ -301,12 +189,12 @@ ind_events_data_merge <- merge(ind_events_data, leader_ranks, by = c("event_idx"
 ind_events_data_merge$period <- factor(ind_events_data_merge$period, levels = c("before","during" ,"after")) 
 
 #removing events where there more than 2 individuals are in the event 
-ind_events_data_merge <- ind_events_data_merge[ind_events_data_merge$n_ind_labeled >2, ] 
+ind_events_data_merge <- ind_events_data_merge[ind_events_data_merge$n_ind_labeled > 2, ] 
 
 #rounding the leader rank for plotting 
 ind_events_data_merge$rounded_leader_rank <- round(ind_events_data_merge$leader_rank, 1) 
 
-event_type<-"fission"
+event_type <- "fission"
 ggplot(data = ind_events_data_merge[ind_events_data_merge$event_type == event_type,],  
        aes(x = period, y = agg_call_rate, col = as.factor(rounded_leader_rank), group = as.factor(ind_idx)))+ 
   geom_line(size = 1.5)+
@@ -324,7 +212,7 @@ ggplot(data = ind_events_data_merge[ind_events_data_merge$event_type == event_ty
 
 
 #TODO get the lm line to work!! Add color for moving group
-event_type<-"fission"
+event_type <- "fission"
 ggplot(data = ind_events_data_merge[ind_events_data_merge$event_type == event_type,],  
        aes(x = leader_rank, y = agg_call_rate, group = as.factor(ind_idx)))+ 
   geom_point(size = 1.5)+
@@ -333,19 +221,17 @@ ggplot(data = ind_events_data_merge[ind_events_data_merge$event_type == event_ty
   ggtitle(paste(event_type, "aggression",leadership_metric[n]))+
   facet_wrap(~period) 
 
-
-
 ## figure out a way to define fission types
 #look at the difference in travel distance 
 
-event<-data.frame()
+event <- data.frame()
 for(i in 1:nrow(group_events_data)){
-  event.times<-group_events_data[i,c(10:14)]
-  times<-ts[as.numeric(event.times[,c(2:5)])]  # start - end backwards
-  event_<-group_events_data[i,c("event_idx","event_type")]
-  event_$b.duration<-as.numeric(difftime(times[3],times[4], units = "secs"))
-  event_$d.duration<-as.numeric(difftime(times[2],times[3], units = "secs"))
-  event<-rbind(event,event_)
+  event.times <- group_events_data[i,c(10:14)]
+  times <- ts[as.numeric(event.times[,c(2:5)])]  # start - end backwards
+  event_ <- group_events_data[i,c("event_idx","event_type")]
+  event_$b.duration <- as.numeric(difftime(times[3],times[4], units = "secs"))
+  event_$d.duration <- as.numeric(difftime(times[2],times[3], units = "secs"))
+  event <- rbind(event,event_)
 }
 
 
@@ -353,14 +239,16 @@ dist_travel_df <- group_events_data[, c("event_type", "event_idx", "B_during_dis
 
 dist_travel_df<-merge(dist_travel_df, event, by = c("event_idx","event_type"), all = T)
 
-fission_dist <- dist_travel_df[dist_travel_df$event_type == "fission",]
+#---------FISSIONS------------------------------------------------------------------------------------------------------------
 
+fission_dist <- dist_travel_df[dist_travel_df$event_type == "fission",]
 fission_dist <- fission_dist[!is.na(fission_dist$B_during_disp),]
 
+#get distance travelled
 fission_dist$move_diff <- abs(fission_dist$B_during_disp - fission_dist$A_during_disp)
 fission_dist$B_move_diff <- fission_dist$B_during_disp - fission_dist$AB_before_disp
 fission_dist$A_move_diff <- fission_dist$A_during_disp - fission_dist$AB_before_disp
-
+#get speed of group before and speeds of subgroups after
 fission_dist$B_speed <- fission_dist$B_during_disp / fission_dist$d.duration
 fission_dist$A_speed <- fission_dist$A_during_disp / fission_dist$d.duration
 fission_dist$AB_speed <- fission_dist$AB_before_disp / fission_dist$b.duration
@@ -370,14 +258,6 @@ png(height = 400, width = 580, units = 'px', filename = paste0(plotdir,'speed_be
 hist(fission_dist$AB_speed, breaks = 30, main = "", xlab = "Speed before split (m/s)", col = "aquamarine4")
 dev.off()
 
-
-
-#for error checking, should remove the fissions where speed is incredibly high (e.g. more than 2.5m/second) in a short duration (6 seconds)
-#this code will not be needed when we use the level2 data to rerun everything
-#for now, we remove these events here
-fission_dist <- fission_dist[fission_dist$B_speed < 2.5,]
-fission_dist <- fission_dist[fission_dist$A_speed < 2.5,]
-
 #removing rows where the before speed is 0
 fission_dist <- fission_dist[which(fission_dist$b.duration > 0),]
 
@@ -386,9 +266,9 @@ fission_dist$speed_diff <- abs(fission_dist$B_speed - fission_dist$A_speed)
 fission_dist$B_speed_diff <- fission_dist$B_speed - fission_dist$AB_speed
 fission_dist$A_speed_diff <- fission_dist$A_speed - fission_dist$AB_speed
 
+hist(fission_dist$speed_diff)
 plot(fission_dist$AB_speed*60, fission_dist$speed_diff)
 plot(fission_dist$B_during_disp, fission_dist$A_during_disp)
-
 
 plot(fission_dist$AB_before_disp, fission_dist$move_diff)
 points(move_diff~AB_before_disp, fission_dist[fission_dist$move_diff >20 & fission_dist$AB_before_disp > 25,], col = "steelblue2", pch = 19)
@@ -415,49 +295,47 @@ fission_dist$change_speed_subgroup[which(abs(fission_dist$speed_diff) < 0.01)] <
 #want to bind the info on which subgroups changed speed to the call rates df
 speed_filt <- fission_dist[,c("event_idx", "change_speed_subgroup", "A_speed_diff", "B_speed_diff")]
 
-ind_events_data <- merge(ind_events_data, speed_filt, by = "event_idx")
+ind_fission_data <- merge(ind_events_data, speed_filt, by = "event_idx")
 
-ind_events_data_long <- ind_events_data %>%
+ind_fission_data_long <- ind_fission_data %>%
   pivot_longer(c(agg_call_rate, contact_call_rate), names_to = "call", values_to = "rate")
 
 #change factor levels so before is shown before after in plot
-ind_events_data_long$period <- factor(ind_events_data_long$period, levels = c("before","during" ,"after"))
+ind_fission_data_long$period <- factor(ind_fission_data_long$period, levels = c("before","during" ,"after"))
 
 
 #get the points to correspond to the period
-
-ggplot(data = ind_events_data_long[ind_events_data_long$event_type == "fission",],
+ggplot(data = ind_fission_data_long[ind_fission_data_long$event_type == "fission",],
             aes(x = call, y = rate, fill = period))+
   geom_boxplot(outlier.shape = NA)+
   geom_jitter(position = position_dodge(width = 0.75), size = 0.5, color = "gray3", aes(group = interaction(call, period))) +
   ylim(c(0,0.75))+
   facet_wrap(~subgroup+change_speed_subgroup)
 
-ind_events_data_long_bef <- ind_events_data_long[ind_events_data_long$period == "before",]
+ind_fission_data_long_bef <- ind_fission_data_long[ind_fission_data_long$period == "before",]
 #get the A group and B group speeds in the same column
-ind_events_data_long_bef2 <- ind_events_data_long_bef %>%
+ind_fission_data_long_bef <- ind_fission_data_long_bef %>%
   pivot_longer(c("A_speed_diff", "B_speed_diff"), names_to = "group", values_to = "speed_diff")
 #just looking at contact calls for plotting
-ind_events_data_long_bef2 <- ind_events_data_long_bef2[ind_events_data_long_bef2$call == "contact_call_rate",]
+ind_fission_data_long_bef <- ind_fission_data_long_bef[ind_fission_data_long_bef$call == "contact_call_rate",]
 
 png(height = 400, width = 580, units = 'px', filename = paste0(plotdir,'callrate_speed.png'))
-plot(ind_events_data_long_bef2$speed_diff, ind_events_data_long_bef2$rate, xlab = "speed difference", ylab = "call rate", pch = 16, cex = 0.5)
+plot(ind_fission_data_long_bef$speed_diff, ind_fission_data_long_bef$rate, xlab = "speed difference", ylab = "call rate", pch = 16, cex = 0.5)
 dev.off()
 
-#next thing to do is remove the NA subgroups as this doesn't help us, and perhaps look at filtering for events when the distance the subgroups move from one another significantly changes (as the group was likely not fully together before the fission event so their calling behaviour may not show any change)
+#next thing to do is remove the NA subgroups as this doesn't help us, and perhaps look at filtering for fission when the distance the subgroups move from one another significantly changes (as the group was likely not fully together before the fission event so their calling behaviour may not show any change)
 
 #removing rows where the subgroup ID is NA
-ind_events_data_long_filt <- ind_events_data_long[!(ind_events_data_long$subgroup== "NA"),]
-ind_events_data_long_filt$period <- factor(ind_events_data_long_filt$period, levels = c("before","during" ,"after"))
+ind_fission_data_long_filt <- ind_fission_data_long[!(ind_fission_data_long$subgroup== "NA"),]
+ind_fission_data_long_filt$period <- factor(ind_fission_data_long_filt$period, levels = c("before","during" ,"after"))
 
 #want to combine the group A with b_speed_changed and group B with a_speed_changed 
 #want to combine the group A with a_speed_changed and group B with b_speed_changed
 #this is so there's just two plots where we have the calling rate of the changing group and the non-changing group
 
-ind_events_data_long_filt$change_group <- NA
+ind_fission_data_long_filt$change_group <- NA
 
-df <- ind_events_data_long_filt
-df <- within(df,{
+ind_fission_data_long_filt <- within(ind_fission_data_long_filt,{
   change_group = NA
   change_group[subgroup == "A" & change_speed_subgroup == "a_speed_changed"] = "change"
   change_group[subgroup == "B" & change_speed_subgroup == "b_speed_changed"] = "change"
@@ -466,9 +344,9 @@ df <- within(df,{
 })
 
 #for now: remove cases where the ab_speed stayed the same
-df <- df[!(df$change_speed_subgroup== "ab_speed_same"),]
+ind_fission_data_long_filt <- ind_fission_data_long_filt[!(ind_fission_data_long_filt$change_speed_subgroup== "ab_speed_same"),]
 
-g <- ggplot(data = df[df$event_type == "fission",],
+g <- ggplot(data = ind_fission_data_long_filt[ind_fission_data_long_filt$event_type == "fission",],
        aes(x = call, y = rate, fill = period))+
   geom_boxplot(outlier.shape = NA)+
   geom_jitter(position = position_dodge(width = 0.75), size = 0.5, color = "gray3", aes(group = interaction(call, period))) +
@@ -482,14 +360,42 @@ ggsave(paste0(plotdir, "call_change.png"), width = 10, height = 5)
 
 
 
+#---------FUSIONS------------------------------------------------------------------------------------------------------------
+#need to get the distance travelled of the full group after the fusion and update the scripts here for this to work...
 
+fusion_dist <- dist_travel_df[dist_travel_df$event_type == "fusion",]
+fusion_dist <- fusion_dist[!is.na(fusion_dist$B_during_disp),]
 
+#get distance travelled
+fusion_dist$move_diff <- abs(fusion_dist$B_during_disp - fusion_dist$A_during_disp)
+fusion_dist$B_move_diff <- fusion_dist$B_during_disp - fusion_dist$AB_before_disp
+fusion_dist$A_move_diff <- fusion_dist$A_during_disp - fusion_dist$AB_before_disp
+#get speed of group before and speeds of subgroups after
+fusion_dist$B_speed <- fusion_dist$B_during_disp / fusion_dist$d.duration
+fusion_dist$A_speed <- fusion_dist$A_during_disp / fusion_dist$d.duration
+fusion_dist$AB_speed <- fusion_dist$AB_before_disp / fusion_dist$b.duration
 
-#plot call rate before on y axis by amount of change in speed on the x axis
+plotdir <- "C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/"
+png(height = 400, width = 580, units = 'px', filename = paste0(plotdir,'speed_before_split.png'))
+hist(fusion_dist$AB_speed, breaks = 30, main = "", xlab = "Speed before split (m/s)", col = "aquamarine4")
+dev.off()
 
+#removing rows where the before speed is 0
+fusion_dist <- fusion_dist[which(fusion_dist$b.duration > 0),]
 
+#calculate speed diff
+fusion_dist$speed_diff <- abs(fusion_dist$B_speed - fusion_dist$A_speed)
+fusion_dist$B_speed_diff <- fusion_dist$B_speed - fusion_dist$AB_speed
+fusion_dist$A_speed_diff <- fusion_dist$A_speed - fusion_dist$AB_speed
 
+hist(fusion_dist$speed_diff)
+plot(fusion_dist$AB_speed*60, fusion_dist$speed_diff)
+plot(fusion_dist$B_during_disp, fusion_dist$A_during_disp)
 
+plot(fusion_dist$AB_before_disp, fusion_dist$move_diff)
+points(move_diff~AB_before_disp, fusion_dist[fusion_dist$move_diff >20 & fusion_dist$AB_before_disp > 25,], col = "steelblue2", pch = 19)
+points(move_diff~AB_before_disp, fusion_dist[fusion_dist$move_diff >20 & fusion_dist$AB_before_disp <= 25,], col = "indianred", pch = 19)
+points(move_diff~AB_before_disp, fusion_dist[fusion_dist$move_diff <20 & fusion_dist$AB_before_disp <= 25,], col = "gold2", pch = 19)
 
 
 

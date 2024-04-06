@@ -181,7 +181,7 @@ for(i in 1:n.inds){
 }
 
 #Save as RData 
-save(file=paste0(data_dir, 'presedente_xy_highres_level2.RData'),list=c('xs','ys'))
+save(file=paste0(data_dir, 'presedente_xy_highres_level2.RData'),list=c('xs','ys','ts'))
 
 
 

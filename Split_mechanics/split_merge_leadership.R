@@ -365,7 +365,7 @@ load(file=paste0(group,'_coati_ids.RData'))
 coati_ids$name_short <- sapply(coati_ids$name, function(x){return(substr(x,1,3))})
 
 #read in timestamp data
-load(file=paste0(group,'_xy_highres_level1.RData'))
+load(file=paste0(group,'_xy_highres_level2.RData'))
 
 #number of individuals
 n_inds <- nrow(coati_ids)
