@@ -117,7 +117,7 @@ for (i in 1:nrow(speed_df)){
   
   #adding context: alone, split or group together
   if(subgroup_size == 1){
-   speed_df$context[i] <-  "alone"
+    speed_df$context[i] <-  "alone"
   }
   
   if(split == TRUE & subgroup_size > 1){
@@ -143,8 +143,8 @@ speed_days <- speed_days %>%  filter(time_only > as_hms("11:30:00") & time_only 
 speed_days$time_only <- as_hms(speed_days$time_only)
 
 speed_days$day_period <- ifelse(speed_days$time_only > as_hms("10:50:00") & speed_days$time_only < as_hms("15:01:00"), "Morning", 
-                         ifelse(speed_days$time_only > as_hms("15:01:00") & speed_days$time_only < as_hms("19:01:00"),  "Midday", 
-                         ifelse(speed_days$time_only > as_hms("19:01:00") & speed_days$time_only < as_hms("23:01:00"), "Afternoon", NA)))
+                                ifelse(speed_days$time_only > as_hms("15:01:00") & speed_days$time_only < as_hms("19:01:00"),  "Midday", 
+                                       ifelse(speed_days$time_only > as_hms("19:01:00") & speed_days$time_only < as_hms("23:01:00"), "Afternoon", NA)))
 
 
 #remove NA's (when individual was not tracked) or when too few individuals were tracked

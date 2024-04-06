@@ -1,6 +1,8 @@
 #Generating preprocessed data for split and merge events
 #Generates a data frame giving properties of the splits and merges and their involved subgroups for manual and automated labels
 
+#should plot the duration of events
+
 #LIBRARY
 library(lubridate)
 library(scales)

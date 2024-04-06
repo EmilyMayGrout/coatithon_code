@@ -1,4 +1,5 @@
 #This script is for looking at how call rates relate to fission-fusion dynamics in coatis
+#need to do this with level2 data
 
 library(dplyr)
 library(ggplot2)
@@ -10,7 +11,7 @@ library(reshape2)
 #datadir <- '~/Dropbox/coatithon/calling_during_fissions_and_fusions/data'
 datadir <- "C:/Users/egrout/Dropbox/coatithon/calling_during_fissions_and_fusions/data"
 callfile <- 'all_data_hms_synched.csv'
-ff_file <- 'galaxy_auto_ff_events_characterized.RData'
+ff_file <- 'galaxy_auto_ff_events_characterized.RData' #need to rerun to get this with level2 in characterize_splits_and_merges
 gps_file <- 'galaxy_xy_highres_level1.RData'
 id_file <- 'galaxy_coati_ids.RData'
 
@@ -261,17 +262,16 @@ for(i in 1:nrow(group_events_data)){
     }
   }
 }
-rm(list = setdiff(ls(),c("ind_events_data","calls","group_events_data")))
+rm(list = setdiff(ls(),c("ind_events_data","calls","group_events_data", "ts")))
 ind_events_data$agg_call_rate<-ind_events_data$agg_calls / ind_events_data$duration
 ind_events_data$contact_call_rate<-ind_events_data$contact_calls / ind_events_data$duration
-#TODO check events where the before and start time are the same
+#TODO check events where the before and start time are the same - because overlap with previous event
 
 leadership_metric<-c("position","crosstime","crosstime_ownfinishline")
 n = 2
 filename<-paste0("C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/galaxy_LeaderRank_",leadership_metric[n],".RData")
 
 load(filename) 
-
 
 fission_leaders_rank <- as.data.frame(out$fission_leaders) 
 fission_leaders_rank<-as.data.frame(t(fission_leaders_rank)) 
@@ -338,80 +338,154 @@ ggplot(data = ind_events_data_merge[ind_events_data_merge$event_type == event_ty
 ## figure out a way to define fission types
 #look at the difference in travel distance 
 
-# event<-data.frame()
-# for(i in 1:nrow(group_events_data)){
-#   event.times<-group_events_data[i,c(10:14)]
-#   times<-ts[as.numeric(event.times[,c(2:5)])]  # start - end backwards
-#   event_<-group_events_data[i,c("event_idx","event_type")]
-#   event_$b.duration<-as.numeric(difftime(times[3],times[4], units = "secs"))
-#   event_$d.duration<-as.numeric(difftime(times[2],times[3], units = "secs"))
-#   event<-rbind(event,event_)
-# }
-# 
-# dist_travel_df <- group_events_data[, c("event_type", "event_idx", "B_during_disp", "A_during_disp", "AB_before_disp" )]
-# 
-# dist_travel_df<-merge(dist_travel_df, event, by = c("event_idx","event_type"), all = T)
-# 
-# fission_dist <- dist_travel_df[dist_travel_df$event_type == "fission",]
-# 
-# fission_dist <- fission_dist[!is.na(fission_dist$B_during_disp),]
-# 
-# fission_dist$move_diff <- abs(fission_dist$B_during_disp - fission_dist$A_during_disp)
-# fission_dist$B_move_diff <- fission_dist$B_during_disp - fission_dist$AB_before_disp
-# fission_dist$A_move_diff <- fission_dist$A_during_disp - fission_dist$AB_before_disp
-# 
-# fission_dist$B_speed <- fission_dist$B_during_disp / fission_dist$d.duration
-# fission_dist$A_speed <- fission_dist$A_during_disp / fission_dist$d.duration
-# fission_dist$AB_speed <- fission_dist$AB_before_disp / fission_dist$b.duration
-# 
-# hist(fission_dist$A_speed, breaks = 20)
-# 
-# #for error checking, should remove the fissions where speed is incredibly high (e.g. more than 2.5m/second) in a short duration (6 seconds)
-# #for now, we remove these events here
-# fission_dist <- fission_dist[fission_dist$B_speed < 2.5,]
-# fission_dist <- fission_dist[fission_dist$A_speed < 2.5,]
-# 
-# #removing rows where the before speed is 0
-# fission_dist <- fission_dist[which(fission_dist$b.duration > 0),]
-# 
-# #calculate speed diff
-# fission_dist$speed_diff <- abs(fission_dist$B_speed - fission_dist$A_speed)
-# fission_dist$B_speed_diff <- fission_dist$B_speed - fission_dist$AB_speed
-# fission_dist$A_speed_diff <- fission_dist$A_speed - fission_dist$AB_speed
-# 
-# plot(fission_dist$AB_speed*60, fission_dist$speed_diff)
-# 
-# 
-# 
-# plot(fission_dist$AB_before_disp, fission_dist$move_diff)
-# points(move_diff~AB_before_disp, fission_dist[fission_dist$move_diff >20 & fission_dist$AB_before_disp > 25,], col = "steelblue2", pch = 19)
-# points(move_diff~AB_before_disp, fission_dist[fission_dist$move_diff >20 & fission_dist$AB_before_disp <= 25,], col = "indianred", pch = 19)
-# points(move_diff~AB_before_disp, fission_dist[fission_dist$move_diff <20 & fission_dist$AB_before_disp <= 25,], col = "gold2", pch = 19)
-# 
-# 
-# 
-# ind_events_data_long <- ind_events_data %>%
-#   pivot_longer(c(agg_call_rate, contact_call_rate), names_to = "call", values_to = "rate")
-# 
-# #change factor levels so before is shown before after in plot
-# ind_events_data_long$period <- factor(ind_events_data_long$period, levels = c("before","during" ,"after"))
-# 
-# #get the points to correspond to the period
-# 
-# ggplot(data = ind_events_data_long[ind_events_data_long$event_type == "fission",], 
-#             aes(x = call, y = rate, fill = period))+
-#   geom_boxplot(outlier.shape = NA)+ 
-#   geom_jitter(position = position_dodge(width = 0.75), size = 0.5, color = "gray3", aes(group = interaction(call, period))) +
-#   ylim(c(0,0.75))+
-#   
-#   #scale_fill_manual(values=c("indianred1", "indianred3", "indianred4"))+
-#   #theme(legend.title=element_blank(), panel.grid.major = element_blank(), panel.grid.minor =     element_blank(), panel.background = element_blank(), axis.text=element_text(size=14), axis.title = element_text(size = 14), legend.text = element_text(size = 14))+ 
-#   xlab(" ") +
-#   ylab("Call rate (per minute)")+
-#   scale_alpha(guide = 'none')+
-#   #facet_wrap(~event_idx)
-# 
-#   NULL
+event<-data.frame()
+for(i in 1:nrow(group_events_data)){
+  event.times<-group_events_data[i,c(10:14)]
+  times<-ts[as.numeric(event.times[,c(2:5)])]  # start - end backwards
+  event_<-group_events_data[i,c("event_idx","event_type")]
+  event_$b.duration<-as.numeric(difftime(times[3],times[4], units = "secs"))
+  event_$d.duration<-as.numeric(difftime(times[2],times[3], units = "secs"))
+  event<-rbind(event,event_)
+}
+
+
+dist_travel_df <- group_events_data[, c("event_type", "event_idx", "B_during_disp", "A_during_disp", "AB_before_disp" )]
+
+dist_travel_df<-merge(dist_travel_df, event, by = c("event_idx","event_type"), all = T)
+
+fission_dist <- dist_travel_df[dist_travel_df$event_type == "fission",]
+
+fission_dist <- fission_dist[!is.na(fission_dist$B_during_disp),]
+
+fission_dist$move_diff <- abs(fission_dist$B_during_disp - fission_dist$A_during_disp)
+fission_dist$B_move_diff <- fission_dist$B_during_disp - fission_dist$AB_before_disp
+fission_dist$A_move_diff <- fission_dist$A_during_disp - fission_dist$AB_before_disp
+
+fission_dist$B_speed <- fission_dist$B_during_disp / fission_dist$d.duration
+fission_dist$A_speed <- fission_dist$A_during_disp / fission_dist$d.duration
+fission_dist$AB_speed <- fission_dist$AB_before_disp / fission_dist$b.duration
+
+plotdir <- "C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/"
+png(height = 400, width = 580, units = 'px', filename = paste0(plotdir,'speed_before_split.png'))
+hist(fission_dist$AB_speed, breaks = 30, main = "", xlab = "Speed before split (m/s)", col = "aquamarine4")
+dev.off()
+
+
+
+#for error checking, should remove the fissions where speed is incredibly high (e.g. more than 2.5m/second) in a short duration (6 seconds)
+#this code will not be needed when we use the level2 data to rerun everything
+#for now, we remove these events here
+fission_dist <- fission_dist[fission_dist$B_speed < 2.5,]
+fission_dist <- fission_dist[fission_dist$A_speed < 2.5,]
+
+#removing rows where the before speed is 0
+fission_dist <- fission_dist[which(fission_dist$b.duration > 0),]
+
+#calculate speed diff
+fission_dist$speed_diff <- abs(fission_dist$B_speed - fission_dist$A_speed)
+fission_dist$B_speed_diff <- fission_dist$B_speed - fission_dist$AB_speed
+fission_dist$A_speed_diff <- fission_dist$A_speed - fission_dist$AB_speed
+
+plot(fission_dist$AB_speed*60, fission_dist$speed_diff)
+plot(fission_dist$B_during_disp, fission_dist$A_during_disp)
+
+
+plot(fission_dist$AB_before_disp, fission_dist$move_diff)
+points(move_diff~AB_before_disp, fission_dist[fission_dist$move_diff >20 & fission_dist$AB_before_disp > 25,], col = "steelblue2", pch = 19)
+points(move_diff~AB_before_disp, fission_dist[fission_dist$move_diff >20 & fission_dist$AB_before_disp <= 25,], col = "indianred", pch = 19)
+points(move_diff~AB_before_disp, fission_dist[fission_dist$move_diff <20 & fission_dist$AB_before_disp <= 25,], col = "gold2", pch = 19)
+
+
+#looks like we can categorize based on some criteria:
+#for fissions:
+#if the group were moving before the split, then the stopping group and continue moving group - so could look at which subgroup changed their speed of travel most in response to the full group before
+
+#make a column to get the subgroup that changed distance more - either by stopping when the group were moving or from moving when the group were relatively stationary
+fission_dist$change_dist_subgroup <- NA
+fission_dist$change_dist_subgroup[which(abs(fission_dist$B_move_diff) > abs(fission_dist$A_move_diff))] <- "b_dist_changed"
+fission_dist$change_dist_subgroup[which(abs(fission_dist$B_move_diff) < abs(fission_dist$A_move_diff))] <- "a_dist_changed"
+fission_dist$change_dist_subgroup[which(abs(fission_dist$move_diff) < 10)] <- "ab_dist_same"
+
+#get the subgroup that changed their speed from the full groups speed
+fission_dist$change_speed_subgroup <- NA
+fission_dist$change_speed_subgroup[which(abs(fission_dist$B_speed_diff) > abs(fission_dist$A_speed_diff))] <- "b_speed_changed"
+fission_dist$change_speed_subgroup[which(abs(fission_dist$B_speed_diff) < abs(fission_dist$A_speed_diff))] <- "a_speed_changed"
+fission_dist$change_speed_subgroup[which(abs(fission_dist$speed_diff) < 0.01)] <- "ab_speed_same"
+
+#want to bind the info on which subgroups changed speed to the call rates df
+speed_filt <- fission_dist[,c("event_idx", "change_speed_subgroup", "A_speed_diff", "B_speed_diff")]
+
+ind_events_data <- merge(ind_events_data, speed_filt, by = "event_idx")
+
+ind_events_data_long <- ind_events_data %>%
+  pivot_longer(c(agg_call_rate, contact_call_rate), names_to = "call", values_to = "rate")
+
+#change factor levels so before is shown before after in plot
+ind_events_data_long$period <- factor(ind_events_data_long$period, levels = c("before","during" ,"after"))
+
+
+#get the points to correspond to the period
+
+ggplot(data = ind_events_data_long[ind_events_data_long$event_type == "fission",],
+            aes(x = call, y = rate, fill = period))+
+  geom_boxplot(outlier.shape = NA)+
+  geom_jitter(position = position_dodge(width = 0.75), size = 0.5, color = "gray3", aes(group = interaction(call, period))) +
+  ylim(c(0,0.75))+
+  facet_wrap(~subgroup+change_speed_subgroup)
+
+ind_events_data_long_bef <- ind_events_data_long[ind_events_data_long$period == "before",]
+#get the A group and B group speeds in the same column
+ind_events_data_long_bef2 <- ind_events_data_long_bef %>%
+  pivot_longer(c("A_speed_diff", "B_speed_diff"), names_to = "group", values_to = "speed_diff")
+#just looking at contact calls for plotting
+ind_events_data_long_bef2 <- ind_events_data_long_bef2[ind_events_data_long_bef2$call == "contact_call_rate",]
+
+png(height = 400, width = 580, units = 'px', filename = paste0(plotdir,'callrate_speed.png'))
+plot(ind_events_data_long_bef2$speed_diff, ind_events_data_long_bef2$rate, xlab = "speed difference", ylab = "call rate", pch = 16, cex = 0.5)
+dev.off()
+
+#next thing to do is remove the NA subgroups as this doesn't help us, and perhaps look at filtering for events when the distance the subgroups move from one another significantly changes (as the group was likely not fully together before the fission event so their calling behaviour may not show any change)
+
+#removing rows where the subgroup ID is NA
+ind_events_data_long_filt <- ind_events_data_long[!(ind_events_data_long$subgroup== "NA"),]
+ind_events_data_long_filt$period <- factor(ind_events_data_long_filt$period, levels = c("before","during" ,"after"))
+
+#want to combine the group A with b_speed_changed and group B with a_speed_changed 
+#want to combine the group A with a_speed_changed and group B with b_speed_changed
+#this is so there's just two plots where we have the calling rate of the changing group and the non-changing group
+
+ind_events_data_long_filt$change_group <- NA
+
+df <- ind_events_data_long_filt
+df <- within(df,{
+  change_group = NA
+  change_group[subgroup == "A" & change_speed_subgroup == "a_speed_changed"] = "change"
+  change_group[subgroup == "B" & change_speed_subgroup == "b_speed_changed"] = "change"
+  change_group[subgroup == "A"& change_speed_subgroup == "b_speed_changed"] = "not_change"
+  change_group[subgroup == "B"& change_speed_subgroup == "a_speed_changed"] = "not_change"
+})
+
+#for now: remove cases where the ab_speed stayed the same
+df <- df[!(df$change_speed_subgroup== "ab_speed_same"),]
+
+g <- ggplot(data = df[df$event_type == "fission",],
+       aes(x = call, y = rate, fill = period))+
+  geom_boxplot(outlier.shape = NA)+
+  geom_jitter(position = position_dodge(width = 0.75), size = 0.5, color = "gray3", aes(group = interaction(call, period))) +
+  ylim(c(0,0.75))+
+  theme_classic()+
+  facet_wrap(~change_group)
+
+g
+#here we can see an increase in contact call rate in the changing speed group 
+ggsave(paste0(plotdir, "call_change.png"), width = 10, height = 5)
+
+
+
+
+
+
+#plot call rate before on y axis by amount of change in speed on the x axis
 
 
 

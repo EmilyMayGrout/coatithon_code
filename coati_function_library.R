@@ -4,7 +4,7 @@
 
 #LIBRARIES
 library(dbscan)
-library(rgdal)
+#library(rgdal)
 library(lubridate)
 library(stringr)
 library(fields)

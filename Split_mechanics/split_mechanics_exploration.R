@@ -181,8 +181,8 @@ for (i in 1:nrow(events)){
     events$B_subgroup_size[i] <- length(v1)
     events$B_age_each_ind[i] <- relist((v1), skeleton=events$B_age_each_ind[i])
     
-} else if (group == "presedente"){
-  
+  } else if (group == "presedente"){
+    
     v1 <- unlist(events$A_age_each_ind[i])
     v1[v1 == 1] <- 3
     v1[v1 == 2] <- 1

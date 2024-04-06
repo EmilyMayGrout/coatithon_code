@@ -5,7 +5,7 @@
 #-----PARAMETERS-------
 
 user <- 'emily'
-group <- 'galaxy'
+group <- 'presedente'
 use_manual_events <- F
 dist_moved_thresh <- 15 #minimum distance moved by a subgroup to count it as having moved (i.e. left or joined)
 make_plots <- F
@@ -346,7 +346,8 @@ get_fission_fusion_leadership <- function(events, n_inds, leadership_type = 'pos
 
 #LOAD EVENTS DATA
 setwd(groupdir)
-
+#TODO:
+#need to rerun the auto events in charecterize_splits_and_merges with the level2 data
 if(use_manual_events){
   load(paste0(group,'_manual_ff_events_characterized.RData'))
 } else{
