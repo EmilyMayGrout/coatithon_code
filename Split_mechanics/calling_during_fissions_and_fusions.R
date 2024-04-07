@@ -231,13 +231,21 @@ for(i in 1:nrow(group_events_data)){
   event_ <- group_events_data[i,c("event_idx","event_type")]
   event_$b.duration <- as.numeric(difftime(times[3],times[4], units = "secs"))
   event_$d.duration <- as.numeric(difftime(times[2],times[3], units = "secs"))
+  event_$a.duration <- as.numeric(difftime(times[1],times[2], units = "secs"))
   event <- rbind(event,event_)
 }
 
 
-dist_travel_df <- group_events_data[, c("event_type", "event_idx", "B_during_disp", "A_during_disp", "AB_before_disp" )]
+dist_travel_df <- group_events_data[, c("event_type", "event_idx", "B_during_disp", "A_during_disp", "AB_before_disp", "AB_after_disp" )]
 
 dist_travel_df<-merge(dist_travel_df, event, by = c("event_idx","event_type"), all = T)
+
+
+
+
+
+
+
 
 #---------FISSIONS------------------------------------------------------------------------------------------------------------
 
@@ -261,14 +269,24 @@ dev.off()
 #removing rows where the before speed is 0
 fission_dist <- fission_dist[which(fission_dist$b.duration > 0),]
 
+
+#for error checking, should remove the fissions where speed is incredibly high (e.g more than 2.5m/second), in a short duration (6 seconds)
+#for now, we remove these events here
+fission_dist <- fission_dist[fission_dist$B_speed < 2.5,]
+fission_dist <- fission_dist[fission_dist$A_speed < 2.5,]
+
+
 #calculate speed diff
 fission_dist$speed_diff <- abs(fission_dist$B_speed - fission_dist$A_speed)
 fission_dist$B_speed_diff <- fission_dist$B_speed - fission_dist$AB_speed
 fission_dist$A_speed_diff <- fission_dist$A_speed - fission_dist$AB_speed
-#the difference between the speed differences (to get one value)
-fission_dist$Diff_AB_speed_diff <- abs(fission_dist$A_speed_diff - fission_dist$B_speed_diff)
-
 hist(fission_dist$speed_diff)
+
+
+#the difference between the speed differences (to get one value)
+fission_dist$diff_AB_speed_diff <- abs(fission_dist$A_speed_diff - fission_dist$B_speed_diff)
+
+
 plot(fission_dist$AB_speed*60, fission_dist$speed_diff)
 plot(fission_dist$B_during_disp, fission_dist$A_during_disp)
 
@@ -295,7 +313,7 @@ fission_dist$change_speed_subgroup[which(abs(fission_dist$B_speed_diff) < abs(fi
 fission_dist$change_speed_subgroup[which(abs(fission_dist$speed_diff) < 0.01)] <- "ab_speed_same"
 
 #want to bind the info on which subgroups changed speed to the call rates df
-speed_filt <- fission_dist[,c("event_idx", "change_speed_subgroup", "A_speed_diff", "B_speed_diff", "Diff_AB_speed_diff")]
+speed_filt <- fission_dist[,c("event_idx", "change_speed_subgroup", "A_speed_diff", "B_speed_diff", "diff_AB_speed_diff")]
 
 ind_fission_data <- merge(ind_events_data, speed_filt, by = "event_idx")
 ind_fission_data <- ind_fission_data[,-c(6,7)]
@@ -352,7 +370,7 @@ ind_fission_data_long_filt <- ind_fission_data_long_filt[!(ind_fission_data_long
 
 #save(ind_fission_data_long_filt, file = "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/changed_df.RData")
 
-g <- ggplot(data = ind_fission_data_long_filt[ind_fission_data_long_filt$event_type == "fission",],
+g <- ggplot(data = ind_fission_data_long_filt,
        aes(x = call, y = rate, fill = period))+
   geom_boxplot(outlier.shape = NA)+
   geom_jitter(position = position_dodge(width = 0.75), size = 0.5, color = "gray3", aes(group = interaction(call, period))) +
@@ -362,17 +380,17 @@ g <- ggplot(data = ind_fission_data_long_filt[ind_fission_data_long_filt$event_t
 
 g
 #here we can see an increase in contact call rate in the changing speed group 
-ggsave(paste0(plotdir, "call_change.png"), width = 10, height = 5)
+ggsave(paste0(plotdir, "fission_call_change.png"), width = 10, height = 5)
 
 
 ind_fission_data_long_filt_bef <- ind_fission_data_long_filt[ind_fission_data_long_filt$period == "before",]
 
 #removing the last event as this is when Gus fuses with the group and then immediately leaves 3 minutes later
-ind_fission_data_long_filt_bef <- ind_fission_data_long_filt_bef[ind_fission_data_long_filt_bef$event_idx != 39,]
+ind_fission_data_long_filt_bef <- ind_fission_data_long_filt_bef[ind_fission_data_long_filt_bef$event_idx != 42,]
 
 
 ggplot(data = ind_fission_data_long_filt_bef[ind_fission_data_long_filt_bef$call == "contact_call_rate",], 
-       aes(x = Diff_AB_speed_diff, y = rate, color = change_group))+
+       aes(x = diff_AB_speed_diff, y = rate, color = change_group))+
   geom_point()+
   theme_classic()+
   stat_smooth(method='lm')
@@ -391,16 +409,17 @@ fusion_dist <- fusion_dist[!is.na(fusion_dist$B_during_disp),]
 
 #get distance travelled
 fusion_dist$move_diff <- abs(fusion_dist$B_during_disp - fusion_dist$A_during_disp)
-fusion_dist$B_move_diff <- fusion_dist$B_during_disp - fusion_dist$AB_before_disp
-fusion_dist$A_move_diff <- fusion_dist$A_during_disp - fusion_dist$AB_before_disp
-#get speed of group before and speeds of subgroups after
+fusion_dist$B_move_diff <- fusion_dist$B_during_disp - fusion_dist$AB_after_disp
+fusion_dist$A_move_diff <- fusion_dist$A_during_disp - fusion_dist$AB_after_disp
+#get speed of group after and speeds of subgroups before
 fusion_dist$B_speed <- fusion_dist$B_during_disp / fusion_dist$d.duration
 fusion_dist$A_speed <- fusion_dist$A_during_disp / fusion_dist$d.duration
-fusion_dist$AB_speed <- fusion_dist$AB_before_disp / fusion_dist$b.duration
+fusion_dist$AB_speed <- fusion_dist$AB_after_disp / fusion_dist$a.duration
+
 
 plotdir <- "C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/"
 png(height = 400, width = 580, units = 'px', filename = paste0(plotdir,'speed_before_split.png'))
-hist(fusion_dist$AB_speed, breaks = 30, main = "", xlab = "Speed before split (m/s)", col = "aquamarine4")
+hist(fusion_dist$AB_speed, breaks = 30, main = "", xlab = "Speed after merge (m/s)", col = "aquamarine3")
 dev.off()
 
 #removing rows where the before speed is 0
@@ -411,16 +430,84 @@ fusion_dist$speed_diff <- abs(fusion_dist$B_speed - fusion_dist$A_speed)
 fusion_dist$B_speed_diff <- fusion_dist$B_speed - fusion_dist$AB_speed
 fusion_dist$A_speed_diff <- fusion_dist$A_speed - fusion_dist$AB_speed
 
+#the difference between the speed differences (to get one value)
+fusion_dist$diff_AB_speed_diff <- abs(fusion_dist$A_speed_diff - fusion_dist$B_speed_diff)
+
 hist(fusion_dist$speed_diff)
 plot(fusion_dist$AB_speed*60, fusion_dist$speed_diff)
 plot(fusion_dist$B_during_disp, fusion_dist$A_during_disp)
 
-plot(fusion_dist$AB_before_disp, fusion_dist$move_diff)
-points(move_diff~AB_before_disp, fusion_dist[fusion_dist$move_diff >20 & fusion_dist$AB_before_disp > 25,], col = "steelblue2", pch = 19)
-points(move_diff~AB_before_disp, fusion_dist[fusion_dist$move_diff >20 & fusion_dist$AB_before_disp <= 25,], col = "indianred", pch = 19)
-points(move_diff~AB_before_disp, fusion_dist[fusion_dist$move_diff <20 & fusion_dist$AB_before_disp <= 25,], col = "gold2", pch = 19)
+plot(fusion_dist$AB_after_disp, fusion_dist$move_diff)
+points(move_diff~AB_after_disp, fusion_dist[fusion_dist$move_diff >20 & fusion_dist$AB_after_disp > 25,], col = "steelblue2", pch = 19)
+points(move_diff~AB_after_disp, fusion_dist[fusion_dist$move_diff >20 & fusion_dist$AB_after_disp <= 25,], col = "indianred", pch = 19)
+points(move_diff~AB_after_disp, fusion_dist[fusion_dist$move_diff <20 & fusion_dist$AB_after_disp <= 25,], col = "gold2", pch = 19)
+
+#make a column to get the subgroup that changed distance more
+fusion_dist$change_dist_subgroup <- NA
+fusion_dist$change_dist_subgroup[which(abs(fusion_dist$B_move_diff) > abs(fusion_dist$A_move_diff))] <- "b_dist_changed"
+fusion_dist$change_dist_subgroup[which(abs(fusion_dist$B_move_diff) < abs(fusion_dist$A_move_diff))] <- "a_dist_changed"
+fusion_dist$change_dist_subgroup[which(abs(fusion_dist$move_diff) < 10)] <- "ab_dist_same"
+
+#get the subgroup that changed their speed from the full groups speed
+fusion_dist$change_speed_subgroup <- NA
+fusion_dist$change_speed_subgroup[which(abs(fusion_dist$B_speed_diff) > abs(fusion_dist$A_speed_diff))] <- "b_speed_changed"
+fusion_dist$change_speed_subgroup[which(abs(fusion_dist$B_speed_diff) < abs(fusion_dist$A_speed_diff))] <- "a_speed_changed"
+fusion_dist$change_speed_subgroup[which(abs(fusion_dist$speed_diff) < 0.01)] <- "ab_speed_same"
 
 
 
+#want to bind the info on which subgroups changed speed to the call rates df
+speed_filt <- fusion_dist[,c("event_idx", "change_speed_subgroup", "A_speed_diff", "B_speed_diff", "diff_AB_speed_diff")]
+
+ind_fusion_data <- merge(ind_events_data, speed_filt, by = "event_idx")
+ind_fusion_data <- ind_fusion_data[,-c(6,7)]
+
+ind_fusion_data_long <- ind_fusion_data %>%
+  pivot_longer(c(agg_call_rate, contact_call_rate), names_to = "call", values_to = "rate")
+
+#change factor levels so before is shown before after in plot
+ind_fusion_data_long$period <- factor(ind_fusion_data_long$period, levels = c("before","during" ,"after"))
+
+
+ind_fusion_data_long_aft <- ind_fusion_data_long[ind_fusion_data_long$period == "after",]
+#get the A group and B group speeds in the same column
+ind_fusion_data_long_aft <- ind_fusion_data_long_aft %>%
+  pivot_longer(c("A_speed_diff", "B_speed_diff"), names_to = "group", values_to = "speed_diff")
+#just looking at contact calls for plotting
+ind_fusion_data_long_aft <- ind_fusion_data_long_aft[ind_fusion_data_long_aft$call == "contact_call_rate",]
+
+#removing rows where the subgroup ID is NA
+ind_fusion_data_long_filt <- ind_fusion_data_long[!(ind_fusion_data_long$subgroup== "NA"),]
+ind_fusion_data_long_filt$period <- factor(ind_fusion_data_long_filt$period, levels = c("before","during" ,"after"))
+
+#want to combine the group A with b_speed_changed and group B with a_speed_changed 
+#want to combine the group A with a_speed_changed and group B with b_speed_changed
+#this is so there's just two plots where we have the calling rate of the changing group and the non-changing group
+
+ind_fusion_data_long_filt$change_group <- NA
+
+ind_fusion_data_long_filt <- within(ind_fusion_data_long_filt,{
+  change_group = NA
+  change_group[subgroup == "A" & change_speed_subgroup == "a_speed_changed"] = "change" #change more
+  change_group[subgroup == "B" & change_speed_subgroup == "b_speed_changed"] = "change"
+  change_group[subgroup == "A"& change_speed_subgroup == "b_speed_changed"] = "not_change" #change less (relative change)
+  change_group[subgroup == "B"& change_speed_subgroup == "a_speed_changed"] = "not_change"
+})
+
+#for now: remove cases where the ab_speed stayed the same
+ind_fusion_data_long_filt <- ind_fusion_data_long_filt[!(ind_fusion_data_long_filt$change_speed_subgroup== "ab_speed_same"),]
+
+g <- ggplot(data = ind_fusion_data_long_filt,
+            aes(x = call, y = rate, fill = period))+
+  geom_boxplot(outlier.shape = NA)+
+  geom_jitter(position = position_dodge(width = 0.75), size = 0.5, color = "gray3", aes(group = interaction(call, period))) +
+  ylim(c(0,0.75))+
+  theme_classic()+
+  facet_wrap(~change_group)
+
+g
+
+#here we can see an increase in contact call rate in the changing speed group - the group that travels to the other group 
+ggsave(paste0(plotdir, "fusion_call_change.png"), width = 10, height = 5)
 
 

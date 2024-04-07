@@ -18,9 +18,13 @@ for(i in unique(subgroup_change$event_idx)){
   # 
   sc$base_calls_mean<-NA
   for(j in sc$ind_idx){
-    sc[sc$ind_idx == j & sc$call == "contact_call_rate", "base_calls_mean"]<-mean(call_rates_together[which(call_rates_together$ind_idx == j & call_rates_together$call_type == "contact call" ),"call_rate"])
-    sc[sc$ind_idx == j & sc$call == "agg_call_rate", "base_calls_mean"]<-mean(call_rates_together[which(call_rates_together$ind_idx == j & call_rates_together$call_type == "aggression call" ),"call_rate"])
+    sc[sc$ind_idx == j & sc$call == "contact_call_rate", "base_calls_mean"] <- mean(call_rates_together[which(call_rates_together$ind_idx == j & call_rates_together$call_type == "contact call" ), "call_rate"])
+    sc[sc$ind_idx == j & sc$call == "agg_call_rate", "base_calls_mean"] <- mean(call_rates_together[which(call_rates_together$ind_idx == j & call_rates_together$call_type == "aggression call" ), "call_rate"])
   }
   subgroup_change_with_ind_baseline<-rbind(subgroup_change_with_ind_baseline,sc)
   
 }
+
+
+ggplot(data = subgroup_change_with_ind_baseline, aes(x = ind_idx, y = base_calls_mean, group = ind_idx))+
+  geom_boxplot()
