@@ -26,5 +26,27 @@ for(i in unique(subgroup_change$event_idx)){
 }
 
 
-ggplot(data = subgroup_change_with_ind_baseline, aes(x = ind_idx, y = base_calls_mean, group = ind_idx))+
-  geom_boxplot()
+ggplot(data = subgroup_change_with_ind_baseline, aes(x = call, y = base_calls_mean))+
+  geom_boxplot()+
+  ylim(c(0,0.75))+
+  theme_classic()+
+  facet_wrap(~change_group)
+
+
+ggsave("C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/baseline_callrate.png", width = 10, height = 5)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
