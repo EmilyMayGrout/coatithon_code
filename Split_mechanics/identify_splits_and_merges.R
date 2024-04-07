@@ -9,17 +9,17 @@ R_outer <- 50
 
 codedir <- '~/Dropbox/code_ari/coatithon_code/'
 dir <- '~/Dropbox/coati/processed/' #directory where all data is stored
-group <- 'presedente' #subdirectory where the group data is stored
+group <- 'galaxy' #subdirectory where the group data is stored
 
 #get directory to group data
 groupdir <- paste0(dir,group)
 
 #for Emily:
 codedir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-#groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
-#plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level2/'
-groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level2/'
+groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level2/'
+#groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
+#plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level2/'
 
 
 #SOURCE FUNCTIONS
@@ -38,7 +38,7 @@ setwd(groupdir)
 load(file=paste0(group,'_coati_ids.RData'))
 
 #read in timestamp data - notice the level number, if 2, then its not got GPS speed errors
-load(file=paste0(group,'_xy_highres_level2.RData'))
+load(file=paste0(group,'_xy_highres_level1.RData'))
 
 ff_data_50 <- detect_fissions_and_fusions(R_inner = 15, R_outer = 50, xs, ys, ts, coati_ids)
 
@@ -52,7 +52,7 @@ save(gal_events_detected, file = "C:/Users/egrout/Dropbox/coatithon/processed/20
 
 
 #looking at one event
-analyse_ff_event(98, events = ff_data_50$events_detected, xs, ys, ts, max_time = 600)
+analyse_ff_event(9, events = ff_data_50$events_detected, xs, ys, ts, max_time = 600)
 
 #animate events
 i <- 10

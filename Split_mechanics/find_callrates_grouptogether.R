@@ -4,9 +4,12 @@
 #--------PARAMS-------
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/'
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level2/'
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
 gps_file <- "galaxy_xy_highres_level1.RData" #level0 is when Venus is not removed
 id_file <- 'galaxy_coati_ids.RData'
+
+#load in events
+load("C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/galaxy_auto_ff_events_characterized.RData") #level 1
 
 #list of Rs
 R <- 50
@@ -62,13 +65,59 @@ for(i in 2:nrow(together_times)){
   together_times$bout[i]<-n
 }
 
-# now get the start and stop time of each together bout
+# now get the start and stop time of each together bout (the output is a list with the start and end time for each together bout)
 tts <- split(together_times,together_times$bout)
 ttsl <- lapply(tts, function(tts_){
   tts_ss <- tts_[c(1, nrow(tts_)),"time"]
   
   return(tts_ss)
 })
+
+# set new start or end times in case the original bout times overlap with an event
+
+et<-events[!is.na(events$before_time),c("before_time","after_time")]
+et<-et[!is.na(et$after_time),]
+ttsl2<-lapply(ttsl, function(together_bout){
+  
+  # super non efficient way of doing things, but hopefully works...if you ever have nothing better to do (unlikely) feel free to make it more efficient
+  # ok, so: we loop though every event for each bout and check whether the before or after time overlaps with the bout. If it does we exchange the start or end time for the before or after time of the event
+  remove<-c("F")
+  for(i in 1:nrow(et)){
+    bt<-ts[et$before_time[i]]
+    # bt<-bt[!is.na(bt)]
+    
+    at<-ts[et$after_time[i]]
+    # at<-at[!is.na(at)]
+    
+    
+    # check whether start overlaps with end of event (basically we don't know where the event is in relation to the together bout)
+    if(together_bout[[1]]< at & together_bout[[2]] > at){
+      together_bout[[1]]<-at
+    }
+    
+    # check whether end overlaps with before of event
+    if(together_bout[[2]]> bt & together_bout[[1]]<bt){
+      together_bout[[2]]<-bt
+    }
+    
+    # check if the together bout is completely within thevents
+    if(together_bout[[1]]>bt & together_bout[[2]]<at){
+      remove<-c(remove,"T")
+      message("YEAY")
+    }else{
+      remove<-c(remove,"F")
+    }
+  }
+  if(any(remove == "T")){
+    
+  }else{
+    return(together_bout)
+  }
+  
+})
+
+
+
 
 
 
@@ -151,23 +200,30 @@ crt_$ind_idx <- 1:nrow(crt_)
 call_rates_together <- data.frame()
 n = 1
 for(together_bout in ttsl){
-  ct_ <- calling_together[which(calling_together$datetime_synch_pos >= together_bout[1] & calling_together$datetime_synch_pos <= together_bout[2]), ]
-  ct_ <- ct_[!is.na(ct_$calltype),]
-  
-  if(nrow(ct_) > 0){
-    calls_ind <- as.data.frame(table(ct_$name, ct_$calltype)); names(calls_ind)<-c("name","call_type","count")
-    calls_all <- merge(calls_ind,crt_,by = "name")
-    calls_all$bout_dur <- as.numeric(difftime(together_bout[2], together_bout[1], units = "secs"))
-    calls_all$call_rate <- calls_all$count/calls_all$bout_dur
-    calls_all$n_ind_in_bout <- length(unique(calls_all$name))
-    calls_all$bout <- n
-    call_rates_together <- rbind(call_rates_together, calls_all)
+     ct_ <- calling_together[which(calling_together$datetime_synch_pos >= together_bout[1] & calling_together$datetime_synch_pos <= together_bout[2]), ]
+    ct_ <- ct_[!is.na(ct_$calltype),]
     
-    n = n+1
-  }
+    if(nrow(ct_) > 0){
+      calls_ind <- as.data.frame(table(ct_$name, ct_$calltype)); names(calls_ind)<-c("name","call_type","count")
+      calls_all <- merge(calls_ind,crt_,by = "name")
+      calls_all$bout_dur <- as.numeric(difftime(together_bout[2], together_bout[1], units = "secs"))
+      calls_all$call_rate <- calls_all$count/calls_all$bout_dur
+      calls_all$n_ind_in_bout <- length(unique(calls_all$name))
+      calls_all$bout <- n
+      call_rates_together <- rbind(call_rates_together, calls_all)
+      
+      n = n+1
+    }
 }
 
+#kick out bouts that are shorter than 2min
+call_rates_together<-call_rates_together[which(call_rates_together$bout_dur > 120),]
 
+save(call_rates_together, file = "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/call_rates_together_gal.RData")
+#load("C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/call_rates_together_gal.RData")
+
+#check number of events left
+length(unique(call_rates_together$bout))
 
 par(mar = c(14,4,1,1))
 boxplot(call_rate ~ name*call_type, data = call_rates_together[call_rates_together$n_ind_in_bout > 5,], las = 2, xlab = "", ylim = c(0, 0.6))
