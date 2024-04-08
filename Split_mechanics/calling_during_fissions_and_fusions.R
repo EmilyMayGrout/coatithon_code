@@ -148,7 +148,7 @@ for(i in 1:nrow(group_events_data)){
   }
 }
 
-rm(list = setdiff(ls(),c("ind_events_data","calls","group_events_data", "ts")))
+rm(list = setdiff(ls(),c("ind_events_data","calls","group_events_data", "ts", "coati_ids")))
 
 ind_events_data$agg_call_rate <- ind_events_data$agg_calls/ind_events_data$duration
 ind_events_data$contact_call_rate <- ind_events_data$contact_calls/ind_events_data$duration
@@ -312,8 +312,16 @@ fission_dist$change_speed_subgroup[which(abs(fission_dist$B_speed_diff) > abs(fi
 fission_dist$change_speed_subgroup[which(abs(fission_dist$B_speed_diff) < abs(fission_dist$A_speed_diff))] <- "a_speed_changed"
 fission_dist$change_speed_subgroup[which(abs(fission_dist$speed_diff) < 0.01)] <- "ab_speed_same"
 
+#get the subgroup that changed their speed (faster or slower - fs) from the full groups speed
+fission_dist$fs_speed_subgroup <- NA
+fission_dist$fs_speed_subgroup[which(abs(fission_dist$B_speed_diff) > abs(fission_dist$A_speed_diff) & (fission_dist$B_speed_diff < 0))] <- "b_slowed_down"
+fission_dist$fs_speed_subgroup[which(abs(fission_dist$B_speed_diff) < abs(fission_dist$A_speed_diff) & (fission_dist$A_speed_diff < 0))] <- "a_slowed_down"
+fission_dist$fs_speed_subgroup[which(abs(fission_dist$B_speed_diff) > abs(fission_dist$A_speed_diff) & (fission_dist$B_speed_diff > 0))] <- "b_sped_up"
+fission_dist$fs_speed_subgroup[which(abs(fission_dist$B_speed_diff) < abs(fission_dist$A_speed_diff) & (fission_dist$A_speed_diff > 0))] <- "a_sped_up"
+fission_dist$fs_speed_subgroup[which(abs(fission_dist$speed_diff) < 0.01)] <- "ab_speed_same"
+
 #want to bind the info on which subgroups changed speed to the call rates df
-speed_filt <- fission_dist[,c("event_idx", "change_speed_subgroup", "A_speed_diff", "B_speed_diff", "diff_AB_speed_diff")]
+speed_filt <- fission_dist[,c("event_idx", "change_speed_subgroup", "fs_speed_subgroup", "A_speed_diff", "B_speed_diff", "diff_AB_speed_diff")]
 
 ind_fission_data <- merge(ind_events_data, speed_filt, by = "event_idx")
 ind_fission_data <- ind_fission_data[,-c(6,7)]
@@ -331,7 +339,7 @@ ggplot(data = ind_fission_data_long[ind_fission_data_long$event_type == "fission
   geom_boxplot(outlier.shape = NA)+
   geom_jitter(position = position_dodge(width = 0.75), size = 0.5, color = "gray3", aes(group = interaction(call, period))) +
   ylim(c(0,0.75))+
-  facet_wrap(~subgroup+change_speed_subgroup)
+  facet_wrap(~subgroup+fs_speed_subgroup)
 
 ind_fission_data_long_bef <- ind_fission_data_long[ind_fission_data_long$period == "before",]
 #get the A group and B group speeds in the same column
@@ -340,9 +348,9 @@ ind_fission_data_long_bef <- ind_fission_data_long_bef %>%
 #just looking at contact calls for plotting
 ind_fission_data_long_bef <- ind_fission_data_long_bef[ind_fission_data_long_bef$call == "contact_call_rate",]
 
-png(height = 400, width = 580, units = 'px', filename = paste0(plotdir,'callrate_speed.png'))
+#png(height = 400, width = 580, units = 'px', filename = paste0(plotdir,'callrate_speed.png'))
 plot(ind_fission_data_long_bef$speed_diff, ind_fission_data_long_bef$rate, xlab = "speed difference", ylab = "call rate", pch = 16, cex = 0.5)
-dev.off()
+#dev.off()
 
 
 #next thing to do is remove the NA subgroups as this doesn't help us, and perhaps look at filtering for fission when the distance the subgroups move from one another significantly changes (as the group was likely not fully together before the fission event so their calling behaviour may not show any change)
@@ -365,6 +373,21 @@ ind_fission_data_long_filt <- within(ind_fission_data_long_filt,{
   change_group[subgroup == "B"& change_speed_subgroup == "a_speed_changed"] = "not_change"
 })
 
+#combine to "sped up" and "slowed down"
+ind_fission_data_long_filt$fs <- NA
+
+ind_fission_data_long_filt <- within(ind_fission_data_long_filt,{
+  fs = NA
+  fs[subgroup == "A" & fs_speed_subgroup == "a_sped_up"] = "sped_up" #change more
+  fs[subgroup == "B" & fs_speed_subgroup == "b_sped_up"] = "sped_up"
+  fs[subgroup == "A"&  fs_speed_subgroup == "a_slowed_down"] = "slowed_down" #change less (relative change)
+  fs[subgroup == "B"&  fs_speed_subgroup == "b_slowed_down"] = "slowed_down"
+  fs[change_group == "not_change"] = "not_change"
+})
+
+
+
+
 #for now: remove cases where the ab_speed stayed the same
 ind_fission_data_long_filt <- ind_fission_data_long_filt[!(ind_fission_data_long_filt$change_speed_subgroup== "ab_speed_same"),]
 
@@ -376,11 +399,22 @@ g <- ggplot(data = ind_fission_data_long_filt,
   geom_jitter(position = position_dodge(width = 0.75), size = 0.5, color = "gray3", aes(group = interaction(call, period))) +
   ylim(c(0,0.75))+
   theme_classic()+
-  facet_wrap(~change_group)
+  facet_wrap(~fs)
 
 g
+
 #here we can see an increase in contact call rate in the changing speed group 
-ggsave(paste0(plotdir, "fission_call_change.png"), width = 10, height = 5)
+ggsave(paste0(plotdir, "fission_call_speedupdown.png"), width = 15, height = 5)
+
+
+#add age/sex class to ind_fission_data_long_filt
+ind_fission_data_long_filt$agesex <- NA
+for (i in 1:nrow(coati_ids)){
+  ind_fission_data_long_filt$agesex[ind_fission_data_long_filt$ind_idx == i] <- paste(coati_ids[i,3], coati_ids[i,4], sep = "_")
+}
+
+#saving ind_fission_data_long_filt for Odd to run brms model
+save(ind_fission_data_long_filt, file ="C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/ind_fission_data_long_filt.RData")
 
 
 ind_fission_data_long_filt_bef <- ind_fission_data_long_filt[ind_fission_data_long_filt$period == "before",]
