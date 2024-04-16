@@ -8,7 +8,7 @@ user <- 'emily'
 group <- 'presedente'
 use_manual_events <- F
 dist_moved_thresh <- 15 #minimum distance moved by a subgroup to count it as having moved (i.e. left or joined)
-make_plots <- F
+make_plots <- T
 dist_frac_thresh <- 0.5
 n_rands <- 1000
 own_finish_line <- T
@@ -558,38 +558,38 @@ if(make_plots){
   
   #Make a histogram of the distances moved by the groups during splits and merges
   #and plot the distance moved threshold on top of it as a sanity check
-  quartz()
+  #quartz()
   hist(c(events$A_during_disp, events$B_during_disp), breaks = 20)
   abline(v = dist_moved_thresh, col = 'red', lwd = 3)
   
   #plot the % of moving out of all fission and fusion events for each individual w/ confidence intervals
   #fissions
-  quartz()
+  #quartz()
   plot(NULL, xlim = c(0,100), ylim = c(0,n_inds), xlab = '% moved', yaxt = 'n', ylab = '', main = 'Fissions')
   arrows(fission_CIs[,1]*100,1:n_inds, fission_CIs[,2]*100, 1:n_inds, length = 0.1, code = 3, angle = 90, lwd = 2)
   points(fission_move_fracs*100, 1:n_inds, pch = 19, cex = 2)
   axis(2, at = 1:n_inds, labels = coati_ids$name, las =1)
   
   #fusions
-  quartz()
+  #quartz()
   plot(NULL, xlim = c(0,100), ylim = c(0,n_inds), xlab = '% moved', yaxt = 'n', ylab = '', main = 'Fusions')
   arrows(fusion_CIs[,1]*100,1:n_inds, fusion_CIs[,2]*100, 1:n_inds, length = 0.1, code = 3, angle = 90, lwd = 2)
   points(fusion_move_fracs*100, 1:n_inds, pch = 19, cex = 2)
   axis(2, at = 1:n_inds, labels = coati_ids$name, las =1)
   
   #fissions vs fusions
-  quartz()
+  #quartz()
   plot(fusion_move_fracs, fission_move_fracs)
   
   #leadership during fusions
-  quartz()
+  #quartz()
   par(mfrow=c(5,5), mar = c(2,2,0,0))
   for(i in 1:n_inds){
     hist(fusion_leaders[i,], breaks= seq(0,1,.2), main = coati_ids$name[i])
   }
   
   #leadership during fissions
-  quartz()
+  #quartz()
   par(mfrow=c(5,5), mar = c(2,2,0,0))
   for(i in 1:n_inds){
     hist(fission_leaders[i,], breaks= seq(0,1,.2), main = coati_ids$name[i])
@@ -598,14 +598,14 @@ if(make_plots){
   
   #compare entropy between real and permuted data
   #test statistic = mean entropy
-  quartz()
+  #quartz()
   fission_means_rand <- colMeans(fission_entropies_rand,na.rm=T)
   fission_mean_data <- mean(fission_entropies_data,na.rm=T)
   hist(fission_means_rand, breaks=20,main = 'Fission', xlab = 'Mean entropy')
   abline(v=fission_mean_data,col='red',lwd=2)
   p_fission <- sum((fission_means_rand < fission_mean_data),na.rm=T)/n_rands
   
-  quartz()
+  #quartz()
   fusion_means_rand <- colMeans(fusion_entropies_rand, na.rm=T)
   fusion_mean_data <- mean(fusion_entropies_data, na.rm=T)
   hist(fusion_means_rand, breaks=20, main = 'Fusion', xlab = 'Mean entropy')

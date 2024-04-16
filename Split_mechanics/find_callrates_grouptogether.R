@@ -219,6 +219,11 @@ for(together_bout in ttsl){
 #kick out bouts that are shorter than 2min
 call_rates_together<-call_rates_together[which(call_rates_together$bout_dur > 120),]
 
+#find total duration of times when group together to get call rates
+
+sum(unique(call_rates_together$bout_dur))/60/60 #in hours
+
+
 save(call_rates_together, file = "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/call_rates_together_gal.RData")
 #load("C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/call_rates_together_gal.RData")
 

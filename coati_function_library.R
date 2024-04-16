@@ -837,21 +837,22 @@ angle_between_vectors <- function(x1_i, y1_i, x1_f, y1_f, x2_i, y2_i, x2_f, y2_f
 #at the point immediately before / after (if the were connected after / before 
 #that NA). Individuals with NAs are not included in the together matrix and will
 #not be included in the groups.
-#Once connectedness of dyads is determined, merge dyads together into groups by
-#using DBSCAN on 1 - together as the distance matrix, with eps = something small
-#(.01 in the code). Store these groups in groups_list, a list of lists whose 
-#length is equal to n_times.
+#Once connectedness of dyads is determined, merge dyads together into groups by 
+#using DBSCAN on 1 - together as the distance matrix, with eps = something small 
+#(.01 in the code). Store these groups in groups_list, a list of lists whose length 
+#is equal to n_times.
+
 #Stepping through the groups_list, identify all changes in group membership,
-#i.e. consecutive time points when the groups do not match. The algorithm 
-#flags any change, including instances where individuals disappear or reappear 
-#in groups due to missing data (but these are later ignored). Store in "changes"
-#data frame.
-#In a last step, find all changes where the individuals were preserved (i.e. 
-#individuals did not disappear) and where the number of subgroups either 
-#increased (a fission) or decreased (a fusion). Store these in a data frame 
-#called events_detected.
-#In cases where the number of subgroups went from 1 to 2 (for a fission) or 2 to
-#1 (for a fusion), identify the members of the 2 subgroups as group A and B 
+#i.e. consecutive time points when the groups do not match. The algorithm flags
+# any change, including instances where individuals disappear or reappear in 
+# groups due to missing data (but these are later ignored). Store in "changes" 
+# data frame.
+#In a last step, find all changes where the individuals were preserved 
+#(i.e. individuals did not disappear) and where the number of subgroups either 
+#increased (a fission) or decreased (a fusion). Store these in a data frame
+# called events_detected.
+#In cases where the number of subgroups went from 1 to 2 (for a fission) or 
+#2 to 1 (for a fusion), identify the members of the 2 subgroups as group A and B 
 #(labels arbitrary). In cases where there were more subgroups, first 
 #INPUTS:
 # R_inner, R_outer: [numeric] inner and outer thresholds respectively
