@@ -103,6 +103,8 @@ coati_ids <- read.csv("coati_id.csv", header = F)
 #removing individuals who were not in the group after collaring
 #Tequila (6) and Rum (4)
 coati_ids <- coati_ids[-c(4, 6),]
+
+
 #making order of row names 1:7
 row.names(coati_ids) <- 1:7
 

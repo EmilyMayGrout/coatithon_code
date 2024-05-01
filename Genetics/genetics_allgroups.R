@@ -13,7 +13,7 @@ all_matrix <- all_matrix[,-1]
 
 
 #load in ID files
-load("C:/Users/egrout/Dropbox/coatithon/processed/2022/trago/trago_coati_ids.RData")
+load("C:/Users/egrout/Dropbox/coatithon/processed/2022/trago/trago_coati_ids_all.RData")
 #adding Gin
 trago_withGin <- rbind(coati_ids, list('Gin', 'na', 'Adult', 'Female', '#FF0000'))
 #adding Absynth
@@ -24,7 +24,7 @@ load("C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/galaxy_coati_ids.R
 #adding Sol to coati_ids
 galaxy_withSOl <- rbind(coati_ids, list('Sol', 'na', 'Adult', 'Female', '#FF0000'))
 
-load("C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/presedente_coati_ids_level1.RData")
+load("C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/presedente_coati_ids.RData")
 pres_ids <- coati_ids
 
 # G8 - Tequila 
@@ -106,5 +106,9 @@ n_inds <- 45
 png(height = 1200, width = 1300, units = 'px', filename = 'C:/Users/egrout/Dropbox/coatithon/results/all_genetics.png')  
 visualize_network_matrix_galaxy(gen_matrix, all_ids)  
 dev.off()  
+
+save(all_ids, file = 'C:/Users/egrout/Dropbox/coatithon/processed/microbiome/all_ids.Rdata')
+all_gen_matrix <- gen_matrix
+save(all_gen_matrix, file = 'C:/Users/egrout/Dropbox/coatithon/processed/microbiome/all_gen_matrix.Rdata')
 
 

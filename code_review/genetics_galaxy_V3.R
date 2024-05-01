@@ -125,7 +125,7 @@ age_matrix <- age_matrix[gal_inds_neworder_agesex, gal_inds_neworder_agesex]
 # NOW WE HAVE ALL 4 MATRICES WITH THE SAME ORDER OF GROUP MEMBERS!
 
 #png(height = 900, width = 1400, units = 'px', filename = paste0(plot_dir,'all_matrices.png'))
-par(mfrow=c(2,2))
+#par(mfrow=c(2,2))
 visualize_network_matrix_galaxy(gal_matrix, coati_ids[gal_neworder_indx,])
 mtext("1) Proportion of time each dyad was in the same subgroup", cex = 1.2)
 visualize_network_matrix_galaxy(age_matrix, coati_ids[gal_neworder_indx,]) 
@@ -136,6 +136,16 @@ visualize_network_matrix_galaxy(gen_matrix, coati_ids[gal_neworder_indx,])
 mtext("4) Genetics - Triadic Maximum Likelihood method", cex = 1.2)
 
 #dev.off()
+
+#save these matrices to send to Tiffany
+save(gal_matrix, file = 'C:/Users/egrout/Dropbox/coatithon/processed/microbiome/galaxy_subgrouping.Rdata')
+save(age_matrix, file = 'C:/Users/egrout/Dropbox/coatithon/processed/microbiome/galaxy_age.Rdata')
+save(sex_matrix, file = 'C:/Users/egrout/Dropbox/coatithon/processed/microbiome/galaxy_sex.Rdata')
+galaxy_gen_matrix <- gen_matrix
+save(galaxy_gen_matrix, file = 'C:/Users/egrout/Dropbox/coatithon/processed/microbiome/galaxy_relatedness.Rdata')
+galaxy_ids <- coati_ids[gal_neworder_indx,]
+save(galaxy_ids, file = 'C:/Users/egrout/Dropbox/coatithon/processed/microbiome/galaxy_ids.Rdata')
+
 
 #-------------------------------------------------------------------------- 
 

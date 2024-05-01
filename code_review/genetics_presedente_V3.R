@@ -11,7 +11,7 @@ library(vegan)
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/" 
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/' 
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/' 
-id_file <- 'presedente_coati_ids_level1.RData'  #level one is where May and Cleopatra have been changed to subadults
+id_file <- 'presedente_coati_ids.RData'  #level one is where May and Cleopatra have been changed to subadults
 pres_gps_matrix <- 'presedente_matrix_10min_proptimeinsamesubgroup_50m.txt' #saved from plot3c in fission_fusion_presedente
 
 #read in the genetics matrix for all groups
@@ -97,6 +97,10 @@ diag(sex_matrix) <- NA
 
 setwd(plot_dir)
 
+
+#rename Ardern in coati_ids_cut
+coati_ids_cut$name[coati_ids_cut$name == "Ardera"] <- "Ardern"
+
 #png(height = 900, width = 1400, units = 'px', filename = paste0(plot_dir,'all_matrices.png'))
 par(mfrow=c(2,2))
 visualize_network_matrix_presedente(pres_matrix, coati_ids_cut[pres_neworder_indx,])
@@ -109,6 +113,17 @@ visualize_network_matrix_presedente(gen_matrix, coati_ids_cut[pres_neworder_indx
 mtext("4) Genetics - Triadic Maximum Likelihood method", cex = 1.2)
 
 #dev.off()
+
+#save these matrices to send to Tiffany
+save(pres_matrix, file = 'C:/Users/egrout/Dropbox/coatithon/processed/microbiome/pres_subgrouping.Rdata')
+save(age_matrix, file = 'C:/Users/egrout/Dropbox/coatithon/processed/microbiome/pres_age.Rdata')
+save(sex_matrix, file = 'C:/Users/egrout/Dropbox/coatithon/processed/microbiome/pres_sex.Rdata')
+pres_gen_matrix <- gen_matrix
+save(pres_gen_matrix, file = 'C:/Users/egrout/Dropbox/coatithon/processed/microbiome/pres_relatedness.Rdata')
+pres_ids <- coati_ids_cut[pres_neworder_indx,]
+save(pres_ids, file = 'C:/Users/egrout/Dropbox/coatithon/processed/microbiome/pres_ids.Rdata')
+
+
 
 #MRQAP with Double-Semi-Partialing (DSP) 
 set.seed(2)
