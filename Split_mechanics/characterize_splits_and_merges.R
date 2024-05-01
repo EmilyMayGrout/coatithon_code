@@ -10,7 +10,7 @@ library(scales)
 #----------PARAMETERS - MODIFY HERE--------------
 
 #which group (galaxy or presedente)
-group <- 'presedente'
+group <- 'galaxy'
 
 #who is using (ari or emily)
 user <- 'emily'
@@ -347,4 +347,7 @@ for(i in 1:nrow(events)){
 events$n_ovlp_before <- sapply(events$ovlp_before, length)
 events$n_ovlp_during <- sapply(events$ovlp_during, length)
 events$n_ovlp_after <- sapply(events$ovlp_after, length)
+
+#look at the sped distributions to decide where to do the cut-off for stationary/slow and moving
+hist(rbind(events$A_during_disp, events$B_during_disp), breaks = 40)
 

@@ -38,7 +38,7 @@ setwd(groupdir)
 load(file=paste0(group,'_coati_ids.RData'))
 
 #read in timestamp data - notice the level number, if 2, then its not got GPS speed errors
-load(file=paste0(group,'_xy_highres_level1.RData'))
+load(file=paste0(group,'_xy_highres_level2.RData'))
 
 ff_data_50 <- detect_fissions_and_fusions(R_inner = 15, R_outer = 50, xs, ys, ts, coati_ids)
 
@@ -50,9 +50,24 @@ save(gal_events_detected, file = "C:/Users/egrout/Dropbox/coatithon/processed/20
   pres_events_detected <- ff_data_50$events_detected
       save(pres_events_detected, file = "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/pres_events_detected.Rda") }
 
+#saving as a csv for documenting erroneous events in the google sheets
+#write.csv(gal_events_detected[, c(1,2,3,8,9,10)], file = "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/gal_events_detected.csv")
+#write.csv(pres_events_detected[, c(1,2,3,8,9,10)], file = "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/pres_events_detected.csv")
+
 
 #looking at one event
-analyse_ff_event(9, events = ff_data_50$events_detected, xs, ys, ts, max_time = 600)
+analyse_ff_event(5, events = ff_data_50$events_detected, xs, ys, ts, max_time = 100)
+
+i <- 149000:150150
+
+plot(xs[c(9,18), i], ys[c(9,18), i])
+points(xs[9,i], ys[9,i], col = "blue", type = 'l')
+points(xs[18,i], ys[18,i], col = "red", type = 'l')
+points(xs[16,i], ys[16,i], col = "green", type = 'l')
+
+
+plot(xs[c(2),10801:10900], ys[c(2),10801:10900])
+
 
 #animate events
 i <- 10
