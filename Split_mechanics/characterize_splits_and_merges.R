@@ -10,7 +10,7 @@ library(scales)
 #----------PARAMETERS - MODIFY HERE--------------
 
 #which group (galaxy or presedente)
-group <- 'galaxy'
+group <- 'presedente'
 
 #who is using (ari or emily)
 user <- 'emily'
@@ -66,7 +66,21 @@ load(file=paste0(group,'_coati_ids.RData'))
 coati_ids$name_short <- sapply(coati_ids$name, function(x){return(substr(x,1,3))})
 
 #read in timestamp data
-load(file=paste0(group,'_xy_highres_level1.RData'))
+load(file=paste0(group,'_xy_highres_level2.RData'))
+
+
+#because the function ignore the last day, adding 1 more day to the data
+
+
+#getting an extra timestamp for following day
+extra_time <- (tail(ts, n=1))+100000
+ts <- c(ts, extra_time)
+#adding an extra xs and ys value to correspond with the additional timestamp
+extra_dat <- matrix(1, nrow = nrow(xs), ncol = 1)
+xs <- cbind(xs, extra_dat)
+ys <- cbind(ys, extra_dat)
+
+
 
 #PROCESS
 setwd(codedir)
@@ -126,7 +140,7 @@ events$AB_before_disp <- events$AB_after_disp <- events$A_during_disp <- events$
 events$split_angle <- events$turn_angle_A <- events$turn_angle_B <- NA
 for(i in c(1:nrow(events))){
   print(i)
-  ff_data <- analyse_ff_event(i, events, xs, ys, ts, plot=F, max_time = 600)
+  ff_data <- analyse_ff_event(i, events, xs, ys, ts, plot=T, max_time = 700)
   if(!is.null(ff_data$disps)){
     events$AB_before_disp[i] <- ff_data$disps['AB','before']
     events$AB_after_disp[i] <- ff_data$disps['AB','after']
@@ -142,6 +156,7 @@ for(i in c(1:nrow(events))){
   events$after_time[i] <- ff_data$after_time
 }
 
+sum(is.na(events$after_time))
 
 
 #adding age class as a number in coati_ids
@@ -285,6 +300,8 @@ if(use_manual_events){
   save(list = c('events'), file = paste0(groupdir, group,'_auto_ff_events_characterized.RData'))
 }
 
+
+
 #Check whether the before period overlaps with a preceding event involving some of the same individuals
 events$ovlp_before <- events$ovlp_during <- events$ovlp_after <- list(c(0))
 events$n_ovlp_before <- events$n_ovlp_during <- events$n_ovlp_after <- NA
@@ -348,6 +365,7 @@ events$n_ovlp_before <- sapply(events$ovlp_before, length)
 events$n_ovlp_during <- sapply(events$ovlp_during, length)
 events$n_ovlp_after <- sapply(events$ovlp_after, length)
 
-#look at the sped distributions to decide where to do the cut-off for stationary/slow and moving
+#look at the speed distributions to decide where to do the cut-off for stationary/slow and moving
+dev.off()
 hist(rbind(events$A_during_disp, events$B_during_disp), breaks = 40)
 

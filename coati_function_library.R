@@ -863,7 +863,7 @@ angle_between_vectors <- function(x1_i, y1_i, x1_f, y1_f, x2_i, y2_i, x2_f, y2_f
 # out: a list of outputs containing
 #   out$events_detected: data frame with info on detected fissions and fusions.
 #     $tidx: (initial) time index of the event
-#     $event_type: "fissin" or "fusion"
+#     $event_type: "fission" or "fusion"
 #     $group_A_idxs, $group_B_idxs: individual idxs of subgroup members
 #     $group_A, $group_B: first 3 letters of names of subgroup members
 #     $n_A, n_B: number of individuals in each subgroup
@@ -885,6 +885,9 @@ detect_fissions_and_fusions <- function(R_inner, R_outer, xs = xs, ys = ys, ts =
   #day start indexes
   days <- date(ts)
   day_start_idxs <- c(1, which(diff(days)==1)+1)
+  
+  #need to make sure we don't lose the last day - currently we get an error down the road when we run this though
+  #day_start_idxs <- c(day_start_idxs, length(ts)+1)
   
   #Get dyadic distances for each pair, then use double threhsold method to determine if htey are otgether at any moment
   dyad_dists <- together <- array(NA, dim = c(n_inds, n_inds, n_times))
