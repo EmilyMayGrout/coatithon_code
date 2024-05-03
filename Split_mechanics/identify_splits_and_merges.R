@@ -51,7 +51,7 @@ save(gal_events_detected, file = "C:/Users/egrout/Dropbox/coatithon/processed/20
       save(pres_events_detected, file = "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/pres_events_detected.Rda") }
 
 #saving as a csv for documenting erroneous events in the google sheets
-#write.csv(gal_events_detected[, c(1,2,3,8,9,10)], file = "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/gal_events_detected.csv")
+write.csv(gal_events_detected[, c(1,2,3,8,9,10)], file = "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/gal_events_detected.csv")
 #write.csv(pres_events_detected[, c(1,2,3,8,9,10)], file = "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/pres_events_detected.csv")
 
 

@@ -10,7 +10,7 @@ library(scales)
 #----------PARAMETERS - MODIFY HERE--------------
 
 #which group (galaxy or presedente)
-group <- 'presedente'
+group <- 'galaxy'
 
 #who is using (ari or emily)
 user <- 'emily'
@@ -72,13 +72,13 @@ load(file=paste0(group,'_xy_highres_level2.RData'))
 #because the function ignore the last day, adding 1 more day to the data
 
 
-#getting an extra timestamp for following day
-extra_time <- (tail(ts, n=1))+100000
-ts <- c(ts, extra_time)
-#adding an extra xs and ys value to correspond with the additional timestamp
-extra_dat <- matrix(1, nrow = nrow(xs), ncol = 1)
-xs <- cbind(xs, extra_dat)
-ys <- cbind(ys, extra_dat)
+# #getting an extra timestamp for following day
+# extra_time <- (tail(ts, n=1))+100000
+# ts <- c(ts, extra_time)
+# #adding an extra xs and ys value to correspond with the additional timestamp
+# extra_dat <- matrix(1, nrow = nrow(xs), ncol = 1)
+# xs <- cbind(xs, extra_dat)
+# ys <- cbind(ys, extra_dat)
 
 
 
