@@ -30,13 +30,6 @@ load(id_file)
 #load in splits df from fission_fusion_galaxy_V1 to get the split times, so before and after the event can be extracted for the ff plot
 load(file = "C:/Users/egrout/Dropbox/coatithon_notgithub/Galaxy_fission_fusion/splits_df.Rdata")
 
-
-#need to use your own API for this to work - replace xxx with your API
-register_google(key="xxx")
-#check your key worked:
-has_google_key()
-
-
 #-----MAIN------
 n_inds <- nrow(xs)
 n_times <- ncol(xs)
@@ -211,8 +204,8 @@ sbar$lon.end <- sbar$lon.start + ((sbar$lon.end-sbar$lon.start)/sbar$distance)*s
 #------------------------------------------------------------------------------------------
 #FIG1: make plot for group split with DBSCAN for each individual
 
-lon_time <- event_i$lon_aft
-lat_time <- event_i$lat_aft
+lon_time <- event_i$lon
+lat_time <- event_i$lat
 
 #for event 25 (for paper, used size 130 for aft split and 120 for before (due to change in plot margins))
 
@@ -226,8 +219,8 @@ gg <- #ggmap(map)+
   scale_y_continuous(limits = c(min_lat, max_lat))+ 
   xlab(" ") +  # Add X-axis label
   ylab(" ") +  # Add Y-axis label
-  ggtitle("c")+
-  annotate("text", x=max_lon - 0.0001, y=min_lat, label= "t+1", color = "yellow", size = 20)+ #for aft, do max_lon - 0.0001, for dur, only max_lon
+  ggtitle("(b)")+
+  annotate("text", x=max_lon - 0.0001, y=min_lat, label= "t", color = "yellow", size = 20)+ #for aft, do max_lon - 0.0001, for dur, only max_lon
   #adding a scale bar
   geom_segment(data = sbar,
                aes(x = lon.start + 0.0018,
@@ -239,7 +232,7 @@ gg <- #ggmap(map)+
   geom_text(data = sbar,
             aes(x = (lon.start +0.0018 + lon.end +0.0018)/2,
                 y = lat.start+ 0.0023 + 0.001*(bb$ur.lat - bb$ll.lat),
-                label = '50m'),
+                label = '50 m'),
             hjust = 0.5,
             vjust = 0.7,
             size = 12, color = "white") +
@@ -256,7 +249,7 @@ gg <- #ggmap(map)+
 
 gg
 
-ggsave(filename = paste0(plot_dir, 'ggmap_split_aft', 25, '.png'), plot = gg, width = 11, height = 10, dpi = 300)
+ggsave(filename = paste0(plot_dir, 'ggmap_split_bef', 25, '.png'), plot = gg, width = 11, height = 10, dpi = 300)
 
 #------------------------------------------------------------------------------------------
 #make plot of groups trajectories using the lat/lon data from preprocess_gps_lowres_galaxy.R script
@@ -404,10 +397,15 @@ gg <- ggmap(map) +
   geom_text(data = sbar,
             aes(x = (lon.start +0.0038 + lon.end +0.0038)/2,
                 y = lat.start+ 0.0017 + 0.001*(bb$ur.lat - bb$ll.lat),
-                label = '50m'),
+                label = '50 m'),
             hjust = 0.5,
             vjust = 0.7,
             size = 8, color = "white") +
+  geom_text(data = sbar,
+            aes(x = -79.7052,
+                y = 9.1235,
+                label = '(a)'), color = "white", size = 8)+
+  
   NULL
 
 gg

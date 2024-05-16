@@ -75,9 +75,12 @@ all_tracked_idxs <- which(n_tracked==n_inds)
 #----------------------------------------------------------------------
 
 # Figure 2a,b,c: Characterizing the subgroup patterns when group was split into 2 or 3 subgroups
-png(height = 400, width = 1280, units = 'px', filename = paste0(plot_dir,'50m_charecterisations.png'))
+#png(height = 400, width = 1450, units = 'px', filename = paste0(plot_dir,'50m_charecterisations.png'))
 
-par(mfrow=c(1,3), mar = c(6,7,2,1)) #(bottom, left, top, right)
+#for making combined plot
+png(height = 800, width = 1450, units = 'px', filename = paste0('C:/Users/egrout/Dropbox/coatithon/results/','50m_charecterisations_both.png'))
+
+par(mfrow=c(1,3), mar = c(6,11,2,1)) #(bottom, left, top, right)
 par(mgp = c(4,0.4,-1.2)) #axis title, axis labels, axis line
 #for dark olivegreen3 match
 green <- rgb(120, 170, 80, maxColorValue = 255)
@@ -85,18 +88,25 @@ green <- rgb(120, 170, 80, maxColorValue = 255)
 darkgreen <- rgb(120, 160, 80, maxColorValue = 255)
 
 subgroup_data <- get_subgroup_data(xs, ys, R)
-hist(subgroup_data$n_subgroups[all_tracked_idxs], main = "", xlab =  'Number of subgroups (radius = 50m)', col = green, breaks = seq(.5,11,1), cex.lab = 2.9, cex.main = 3, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 6), border = "darkolivegreen3", las = 1, yaxt = "n")
+hist(subgroup_data$n_subgroups[all_tracked_idxs], main = "", xlab =  'Number of subgroups (radius = 50 m)', col = green, breaks = seq(.5,11,1), cex.lab = 2.9, cex.main = 3, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 6), border = "darkolivegreen3", las = 1, yaxt = "n")
 axis(2, at = c(0,0.3,0.6), cex.axis = 3, las = 1)
+text(x = 0.3, y = 0.55,label = "(a)", cex = 3)
+mtext("Galaxy group", side = 2, line = 9, cex = 2)
+
+
 subgroup_counts <- subgroup_data$subgroup_counts[,all_tracked_idxs]
 n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
 
 s2 <- which(n_subgroups == 2)
 s3 <- which(n_subgroups == 3)
 
-hist(subgroup_counts[,s2], breaks=seq(0.5,11,1), main = "", xlab = 'Subgroup size (N subgroups = 2)',  col = "darkolivegreen", cex.lab = 2.9, cex.main = 3, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 11), border = darkgreen, las = 1, yaxt = "n")
+hist(subgroup_counts[,s2], breaks=seq(0.5,11,1), main = "", xlab = expression("Subgroup size (" * italic("N") * " subgroups = 2)"),  col = "darkolivegreen", cex.lab = 2.9, cex.main = 3, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 11), border = darkgreen, las = 1, yaxt = "n")
 axis(2, at = c(0,0.3,0.6), cex.axis = 3,las = 1)
-hist(subgroup_counts[,s3], breaks=seq(0.5,11,1), main = "", xlab = 'Subgroup size (N subgroups = 3)',  col = "darkolivegreen", cex.lab = 2.9, cex.main = 3, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 11), border = darkgreen, las = 1, yaxt = "n")
+text(x = 0.6, y = 0.55,label = "(b)", cex = 3)
+
+hist(subgroup_counts[,s3], breaks=seq(0.5,11,1), main = "", xlab = expression("Subgroup size (" * italic("N") * " subgroups = 3)"),  col = "darkolivegreen", cex.lab = 2.9, cex.main = 3, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 11), border = darkgreen, las = 1, yaxt = "n")
 axis(2, at = c(0,0.3,0.6), cex.axis = 3, las = 1)
+text(x = 0.6, y = 0.55,label = "(c)", cex = 3)
 
 dev.off()
 
@@ -112,8 +122,9 @@ prop_2.3 <- (sum_2.3/ sum_all)*100
 
 #Figure S1a: Number of sub groups when the radius is changed (graph put in dropbox results folder)
 
-png(height = 1080, width = 480, units = 'px', filename = paste0(plot_dir,'n_subgroups_hists_level1.png'))
-par(mfrow=c(6,1), mar = c(8,7,1,1), mgp=c(4,1,0))
+png(height = 2200, width = 900, units = 'px', filename = paste0(plot_dir,'n_subgroups_hists_onlyGroup_level1.png'))
+
+par(mfrow=c(6,1), mar = c(8,9,12,1), mgp=c(6,1,0)) #(bottom, left, top, right)
 
 for (i in 1:length(Rs)){
   
@@ -123,18 +134,30 @@ for (i in 1:length(Rs)){
   if(i == length(Rs)){
     xlab <- 'Number of subgroups'
   }
-  hist(subgroup_data$n_subgroups[all_tracked_idxs],main = paste(R, "m"), xlab = xlab, col = "darkolivegreen3", breaks = seq(.5,11,1), cex.lab = 2.5, cex.main = 2, cex.axis=2, freq = FALSE, ylim=c(0,.7), yaxt = "n")
-  axis(2, at = c(0,0.3,0.6), cex.axis = 2, las = 1)
+  
+ 
+  hist(subgroup_data$n_subgroups[all_tracked_idxs],main = paste(R, "m"), xlab = xlab, col = "darkolivegreen3", breaks = seq(.5,11,1), cex.lab = 4, cex.main = 4, cex.axis=4, freq = FALSE, ylim=c(0,.7), xlim = c(0.5, 11), yaxt = "n", axes = F)
+  axis(2, at = c(0,0.3,0.6), cex.axis = 4, las = 1, pos = 0.5)
+  axis(1, cex.axis = 4, las = 1, pos = 0, padj = 0.6)
+  
+ 
+   # Add the title only for the first plot
+  if(i == 1) {
+    mtext("Galaxy group", side = 3, line = 9, cex = 3)
+  }
+  
   
 }
+
 dev.off()
 
 #--------------------------------------------------------------
+
 R <- 50
 
 #Figure 3a: which individuals tend to be in the same subgroup
 
-subgroup_data <- get_subgroup_data(xs, ys, R= R)
+subgroup_data <- get_subgroup_data(xs, ys, R)
 
 ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
 
@@ -248,12 +271,20 @@ dev.off()
 
 #Figure S2ab: make plot for the number of GPS points recorded for each individual
 
-png(height = 600, width = 1400, units = 'px', filename = paste0(plot_dir, "number_tracked.png"))
-par(mfrow=c(1,2), mar = c(8,8,2,1)) #c(bottom, left, top, right)
+png(height = 1200, width = 1400, units = 'px', filename = paste0(plot_dir, "number_tracked.png"))
+par(mfrow=c(1,2), mar = c(10,9,2,1)) #c(bottom, left, top, right)
 sum_tracked <- colSums(!is.na(xs))
-hist(sum_tracked[ !(sum_tracked==0) ], ylim = c(0, 800), main = "", xlab = "Number of individuals tracked", ylab = "Frequency", col = "darkolivegreen4", cex.lab = 2, cex.axis = 2)
+hist(sum_tracked[ !(sum_tracked==0) ], ylim = c(0, 800), main = "", xlab = "Number of individuals tracked", ylab = "Frequency", col = "darkolivegreen4", cex.lab = 2, cex.axis = 2, yaxt = "n", xaxt = "n")
+#axis(1, at = c(2,4,6,8,10), cex.axis = 3, las = 1)
+axis(2, at = c(0,200,400,600,800), cex.axis = 2, las = 1, pos = 2)
+axis(1, cex.axis = 2, las = 1, pos = 0, padj = 0.6)
+text(x = 2.5, y = 800,label = "(a)", cex = 3)
+mtext("Galaxy group", side = 2, line = 7, cex = 2)
+
+
 each_sum <- data.frame(sum = rowSums(!is.na(xs)))
-barplot(each_sum$sum, names.arg = coati_ids$name, las=2, col = "darkolivegreen3", ylab = "Number of GPS points",  cex.lab = 2, cex.axis = 2, cex.names=2, mgp=c(5,1,0))
+barplot(each_sum$sum, names.arg = coati_ids$name, las=2, col = "darkolivegreen3", ylab = "Number of GPS points",  cex.lab = 2, cex.axis = 2, cex.names=2, mgp=c(5,1,0), ylim = c(0, 1300))
+text(x = 0.5, y = 1250,label = "(b)", cex = 3)
 dev.off()
 
 #calculate the proportion of missing data
@@ -390,6 +421,7 @@ p_dyad_together <- get_p_dyad_together(splits_df_local = splits_df, n_inds_local
 consistency_data <- get_consistency(p_dyad_together)
 
 #randomize splits and recompute consistency metric
+set.seed(24)
 n_rands <- 1000
 rando_consistencies <- rep(NA, n_rands)
 for (i in 1:n_rands){
@@ -401,10 +433,16 @@ for (i in 1:n_rands){
   
 }
 
-png(height = 600, width = 900, units = 'px', filename = paste0(plot_dir,'consistency_splits_hist.png'))
-par(mfrow=c(1,1), mar = c(6,6,3,3))#(bottom, left, top, right)
-hist(rando_consistencies, breaks=seq(0,0.5,0.005), main = "", xlab = "Consistency of random sub-group allocations", col = "slategray4",  cex.lab = 2.5, cex.axis=2.5)
-abline(v=consistency_data, col = 'orange2', lwd=4)
+png(height = 600, width = 900, units = 'px', filename = paste0(plot_dir,'consistency_splits_hist_50.png'))
+par(mfrow=c(1,1), mar = c(6,6,5,3))#(bottom, left, top, right)
+hist(rando_consistencies, breaks=seq(0,0.5,0.005), main = "", xlab = "Consistency of random sub-group allocations", col = "slategray4",  cex.lab = 2.5, cex.axis=2.5, yaxt = "n", xaxt = "n")
+#abline(v=consistency_data, col = 'orange2', lwd=4)
+segments(x0 = consistency_data, x1 = consistency_data, y0 = 0.01, y1 = 300, col = 'orange2', lwd=4)
+axis(2, at = c(0,50,100,150), cex.axis = 2.5, las = 1, pos = 0, padj = 0.2)
+axis(1, at = c(0.1,0.2,0.3, 0.4), cex.axis = 2.5, las = 1, pos = 0, padj = 0.3)
+text(x = 0.02, y = 110,label = "(a)", cex = 3) #50m is y = 110 30m y = 130 ---- 70m y = 120
+mtext("Galaxy group", side = 3, line = 2, cex = 2.5)
+
 dev.off()
 
 
@@ -487,6 +525,10 @@ gg <- ggplot(aes(x = prop_alone, y = age_sex, color = name), data = coati_ids) +
   
 gg
 
+
+
+
+
 coati_ids_alone_gal <- coati_ids
 #this dataframe is used in alone_inds_all_groups
 save(coati_ids_alone_gal, file = "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/gal_alone_inds_level1_ind.Rdata")  
@@ -526,8 +568,8 @@ names(time_df)[2] <- "time"
 subgroup_data_long <- left_join(subgroup_data_long, time_df)
 
 #filter test df to 05.01.22
-start_time <- as.POSIXct("2022-01-05 11:00:00")
-end_time <- as.POSIXct("2022-01-05 23:00:00")
+start_time <- as.POSIXct("2022-01-06 11:00:00")
+end_time <- as.POSIXct("2022-01-06 21:00:00")
 
 # Subset the dataframe to include only rows within the date range
 subset_df <- subgroup_data_long[subgroup_data_long$ts >= start_time & subgroup_data_long$ts <= end_time, ]
@@ -623,6 +665,10 @@ p1 <- ggplot() +
   scale_color_manual(values = sample(c('#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a','#b15928'), #these are 11 distinct colors, they will be randomly assigned to the coatis
                                      11, replace = FALSE)) +
   theme_classic() +
+  geom_text(data = df_mod2,
+            aes(x = ts[1],
+                y = 4.5,
+                label = '(e)'), size = 8)+
   #get rid of all the extra stuff (note, this now is for a horizontal plot. if you want a vertical plot,
   # then replace the xs with ys and the ys with xs)
   theme(legend.position = "none",
@@ -642,7 +688,7 @@ p1
 # save it
 ggsave(filename = "C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/FF line and dot subgroupings_0501022_horz.png",
        width = 15,
-       height = 3,
+       height = 5,
        units = "in",
        dpi = 350,
        scale = 1)

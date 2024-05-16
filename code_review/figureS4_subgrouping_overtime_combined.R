@@ -25,11 +25,12 @@ gg <- ggplot(n_subs, aes(panama_time_hms, n_groups, color = group))+
   geom_point(stat = "sum", position = position_dodge(width = 5000), alpha = 0.7) +
   # geom_violin(aes(color = group), trim = FALSE, position = position_dodge(0.5))+
   theme_classic()+ 
-  scale_color_manual(values = c("Galaxy" = "darkolivegreen3", "Presidente" = "aquamarine3"))+
+  scale_color_manual(values = c("Galaxy" = "darkolivegreen3", "Presidente" = "aquamarine4"))+
   labs(color = "Group") +
   #scale_x_binned(breaks = c(-Inf, 10, 14, Inf)) + #this only works if panama_time is not an hms object
   xlab("Time of day") +
   ylab("Number of subgroups") +
+  labs(size = expression(italic(N)))+
   NULL
 
 gg

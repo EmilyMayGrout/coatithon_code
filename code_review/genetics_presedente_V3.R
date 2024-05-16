@@ -158,6 +158,13 @@ df <- data.frame(cbind(gen_vec, pres_vec))
 plot(df$gen_vec, df$pres_vec, ylab = "Proportion of time together", xlab = "Relatedness (Triadic Maximum Likelihood)", pch = 19, col = "aquamarine3", cex = 3, cex.lab = 3, cex.axis = 2.5, yaxt = "n", ylim = c(0.3, 1))
 axis(2, at = c(0,0.3,0.6,0.9), cex.axis = 3, las = 1)
 abline(lm(pres_vec ~ gen_vec, data = data.frame(df)), col = "black", lwd = 2)
+text(x = 0.4, y = 0.76,labels = expression(paste("r"^2, " = 0.089")), cex = 3)
+text(x = 0.045, y = 0.99, labels = "(b)", cex = 3)
+mtext("Presidente group", side = 3, line = 2, cex = 3)
+
+
+
+
 #str(summary(lm(pres_vec ~ gen_vec, data = data.frame(df)))) #rsquared 0.0885
 
 dev.off()

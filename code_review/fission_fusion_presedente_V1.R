@@ -63,6 +63,7 @@ load(id_file)
 # sam_prop <- sam_group/sam_sum
 
 
+
 #---------------------------------------------------------------
 
 
@@ -91,8 +92,9 @@ all_tracked_idxs <- which(n_tracked==n_inds)
 #------------------------------------------------------------------------------------
 
 #Figure S2b: number of sub groups when the radius is changed (graph put in dropbox results folder) 
-png(height = 1080, width = 480, units = 'px', filename = paste0(plot_dir,'n_subgroups_hists_onlyGroup_level1.png'))
-par(mfrow=c(6,1), mar = c(8,7,1,1), mgp=c(4,1,0))
+png(height = 2200, width = 900, units = 'px', filename = paste0(plot_dir,'n_subgroups_hists_onlyGroup_level1.png'))
+
+par(mfrow=c(6,1), mar = c(8,9,12,1), mgp=c(6,1,0)) #(bottom, left, top, right)
 
 for (i in 1:length(Rs)){
   
@@ -102,26 +104,41 @@ for (i in 1:length(Rs)){
   if(i == length(Rs)){
     xlab <- 'Number of subgroups'
   }
-  hist(subgroup_data$n_subgroups[all_tracked_idxs],main = paste(R, "m"), xlab = xlab, col = "aquamarine3", breaks = seq(.5,22,1), cex.lab = 2.5, cex.main = 2, cex.axis=2, freq = FALSE, ylim=c(0,.7), xlim = c(0,16), yaxt = "n")
-  axis(2, at = c(0,0.3,0.6), cex.axis = 2, las = 1)
+  
+  
+  hist(subgroup_data$n_subgroups[all_tracked_idxs],main = paste(R, "m"), xlab = xlab, col = "aquamarine3", breaks = seq(.5,16,1), cex.lab = 4, cex.main = 4, cex.axis=3, freq = FALSE, ylim=c(0,.7), xlim=c(0.5,16), axes = F)
+  axis(2, at = c(0,0.3,0.6), cex.axis = 4, las = 1, pos = 0.5)
+  axis(1, at = c(5,10,15), cex.axis = 4, las = 1, pos = 0, padj = 0.6)
+  
+  
+  # Add the title only for the first plot
+  if(i == 1) {
+    mtext("Presidente group", side = 3, line = 9, cex = 3)
+  }
+  
   
 }
+
 dev.off()
 
 #-------------------------------------------------------------------------------------
 
+R <- 50
+
 # Figure 2a,b,c: Characterizing the subgroup patterns when group was split into 2 or 3 subgroups
-png(height = 400, width = 1280, units = 'px', filename = paste0(plot_dir,'50m_charecterisations.png'))
+png(height = 400, width = 1450, units = 'px', filename = paste0(plot_dir,'50m_charecterisations.png'))
 
 blue <- rgb(69, 119, 116, maxColorValue = 255)
 
 lightblue <- rgb(128, 218, 178, maxColorValue = 255)
 
-par(mfrow=c(1,3), mar = c(6,7,2,1)) #(bottom, left, top, right)
-par(mgp = c(4,0.4,-1.2)) #axis title, axis labels, axis line
+par(mfrow=c(1,3), mar = c(6,11,2,1)) #(bottom, left, top, right)
+par(mgp = c(4,0.4,-1.25)) #axis title, axis labels, axis line
 subgroup_data <- get_subgroup_data(xs, ys, R)
-hist(subgroup_data$n_subgroups[all_tracked_idxs],main = "", xlab =  'Number of subgroups (radius = 50m)', col = "aquamarine3", breaks = seq(.5,16,1), cex.lab = 2.9, cex.main = 3, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 6), border = lightblue, las = 1,yaxt = "n")
+hist(subgroup_data$n_subgroups[all_tracked_idxs],main = "", xlab =  'Number of subgroups (radius = 50 m)', col = "aquamarine3", breaks = seq(.5,16,1), cex.lab = 2.9, cex.main = 3, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 6), border = lightblue, las = 1, yaxt = "n")
 axis(2, at = c(0,0.3,0.6), cex.axis = 3, las = 1)
+text(x = 0.3, y = 0.55,label = "(d)", cex = 3)
+mtext("Presidente group", side = 2, line = 9, cex = 2)
 
 subgroup_counts <- subgroup_data$subgroup_counts[,all_tracked_idxs]
 n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
@@ -129,10 +146,13 @@ n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
 s2 <- which(n_subgroups == 2)
 s3 <- which(n_subgroups == 3)
 
-hist(subgroup_counts[,s2], breaks=seq(0.5,16,1), xlab = 'Subgroup size (N subgroups = 2)', main = '', col = blue, cex.lab = 3, cex.main = 2.9, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 16), border = "aquamarine4", las = 1,yaxt = "n")
+hist(subgroup_counts[,s2], breaks=seq(0.5,16,1), xlab = expression("Subgroup size (" * italic("N") * " subgroups = 2)"), main = '', col = blue, cex.lab = 3, cex.main = 2.9, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 16), border = "aquamarine4", las = 1,yaxt = "n")
 axis(2, at = c(0,0.3,0.6), cex.axis = 3, las = 1)
-hist(subgroup_counts[,s3], breaks=seq(0.5,16,1), xlab = 'Subgroup size (N subgroups = 3)', main = '', col = blue, cex.lab = 3, cex.main = 2.9, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 16), border = "aquamarine4", las = 1,yaxt = "n")
+text(x = 0.8, y = 0.55,label = "(e)", cex = 3)
+
+hist(subgroup_counts[,s3], breaks=seq(0.5,16,1), xlab = expression("Subgroup size (" * italic("N") * " subgroups = 3)"), main = '', col = blue, cex.lab = 3, cex.main = 2.9, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 16), border = "aquamarine4", las = 1,yaxt = "n")
 axis(2, at = c(0,0.3,0.6), cex.axis = 3, las = 1)
+text(x = 0.8, y = 0.55,label = "(f)", cex = 3)
 
 dev.off()
 
@@ -150,7 +170,7 @@ prop_2.3 <- (sum_2.3/ sum_all)*100
 
 #Figure 3c: which individuals tend to be in the same subgroup for only the group
 
-subgroup_data <- get_subgroup_data(xs, ys, R=50)
+subgroup_data <- get_subgroup_data(xs, ys, R=R)
 
 ff_net <- matrix(NA, nrow = n_inds, ncol = n_inds)
 
@@ -190,7 +210,6 @@ write.table(ffnet_reorder,file="C:/Users/egrout/Dropbox/coatithon/processed/2023
 
 #this is the probability of individuals being in the same sub-group using absolute dyadic distances 
 
-R = 50
 subgroup_data <- get_subgroup_data(xs, ys, R)
 
 n_inds <- nrow(xs)
@@ -264,11 +283,19 @@ dev.off()
 #Figure S4cd: make plot for the number of GPS points recorded for each individual
 
 png(height = 600, width = 1400, units = 'px', filename = paste0(plot_dir, "number_tracked.png"))
-par(mfrow=c(1,2), mar = c(10,8,2,1)) #c(bottom, left, top, right)
+par(mfrow=c(1,2), mar = c(10,9,2,1)) #c(bottom, left, top, right)
 sum_tracked <- colSums(!is.na(xs))
-hist(sum_tracked[ !(sum_tracked==0) ], ylim = c(0, 400), main = "", xlab = "Number of individuals tracked", ylab = "Frequency", col = "aquamarine4", cex.lab = 2, cex.axis = 2)
+hist(sum_tracked[ !(sum_tracked==0) ], ylim = c(0, 400), main = "", xlab = "Number of individuals tracked", ylab = "Frequency", col = "aquamarine4", cex.lab = 2, cex.axis = 2, yaxt = "n", xaxt = "n")
+axis(2, at = c(0,100,200,300,400), cex.axis = 2, las = 1, pos = 1)
+axis(1, cex.axis = 2, las = 1, pos = 0, padj = 0.6)
+text(x = 2, y = 400,label = "(c)", cex = 3)
+mtext("Presidente group", side = 2, line = 7, cex = 2)
+
+
 each_sum <- data.frame(sum = rowSums(!is.na(xs)))
-barplot(each_sum$sum, names.arg = coati_ids$name, las=2, col = "aquamarine3", ylab = "Number of GPS points",  cex.lab = 2, cex.axis = 2, cex.names=2, mgp=c(5,1,0))
+barplot(each_sum$sum, names.arg = coati_ids$name, las=2, col = "aquamarine3", ylab = "Number of GPS points",  cex.lab = 2, cex.axis = 2, cex.names=2, mgp=c(5,1,0), ylim = c(0, 1100))
+text(x = 0.5, y = 1050,label = "(d)", cex = 3)
+
 dev.off()
 
 #------------------------------------------------------------------------------
@@ -288,7 +315,7 @@ sd(each_sum$prop)
 #Figure 4b: histogram for consistency 
 
 #get the subgroup data when radius is 50m
-subgroup_data <- get_subgroup_data(xs, ys, 50)
+subgroup_data <- get_subgroup_data(xs, ys, R)
 
 splits <- c()
 for(t in 1:(n_times-1)){
@@ -399,6 +426,7 @@ consistency_data <- get_consistency(p_dyad_together)
 
 #randomize splits and recompute consistency metric
 n_rands <- 1000
+set.seed(24)
 rando_consistencies <- rep(NA, n_rands)
 for (i in 1:n_rands){
   
@@ -410,9 +438,16 @@ for (i in 1:n_rands){
 }
 
 png(height = 600, width = 900, units = 'px', filename = paste0(plot_dir,'consistency_splits_hist.png'))
-par(mfrow=c(1,1), mar = c(6,6,3,3))#(bottom, left, top, right)
-hist(rando_consistencies, breaks=seq(0,0.5,0.005), main = "", xlab = "Consistency of random sub-group allocations", col = "slategray4",  cex.lab = 2.5, cex.axis=2.5)
-abline(v=consistency_data, col = 'orange2', lwd=4)
+par(mfrow=c(1,1), mar = c(6,6,5,3))#(bottom, left, top, right)
+hist(rando_consistencies, breaks=seq(0,0.5,0.005), main = "", xlab = "Consistency of random sub-group allocations", xlim = c(0,0.4), col = "slategray4",  cex.lab = 2.5, cex.axis=2.5, yaxt = "n", xaxt = "n") #for 70m, change xlim to 0.5
+#abline(v=consistency_data, ylim = c(0, 50), col = 'orange2', lwd=4)
+segments(x0 = consistency_data, x1 = consistency_data, y0 = 0.01, y1 = 300, col = 'orange2', lwd=4)
+
+axis(2, at = c(0,100,200,300), cex.axis = 2.5, las = 1, pos = 0, padj = 0.2)
+axis(1, at = c(0.1,0.2,0.3, 0.4), cex.axis = 2.5, las = 1, pos = 0, padj = 0.3) #for 70m, change to 0.5
+text(x = 0.017, y = 250,label = "(b)", cex = 3) #50m y = 250, x = 0.017, ---- 30m y = 228, ---- 70m, y = 226 and x = 0.0.022
+mtext("Presidente group", side = 3, line = 2, cex = 2.5)
+
 dev.off()
 
 

@@ -161,14 +161,17 @@ mod
 #write.csv(gen_matrix, file = "C:/Users/egrout/Dropbox/coatithon/processed/genetics/galaxy/gen_matrix.csv")
 
 #Figure S6 - scatter plot for genetics and prop time together
-png(height = 1000, width = 1000, units = 'px', filename = paste0(plot_dir,'gen_gal_scatter_2.png'))
-par(mar=c(8,8,6,3), mgp=c(5,1.2,0))
+png(height = 1000, width = 2000, units = 'px', filename = paste0(plot_dir,'gen_gal_scatter_2.png'))
+par(mfrow=c(1,2), mar=c(8,8,6,3), mgp=c(5,1.2,0))
 gen_vec <- gen_matrix[upper.tri(gen_matrix)]
 gal_vec <- gal_matrix[upper.tri(gal_matrix)]
 df <- data.frame(cbind(gen_vec, gal_vec))
 plot(df$gen_vec, df$gal_vec, ylab = "Proportion of time together", xlab = "Relatedness (Triadic Maximum Likelihood)", pch = 19, col = "darkolivegreen3", cex = 3, cex.lab = 3, cex.axis = 2.5, yaxt = "n", ylim = c(0.3,1))
 axis(2, at = c(0,0.3,0.6,0.9), cex.axis = 3, las = 1)
 abline(lm(gal_vec ~ gen_vec, data = data.frame(df)), col = "black", lwd = 2)
+text(x = 0.4, y = 0.76,labels = expression(paste("r"^2, " = 0.182")), cex = 3)
+text(x = 0.015, y = 0.99,labels = "(a)", cex = 3)
+mtext("Galaxy group", side = 3, line = 2, cex = 3)
 
 #str(summary(lm(gal_vec ~ gen_vec, data = data.frame(df)))) #rsquared = 0.182
 dev.off()
