@@ -120,7 +120,7 @@ prop_2.3 <- (sum_2.3/ sum_all)*100
 
 #-----------------------------------------------------------
 
-#Figure S1a: Number of sub groups when the radius is changed (graph put in dropbox results folder)
+#Figure A1: Number of sub groups when the radius is changed (graph put in dropbox results folder)
 
 png(height = 2200, width = 900, units = 'px', filename = paste0(plot_dir,'n_subgroups_hists_onlyGroup_level1.png'))
 
@@ -269,7 +269,7 @@ dev.off()
 
 #---------------------------------------------------------------------
 
-#Figure S2ab: make plot for the number of GPS points recorded for each individual
+#Figure A9: make plot for the number of GPS points recorded for each individual
 
 png(height = 1200, width = 1400, units = 'px', filename = paste0(plot_dir, "number_tracked.png"))
 par(mfrow=c(1,2), mar = c(10,9,2,1)) #c(bottom, left, top, right)
@@ -297,7 +297,7 @@ sd(each_sum$prop)
 
 #---------------------------------------------------------------------
 
-#Figure S5a: histogram for consistency 
+#Figure A4,7,12: histogram for consistency 
 
 #need to run this again as Gus was removed for figure 6a
 n_inds <- nrow(xs)
@@ -451,7 +451,7 @@ dev.off()
 
 #----------------------------------------------------------------
 
-#Figure S8bd + S11bd: consistency matrix
+#consistency matrix
 
 #should look into repeatability of binary data - to see if there is a better metric for getting consistency values from binary data
 
@@ -474,7 +474,7 @@ dev.off()
 
 #---------------------------------------------------------------------
 
-#look at which age/sex classes tend to be on their own
+#Figure A8: look at which age/sex classes tend to be on their own
 inds_subgroup <- data.frame(subgroup_data$ind_subgroup_membership)
 #make an empty dataframe to add the alone inds data to
 df <- data.frame(matrix(nrow = 11, ncol = ncol(inds_subgroup)))
@@ -692,23 +692,6 @@ ggsave(filename = "C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/FF l
        units = "in",
        dpi = 350,
        scale = 1)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

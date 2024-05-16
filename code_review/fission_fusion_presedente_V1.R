@@ -91,7 +91,7 @@ all_tracked_idxs <- which(n_tracked==n_inds)
 
 #------------------------------------------------------------------------------------
 
-#Figure S2b: number of sub groups when the radius is changed (graph put in dropbox results folder) 
+#Figure A1: number of sub groups when the radius is changed (graph put in dropbox results folder) 
 png(height = 2200, width = 900, units = 'px', filename = paste0(plot_dir,'n_subgroups_hists_onlyGroup_level1.png'))
 
 par(mfrow=c(6,1), mar = c(8,9,12,1), mgp=c(6,1,0)) #(bottom, left, top, right)
@@ -125,7 +125,7 @@ dev.off()
 
 R <- 50
 
-# Figure 2a,b,c: Characterizing the subgroup patterns when group was split into 2 or 3 subgroups
+# Figure 2d,e,f: Characterizing the subgroup patterns when group was split into 2 or 3 subgroups
 png(height = 400, width = 1450, units = 'px', filename = paste0(plot_dir,'50m_charecterisations.png'))
 
 blue <- rgb(69, 119, 116, maxColorValue = 255)
@@ -206,7 +206,7 @@ write.table(ffnet_reorder,file="C:/Users/egrout/Dropbox/coatithon/processed/2023
 
 #-------------------------------------------------------------------------------------
 
-#Figure 6b: within full group individual associations to compare with the sub group memberships
+#Figure A3b,d and A6b,d: within full group individual associations to compare with the sub group memberships
 
 #this is the probability of individuals being in the same sub-group using absolute dyadic distances 
 
@@ -280,7 +280,7 @@ dev.off()
 
 #-------------------------------------------------------------------
 
-#Figure S4cd: make plot for the number of GPS points recorded for each individual
+#Figure A9c,d: make plot for the number of GPS points recorded for each individual
 
 png(height = 600, width = 1400, units = 'px', filename = paste0(plot_dir, "number_tracked.png"))
 par(mfrow=c(1,2), mar = c(10,9,2,1)) #c(bottom, left, top, right)
@@ -312,7 +312,7 @@ sd(each_sum$prop)
 
 #---------------------------------------------------------------------
 
-#Figure 4b: histogram for consistency 
+#Figure A4,7,12: histogram for consistency 
 
 #get the subgroup data when radius is 50m
 subgroup_data <- get_subgroup_data(xs, ys, R)
@@ -457,7 +457,7 @@ dev.off()
 
 #----------------------------------------------------------------
 
-#Figure 3d: consistency matrix
+#consistency matrix
 
 #symmetrize matrix - copy entries from p_dyad_together[i,j] to p_dyad_together[j,i]
 for(i in 1:(n_inds-1)){
@@ -479,7 +479,7 @@ dev.off()
 
 #--------------------------------------------------------------------------------------
 
-#look at which age/sex classes tend to be on their own
+#Figure A8: look at which age/sex classes tend to be on their own
 inds_subgroup <- data.frame(subgroup_data$ind_subgroup_membership)
 #make an empty dataframe to add the alone inds data to
 df <- data.frame(matrix(nrow = 16, ncol = ncol(inds_subgroup)))

@@ -109,12 +109,13 @@ visualize_network_matrix_presedente(age_matrix, coati_ids_cut[pres_neworder_indx
 mtext("2) Age homophily", cex = 1.2)
 visualize_network_matrix_presedente(sex_matrix, coati_ids_cut[pres_neworder_indx,]) 
 mtext("3) Sex homophily", cex = 1.2)
+#Figure 3d
 visualize_network_matrix_presedente(gen_matrix, coati_ids_cut[pres_neworder_indx,]) 
 mtext("4) Genetics - Triadic Maximum Likelihood method", cex = 1.2)
 
 #dev.off()
 
-#save these matrices to send to Tiffany
+#save these matrices 
 save(pres_matrix, file = 'C:/Users/egrout/Dropbox/coatithon/processed/microbiome/pres_subgrouping.Rdata')
 save(age_matrix, file = 'C:/Users/egrout/Dropbox/coatithon/processed/microbiome/pres_age.Rdata')
 save(sex_matrix, file = 'C:/Users/egrout/Dropbox/coatithon/processed/microbiome/pres_sex.Rdata')
@@ -149,7 +150,7 @@ dev.off()
 
 #make plot with dyadic strength against relatedness
 
-#figure S6
+#figure A13
 png(height = 1000, width = 1000, units = 'px', filename = paste0(plot_dir,'gen_pres_scatter_2.png'))
 par(mar=c(8,8,6,3), mgp=c(5,1.2,0))
 gen_vec <- gen_matrix[upper.tri(gen_matrix)]

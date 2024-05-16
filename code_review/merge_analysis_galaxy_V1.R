@@ -91,9 +91,6 @@ for(t in 1:(n_times-1)){
   
 }
 
-#this seems to work
-
-
 
 
 #make a data frame of merges, with merged group and subgroups

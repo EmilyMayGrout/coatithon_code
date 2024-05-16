@@ -132,12 +132,13 @@ visualize_network_matrix_galaxy(age_matrix, coati_ids[gal_neworder_indx,])
 mtext("2) Age homophily", cex = 1.2)
 visualize_network_matrix_galaxy(sex_matrix, coati_ids[gal_neworder_indx,]) 
 mtext("3) Sex homophily", cex = 1.2)
+#Figure 3b
 visualize_network_matrix_galaxy(gen_matrix, coati_ids[gal_neworder_indx,]) 
 mtext("4) Genetics - Triadic Maximum Likelihood method", cex = 1.2)
 
 #dev.off()
 
-#save these matrices to send to Tiffany
+#save these matrices 
 save(gal_matrix, file = 'C:/Users/egrout/Dropbox/coatithon/processed/microbiome/galaxy_subgrouping.Rdata')
 save(age_matrix, file = 'C:/Users/egrout/Dropbox/coatithon/processed/microbiome/galaxy_age.Rdata')
 save(sex_matrix, file = 'C:/Users/egrout/Dropbox/coatithon/processed/microbiome/galaxy_sex.Rdata')
@@ -160,7 +161,7 @@ mod
 #write.csv(gal_matrix, file = "C:/Users/egrout/Dropbox/coatithon/processed/genetics/galaxy/gal_matrix.csv")
 #write.csv(gen_matrix, file = "C:/Users/egrout/Dropbox/coatithon/processed/genetics/galaxy/gen_matrix.csv")
 
-#Figure S6 - scatter plot for genetics and prop time together
+#Figure A13 - scatter plot for genetics and prop time together
 png(height = 1000, width = 2000, units = 'px', filename = paste0(plot_dir,'gen_gal_scatter_2.png'))
 par(mfrow=c(1,2), mar=c(8,8,6,3), mgp=c(5,1.2,0))
 gen_vec <- gen_matrix[upper.tri(gen_matrix)]
