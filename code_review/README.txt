@@ -25,7 +25,6 @@ gps_file is the filename of the data for the specific group
 id_file is the filename of the coati ids with their age/sex class
 
 #----------------------------------------------------------------------------------------------------------
-#not for review
 preprocessing code (5 files): 
 
 # the preprocessing code puts the raw data into the correct formats for running the analysis (level0)
@@ -43,7 +42,6 @@ output files for analysis and plotting:
 	       Trago -> 'trago_xy_10min_level0.RData' (a list of 'xs','ys','ts') and 'coati_ids.RData'
 
 #-----------------------------------------------------------------------------------------------------------
-#code scripts for review
 
 functions code:
 	     'coati_function_library_V1.R'
@@ -65,10 +63,9 @@ genetics code for MRQAP analysis:
 plot scripts:
 	for Figure 1: 'figure1_fissionfusion_plot.R' 
 	#for the google maps image in Figure1a, you need to find your own API for this code to work
-	for Figure S4: 'figureS4_subgrouping_overtime_combined.R'
+	for Figure A11: 'figureS4_subgrouping_overtime_combined.R'
 
 #---------------------------------------------------------------------------------------------------------------
-How these data were processed to make the output files for review
 Preprocess data:
 
 	a. before R: 
@@ -105,7 +102,6 @@ Preprocess data:
         e. level1 files are used for Galaxy and Presedente analysis, Trago analysis use level0 because no additional cleaning was needed
 
 #---------------------------------------------------------------------------------------------------------------
-#for review
 
 1. calculate split durations:
 	-before calculating split durations, the fission_fusion_galaxy_V1.R and fission_fusion_presedente_V1.R code
@@ -116,7 +112,6 @@ Preprocess data:
 	is in merge_analysis_presedente_V1.R
 
 #---------------------------------------------------------------------------------------------------------------
-#for review
 
 2. MRQAP analysis:
 
@@ -127,7 +122,6 @@ Preprocess data:
 	-Must make sure the order of ids for each matrices are the same for the mrqap analysis!! - this is organised in the script
 
 #---------------------------------------------------------------------------------------------------------------
-#for review
 
 4. plotting:
 
@@ -139,24 +133,31 @@ Figure 3 - (a) in fission_fusion_galaxy_V1.R
 	   (b) in genetics_galaxy_V3.R
 	   (c) in fission_fusion_presedente_V1.R
 	   (d) in genetics_presedente_V3.R
-Figure S1 - (a) in fission_fusion_galaxy_V1.R
+Figure A1 - (a) in fission_fusion_galaxy_V1.R
 	    (b) in fission_fusion_presedente_V1.R
-Figure S2 - (a-b) in fission_fusion_galaxy_V1.R
+Figure A2 - (a-b) in fission_fusion_galaxy_V1.R
 	    (c-d) in fission_fusion_presedente_V1.R
-Figure S3 - (a) in fission_fusion_trago_V1.R
-	    (b) in genetics_trago_V1.R
-Figure S4 - in figureS4_subgrouping_overtime_combined.R
-Figure S5 - (a) in fission_fusion_galaxy_V1.R
+Figure A3 - (a-b) in fission_fusion_galaxy_V1.R
+	    (c-d) in fission_fusion_presedente_V1.R
+Figure A4 - (a) in fission_fusion_galaxy_V1.R
 	    (b) in fission_fusion_presedente_V1.R
-Figure S6 - (a) in genetics_galaxy_V3.R
-	    (b) in genetics_presedente_V3.R
-Alternative parameters: For these plots the R value was changed to 30m for Figures S7-S9 and 70m for Figures S10 to S12
-Figure S7 and S10 - (a-c) in fission_fusion_galaxy_V1.R
-                  (d-f) in fission_fusion_presedente_V1.R
-Figure S8 and S11 - (a-b) in fission_fusion_galaxy_V1.R
-		  (c-d) in fission_fusion_presedente_V1.R 
-Figure S9 and S12 - (a) in fission_fusion_galaxy_V1.R
-		  (b) in fission_fusion_presedente_V1.R
+Figure A5 - (a) in fission_fusion_galaxy_V1.R
+	    (b) in fission_fusion_presedente_V1.R
+Figure A6 - (a) in fission_fusion_galaxy_V1.R
+	    (b) in fission_fusion_presedente_V1.R
+Figure A7 - (a) in fission_fusion_galaxy_V1.R
+	    (b) in fission_fusion_presedente_V1.R
+Figure A8 - (a) in fission_fusion_galaxy_V1.R
+	    (b) in fission_fusion_presedente_V1.R
+Figure A9 - (a) in fission_fusion_galaxy_V1.R
+	    (b) in fission_fusion_presedente_V1.R
+Figure A10 - (b) in genetics_trago_V1.R
+	     (a) in fission_fusion_trago_V1.R
+Figure A11 - in figureA11_subgrouping_overtime_combined.R
+Figure A12 - (a) in fission_fusion_galaxy_V1.R
+	     (b) in fission_fusion_presedente_V1.R
+Figure A13 - (a) in genetics_galaxy_V3.R
+	     (b) in genetics_presedente_V3.R
 
 MRQAP Tables:
-Table 1, S1, and S2 - Galaxy results from genetics_galaxy_V3 and Presidente results from genetics_presedente_V3.R
+Table 1, A1, and A2 - Galaxy results from genetics_galaxy_V3 and Presidente results from genetics_presedente_V3.R
