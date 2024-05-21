@@ -10,7 +10,7 @@ library(scales)
 #----------PARAMETERS - MODIFY HERE--------------
 
 #which group (galaxy or presedente)
-group <- 'galaxy'
+group <- 'presedente'
 
 #who is using (ari or emily)
 user <- 'emily'
@@ -68,20 +68,6 @@ coati_ids$name_short <- sapply(coati_ids$name, function(x){return(substr(x,1,3))
 #read in timestamp data
 load(file=paste0(group,'_xy_highres_level2.RData'))
 
-
-#because the function ignore the last day, adding 1 more day to the data
-
-
-# #getting an extra timestamp for following day
-# extra_time <- (tail(ts, n=1))+100000
-# ts <- c(ts, extra_time)
-# #adding an extra xs and ys value to correspond with the additional timestamp
-# extra_dat <- matrix(1, nrow = nrow(xs), ncol = 1)
-# xs <- cbind(xs, extra_dat)
-# ys <- cbind(ys, extra_dat)
-
-
-
 #PROCESS
 setwd(codedir)
 #read in events if using manual events
@@ -92,12 +78,40 @@ if(use_manual_events){
   events <- ff_data$events_detected
 }
 
-#CHARACTERIZE EVENTS
+
+
+#-------CLEANING EVENTS------------------------
+
 #preprocess events to...
 if(use_manual_events){
   events <- events[which(events$fission_time!='before start'),] #remove events where we missed the start
   events <- events[which(events$event_type %in% c('fission','fusion')),] #only include fission and fusion events (remove 'almost fusion')
 }
+
+#using google sheets (Finding correct ff from level 1) to remove the events which are not true events (either caused by one individuals moving groups and temporarily joining the groups or due to GPS error when collars started recording)
+#also removing events which are due to males ff-ing
+#these indexes are for the time index so should work for events in level 1 and 2 data
+if(group == 'galaxy'){
+events <- events[!events$tidx %in% c(46805,122721,130464,134273,134288,141605,143333),]
+
+} else{(group=='presedente')
+  
+  #removing false events
+  events <- events[!events$tidx %in% c(16099,16123,106812,106820,112549,120551,120691,122811,126046,130953,131232,131657,131736,131745,131746,131795,133444,133926,134385,135523,136192,136279,137678,138010,140811,141521,149395,149442,153490,153653,153948,154409,154493,154661),]
+  #these are the event idxs which match the tidx: c(32,33,199,200,211,224,225,235,255,267,269,272:275,277,281,286,289,296,300,301,305,306,315,318,347,348,366,369,370,372,373,374)
+  
+  #removing the MALE events - got numbers from google sheets (manually found these as male events by going through each event with analyse_ff_events function in the identify_splits_and_merges code)
+  events <- events[!events$tidx %in% c(330,822,2159,2438,2505,6364,6992,9446,9566,9877,10010,10131,10313,12985,16747,17107,19229,19357,20503,21200,23996,24443,26658,28965,30814,31967,33159,33592,42029,44951,45094,45560,49299,49469,54764,55607,55819,57222,57275,57545,59151,64502,64521,64720,64841,65443,65954,66028,74171,74173,74466,76501,76815,76990,77475,77523,77622,81869,83212,83438,86147,86192,86334,86485,88445,88625,91699,92030,92400,92551 ,92804,93041,96484,100519,105525,105798,105823,105971,106059,107389,112609,113319,120961,121008,121359,122213,122773,123393,123704,123854,125431,125626,126237,126514,126592,126693,126784,126849,127456,128094,128694,129221,131458,132232,133963,134222,134626,135406,136771,137198,138010,138477,139508,143063,143532,143846,144407,146494,146900,147804,148288,150425,150527,151380,151833,152384,152766,152780,153279,153411,157533,157535,157976,159280,159767),]
+  #these are the event ids which match these tidx: c(4,5,6,7,16:23, 27,35,36,44,45,49,50,55,57,60,66:70,77,79,82,84,88,89,102:104,109:111,114,117:123,134:137,139,140,142:144,156:158,160:165,168:174,178,193:197,202,212,214,227:229,231,234,239,241,242,251,252,257:266,270,278,287, 288,291,295,303,304,306,307,310,324,325,327,329,333,334,336,340,350,351,354,356,358:360,363,365,379,380,382,385,387),]
+  
+  #removing events which are too early to be real
+  events <- events[!events$tidx %in% c(14,117,10823,10939,21672,53990,54019,64841,86485,97329,108015,118821,140414),]
+  
+  }
+
+#-----------------------------------------------
+
+#CHARACTERIZE EVENTS
 
 #create columns for subgroup idxs (initialize with zeros to convince R to let you do this)
 events$group_A_idxs <- list(c(0,0,0))
@@ -140,7 +154,7 @@ events$AB_before_disp <- events$AB_after_disp <- events$A_during_disp <- events$
 events$split_angle <- events$turn_angle_A <- events$turn_angle_B <- NA
 for(i in c(1:nrow(events))){
   print(i)
-  ff_data <- analyse_ff_event(i, events, xs, ys, ts, plot=T, max_time = 700)
+  ff_data <- analyse_ff_event(i, events, xs, ys, ts, plot=T, max_time = 700) #with 700s, catches more strt time of events which are still accurate to the event (not picking up a time from a different event)
   if(!is.null(ff_data$disps)){
     events$AB_before_disp[i] <- ff_data$disps['AB','before']
     events$AB_after_disp[i] <- ff_data$disps['AB','after']

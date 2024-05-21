@@ -10,7 +10,7 @@ id_file <- 'presedente_coati_ids.RData'
 
 #list of Rs
 Rs <- c(10,20,30,40,50,100)
-R <- 50
+R <- 70
 #-------SETUP-------
 
 library(fields)
@@ -123,7 +123,7 @@ dev.off()
 
 #-------------------------------------------------------------------------------------
 
-R <- 50
+R <- 70
 
 # Figure 2d,e,f: Characterizing the subgroup patterns when group was split into 2 or 3 subgroups
 png(height = 400, width = 1450, units = 'px', filename = paste0(plot_dir,'50m_charecterisations.png'))
@@ -135,10 +135,11 @@ lightblue <- rgb(128, 218, 178, maxColorValue = 255)
 par(mfrow=c(1,3), mar = c(6,11,2,1)) #(bottom, left, top, right)
 par(mgp = c(4,0.4,-1.25)) #axis title, axis labels, axis line
 subgroup_data <- get_subgroup_data(xs, ys, R)
-hist(subgroup_data$n_subgroups[all_tracked_idxs],main = "", xlab =  'Number of subgroups (radius = 50 m)', col = "aquamarine3", breaks = seq(.5,16,1), cex.lab = 2.9, cex.main = 3, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 6), border = lightblue, las = 1, yaxt = "n")
-axis(2, at = c(0,0.3,0.6), cex.axis = 3, las = 1)
+hist(subgroup_data$n_subgroups[all_tracked_idxs],main = "", xlab =  'Number of subgroups (radius = 70 m)', col = "aquamarine3", breaks = seq(.5,16,1), cex.lab = 2.9, cex.main = 3, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 6), border = lightblue, las = 1, yaxt = "n", xaxt = "n")
+axis(2, at = c(0,0.3,0.6), cex.axis = 3, las = 1, pos = 0, hadj = 1.2)
+axis(1, at = c(0:7), cex.axis = 3, las = 1, pos = 0, padj = 0.8)
 text(x = 0.3, y = 0.55,label = "(d)", cex = 3)
-mtext("Presidente group", side = 2, line = 9, cex = 2)
+mtext("Presidente group", side = 2, line = 8.5, cex = 2)
 
 subgroup_counts <- subgroup_data$subgroup_counts[,all_tracked_idxs]
 n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
@@ -146,12 +147,15 @@ n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
 s2 <- which(n_subgroups == 2)
 s3 <- which(n_subgroups == 3)
 
-hist(subgroup_counts[,s2], breaks=seq(0.5,16,1), xlab = expression("Subgroup size (" * italic("N") * " subgroups = 2)"), main = '', col = blue, cex.lab = 3, cex.main = 2.9, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 16), border = "aquamarine4", las = 1,yaxt = "n")
-axis(2, at = c(0,0.3,0.6), cex.axis = 3, las = 1)
+hist(subgroup_counts[,s2], breaks=seq(0.5,16,1), xlab = expression("Subgroup size (" * italic("N") * " subgroups = 2)"), main = '', col = blue, cex.lab = 3, cex.main = 2.9, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 16), border = "aquamarine4", las = 1,yaxt = "n", xaxt = "n")
+axis(2, at = c(0,0.3,0.6), cex.axis = 3, las = 1, pos = 0, hadj = 1.2)
+axis(1, at = c(0,5,10,15), cex.axis = 3, las = 1, pos = 0, padj = 0.8)
+
 text(x = 0.8, y = 0.55,label = "(e)", cex = 3)
 
-hist(subgroup_counts[,s3], breaks=seq(0.5,16,1), xlab = expression("Subgroup size (" * italic("N") * " subgroups = 3)"), main = '', col = blue, cex.lab = 3, cex.main = 2.9, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 16), border = "aquamarine4", las = 1,yaxt = "n")
-axis(2, at = c(0,0.3,0.6), cex.axis = 3, las = 1)
+hist(subgroup_counts[,s3], breaks=seq(0.5,16,1), xlab = expression("Subgroup size (" * italic("N") * " subgroups = 3)"), main = '', col = blue, cex.lab = 3, cex.main = 2.9, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 16), border = "aquamarine4", las = 1,yaxt = "n", xaxt = "n")
+axis(2, at = c(0,0.3,0.6), cex.axis = 3, las = 1, pos = 0, hadj = 1.2)
+axis(1, at = c(0,5,10,15), cex.axis = 3, las = 1, pos = 0, padj = 0.8)
 text(x = 0.8, y = 0.55,label = "(f)", cex = 3)
 
 dev.off()

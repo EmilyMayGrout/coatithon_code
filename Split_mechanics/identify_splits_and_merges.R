@@ -9,17 +9,17 @@ R_outer <- 50
 
 codedir <- '~/Dropbox/code_ari/coatithon_code/'
 dir <- '~/Dropbox/coati/processed/' #directory where all data is stored
-group <- 'galaxy' #subdirectory where the group data is stored
+group <- 'presedente' #subdirectory where the group data is stored
 
 #get directory to group data
 groupdir <- paste0(dir,group)
 
 #for Emily:
 codedir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level2/'
-#groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
-#plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level2/'
+#groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
+#plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level2/'
+groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level2/'
 
 
 #SOURCE FUNCTIONS
@@ -51,20 +51,19 @@ save(gal_events_detected, file = "C:/Users/egrout/Dropbox/coatithon/processed/20
       save(pres_events_detected, file = "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/pres_events_detected.Rda") }
 
 #saving as a csv for documenting erroneous events in the google sheets
-write.csv(gal_events_detected[, c(1,2,3,8,9,10)], file = "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/gal_events_detected.csv")
-#write.csv(pres_events_detected[, c(1,2,3,8,9,10)], file = "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/pres_events_detected.csv")
+#write.csv(gal_events_detected[, c(1,2,3,8,9,10)], file = "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/gal_events_detected.csv")
+write.csv(pres_events_detected[, c(1,2,3,8,9,10)], file = "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/pres_events_detected.csv")
 
 
 #looking at one event
-analyse_ff_event(5, events = ff_data_50$events_detected, xs, ys, ts, max_time = 100)
+analyse_ff_event(387, events = ff_data_50$events_detected, xs, ys, ts, max_time = 600, plot = T)
 
-i <- 149000:150150
+plot(xs[c(2,3,9), i], ys[c(2,3,9), i])
+#points(xs[9,i], ys[9,i], col = "blue", type = 'l')
+points(xs[2,i], ys[2,i], col = "red", type = 'l')
+points(xs[3,i], ys[3,i], col = "green", type = 'l')
 
-plot(xs[c(9,18), i], ys[c(9,18), i])
-points(xs[9,i], ys[9,i], col = "blue", type = 'l')
-points(xs[18,i], ys[18,i], col = "red", type = 'l')
-points(xs[16,i], ys[16,i], col = "green", type = 'l')
-
+dev.off()
 
 plot(xs[c(2),10801:10900], ys[c(2),10801:10900])
 

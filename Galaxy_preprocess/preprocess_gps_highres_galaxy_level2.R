@@ -76,8 +76,13 @@ ys[3,65720:65850] <- NA
 xs[8,163650:163700] <- NA
 ys[8,163650:163700] <- NA
 
+#Pluto
+xs[9,175830:175900] <- NA
+ys[9,175830:175900] <- NA
 
-
+#Estrella
+xs[2,175800:176250] <- NA
+ys[2,175800:176250] <- NA
 
 save(list=c('xs','ys','ts'), file = paste0(groupdir,'galaxy_xy_highres_level2.RData'))
 

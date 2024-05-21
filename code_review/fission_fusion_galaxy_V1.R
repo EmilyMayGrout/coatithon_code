@@ -10,7 +10,7 @@ id_file <- 'galaxy_coati_ids.RData'
 
 #list of Rs
 Rs <- c(10,20,30,40,50,100)
-R <- 50
+R <- 70
 
 #-------SETUP-------
 
@@ -78,7 +78,7 @@ all_tracked_idxs <- which(n_tracked==n_inds)
 #png(height = 400, width = 1450, units = 'px', filename = paste0(plot_dir,'50m_charecterisations.png'))
 
 #for making combined plot
-png(height = 800, width = 1450, units = 'px', filename = paste0('C:/Users/egrout/Dropbox/coatithon/results/','50m_charecterisations_both.png'))
+png(height = 800, width = 1450, units = 'px', filename = paste0('C:/Users/egrout/Dropbox/coatithon/results/','50m_charecterisations_both_test2.png'))
 
 par(mfrow=c(1,3), mar = c(6,11,2,1)) #(bottom, left, top, right)
 par(mgp = c(4,0.4,-1.2)) #axis title, axis labels, axis line
@@ -88,10 +88,11 @@ green <- rgb(120, 170, 80, maxColorValue = 255)
 darkgreen <- rgb(120, 160, 80, maxColorValue = 255)
 
 subgroup_data <- get_subgroup_data(xs, ys, R)
-hist(subgroup_data$n_subgroups[all_tracked_idxs], main = "", xlab =  'Number of subgroups (radius = 50 m)', col = green, breaks = seq(.5,11,1), cex.lab = 2.9, cex.main = 3, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 6), border = "darkolivegreen3", las = 1, yaxt = "n")
-axis(2, at = c(0,0.3,0.6), cex.axis = 3, las = 1)
+hist(subgroup_data$n_subgroups[all_tracked_idxs], main = "", xlab =  'Number of subgroups (radius = 70 m)', col = green, breaks = seq(.5,11,1), cex.lab = 2.9, cex.main = 3, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 6), border = "darkolivegreen3", las = 1, yaxt = "n", xaxt = "n")
+axis(2, at = c(0,0.3,0.6), cex.axis = 3, las = 1, pos = 0, hadj = 1.2)
+axis(1, at = c(0:7), cex.axis = 3, las = 1, pos = 0, padj = 0.8)
 text(x = 0.3, y = 0.55,label = "(a)", cex = 3)
-mtext("Galaxy group", side = 2, line = 9, cex = 2)
+mtext("Galaxy group", side = 2, line = 8.5, cex = 2)
 
 
 subgroup_counts <- subgroup_data$subgroup_counts[,all_tracked_idxs]
@@ -100,12 +101,14 @@ n_subgroups <- subgroup_data$n_subgroups[all_tracked_idxs]
 s2 <- which(n_subgroups == 2)
 s3 <- which(n_subgroups == 3)
 
-hist(subgroup_counts[,s2], breaks=seq(0.5,11,1), main = "", xlab = expression("Subgroup size (" * italic("N") * " subgroups = 2)"),  col = "darkolivegreen", cex.lab = 2.9, cex.main = 3, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 11), border = darkgreen, las = 1, yaxt = "n")
-axis(2, at = c(0,0.3,0.6), cex.axis = 3,las = 1)
+hist(subgroup_counts[,s2], breaks=seq(0.5,11,1), main = "", xlab = expression("Subgroup size (" * italic("N") * " subgroups = 2)"),  col = "darkolivegreen", cex.lab = 2.9, cex.main = 3, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 11), border = darkgreen, las = 1, yaxt = "n", xaxt = "n")
+axis(2, at = c(0,0.3,0.6), cex.axis = 3, las = 1, pos = 0, hadj = 1.2)
+axis(1, at = c(0,2,4,6,8,10,12), cex.axis = 3, las = 1, pos = 0, padj = 0.8)
 text(x = 0.6, y = 0.55,label = "(b)", cex = 3)
 
-hist(subgroup_counts[,s3], breaks=seq(0.5,11,1), main = "", xlab = expression("Subgroup size (" * italic("N") * " subgroups = 3)"),  col = "darkolivegreen", cex.lab = 2.9, cex.main = 3, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 11), border = darkgreen, las = 1, yaxt = "n")
-axis(2, at = c(0,0.3,0.6), cex.axis = 3, las = 1)
+hist(subgroup_counts[,s3], breaks=seq(0.5,11,1), main = "", xlab = expression("Subgroup size (" * italic("N") * " subgroups = 3)"),  col = "darkolivegreen", cex.lab = 2.9, cex.main = 3, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 11), border = darkgreen, las = 1, yaxt = "n", xaxt = "n")
+axis(2, at = c(0,0.3,0.6), cex.axis = 3, las = 1, pos = 0, hadj = 1.2)
+axis(1, at = c(0,2,4,6,8,10,12), cex.axis = 3, las = 1, pos = 0, padj = 0.8)
 text(x = 0.6, y = 0.55,label = "(c)", cex = 3)
 
 dev.off()
