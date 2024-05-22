@@ -1,31 +1,44 @@
 #Exploring fission-fusion mechanics
-#this code is mostly plot making - some code has been copied from charecterize_splits_and_merges
+#defining the different types of splits
 
 #LIBRARY
 library(lubridate)
 library(scales)
+library(ggplot2)
+library(patchwork)
 
 #set time zone to UTC to avoid confusing time zone issues
 Sys.setenv(TZ='UTC')
 
 #DIRECTORIES AND PARAMETERS
-#codedir <- '~/Dropbox/code_ari/coatithon_code/'
-#dir <- '~/Dropbox/coati/processed/' #directory where all data is stored
-group <- 'galaxy' #subdirectory where the group data is stored
 
-#get directory to group data
+#who is using (ari or emily)
+user <- 'emily'
 
-#groupdir <- paste0(dir,group)
+#which group - galaxy or presedente
+group <- 'presedente' #subdirectory where the group data is stored
 
-#for Emily:
-codedir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
+#whether to identify splits and merges automatically (if F) or use manually identified events (if T)
+use_manual_events <- F
 
-groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
-
-#groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
-#plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
-
+if(user %in% c('Ari','ari')){
+  codedir <- '~/Dropbox/code_ari/coatithon_code/'
+  dir <- '~/Dropbox/coati/processed/' #directory where all data is stored
+  if(group == 'galaxy'){
+    groupdir <- '~/Dropbox/coati/processed/galaxy/'
+  } else if(group=='presedente'){
+    groupdir <- '~/Dropbox/coati/processed/presedente/'
+  }
+} else{
+  codedir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
+  if(group == 'galaxy'){
+    groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
+    plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
+  } else if(group == 'presedente'){
+    groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
+    plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
+  }
+}
 
 #FUNCTIONS
 #read in functions
@@ -36,232 +49,168 @@ source('coati_function_library.R')
 #navigate into directory
 setwd(codedir)
 
-#read in events
-#events <- read.csv(paste0('Split_mechanics/',group,'_manual_split_merge_clean.csv'), sep=';')
-events <- read.csv(paste0('C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/',group,'_manual_split_merge_clean2.csv'),  sep=",", header=TRUE)
 
-
-#if automated events
-#load('C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/galaxy_auto_ff_events_characterized.RData')
-
+if(use_manual_events){
+  events <- read.csv(paste0('C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/',group,'_manual_split_merge_clean2.csv'),  sep=",", header=TRUE)
+  #preprocess events to...
+  events <- events[which(events$fission_time!='before start'),] #remove events where we missed the start
+  events <- events[which(events$event_type %in% c('fission','fusion')),] #only include fission and fusion events (remove 'almost fusion')
+  
+  
+} else{ #otherwise load in automated events
+  #read in automated events - df made in characterize_splits_amd_merges 
+  load(paste0(groupdir, group,'_auto_ff_events_characterized.RData'))
+  
+}
 
 #read in coati ids
 setwd(groupdir)
-load(file=paste0(group,'_coati_ids.RData'))
 
 #read in timestamp data
 load(file=paste0(group,'_xy_highres_level1.RData'))
 
-#PROCESS
-#preprocess events to...
-events <- events[which(events$fission_time!='before start'),] #remove events where we missed the start
-events <- events[which(events$event_type %in% c('fission','fusion')),] #only include fission and fusion events (remove 'almost fusion')
-
+load(file=paste0(group,'_coati_ids.RData'))
 #modify coati ids to only include first 3 letters
 coati_ids$name_short <- sapply(coati_ids$name, function(x){return(substr(x,1,3))})
 
-#create columns for subgroup idxs (initialize with zeros to convince R to let oyu do this)
-events$group_A_idxs <- list(c(0,0,0))
-events$group_B_idxs <- list(c(0,0,0))
+#Deciding cut-off points to categorise different types of fissions and fusions
+
+# Combine the two columns into a single vector, removing NA values
+during_dist <- as.vector(t(rbind(events$A_during_disp, events$B_during_disp)))
+during_dist <- na.omit(during_dist)
+
+# Compute density
+density_data <- density(during_dist)
+
+# Create a histogram with density on the y-axis
+hist(during_dist, breaks = 100, freq = FALSE, main = " ", xlab = "Distance during displacement", ylab = "Density", col = "darkslategray4")
+lines(density(during_dist), col = "darkorange", lwd = 2)
+
+#Finding the point where to split the data to slow group and fast group (by finding the lowest peak between the high peaks)
+yvals <- density(during_dist)$y
+xvals <- density(during_dist)$x
+d_yvals <- yvals[2:length(yvals)] - yvals[1:length(yvals)-1]
+d_xvals <- xvals[2:length(xvals)] - xvals[1:length(xvals)-1]
+d <- d_yvals/d_xvals
+
+d <- d[(15 < xvals) & (xvals < 30)]
+xvals <- xvals[(15 < xvals) & (xvals < 30)]
+
+index_min <- which(diff(sign(d)) != 0)
+threshold <- xvals[index_min]
+print(threshold)
+abline(v=threshold, lty = 3)
 
 
-for (i in 1:nrow(events)){
-  group_A_names <- events$group_A[i]
-  group_B_names <- events$group_B[i]
-  
-  group_A_idxs <- match_coati_names(group_A_names, coati_ids)
-  group_B_idxs <- match_coati_names(group_B_names, coati_ids)
-  events$group_A_idxs[i] <- list(group_A_idxs)
-  events$group_B_idxs[i] <- list(group_B_idxs)
-}
+# Combine the two columns into a single vector, removing NA values
+diff_dist <- abs(events$A_during_disp - events$B_during_disp)
+events$dist_diff <-  diff_dist
 
-#merge fission_time and fusion_time columns into one
-events$time_min <- paste0(events$fission_time,events$fusion_time)
+# Create a histogram with density on the y-axis
+hist(diff_dist, breaks = 100, freq = FALSE, main = " ", xlab = "Distance difference during displacement", ylab = "Density", col = "darkslategray3")
+lines(density(na.omit(diff_dist)), col = "darkorange", lwd = 2)
+abline(v=threshold, lty = 3)
 
-#convert to POSIX
-#if loading in manual_split_merge_clean:
-#events$datetime <- as.POSIXct(paste(events$date, events$time_min), format = "%Y-%m-%d %H:%M",tz = "UTC")
+#get speed to plot the histogram for speed during displacement - m/s
+events$B_during_speed <- events$B_during_disp/(events$end_time - events$start_time)
+events$A_during_speed <- events$A_during_disp/(events$end_time - events$start_time)
+diff_speed <- abs(events$A_during_speed - events$B_during_speed)
 
-#if loading in manual_split_merge_clean2:
-events$datetime <- as.POSIXct(paste(events$date, events$time_min), format = "%d.%m.%Y %H:%M",tz = "UTC")
-#also clean2 needs the 25th to be removed
-events <- events[!(events$date == "25.12.2021"),]
-
-
-#match times to get indexes into matrices
-events$tidx <- match(events$datetime, ts)
-
-#remove rows where there is no match (because too late):
-events <- events[!is.na(events$tidx),]
-
-#count up how many individuals are in each group
-events$n_A <- unlist(lapply(events$group_A_idxs,length))
-events$n_B <- unlist(lapply(events$group_B_idxs,length))
-
-events$before_time <- events$start_time <- events$end_time <- events$after_time <- NA
-events$AB_before_disp <- events$A_during_disp <- events$B_during_disp <- NA
-events$split_angle <- events$turn_angle_A <- events$turn_angle_B <- NA
-for(i in c(1:nrow(events))){
-  print(i)
-  ff_data <- analyse_ff_event(i, events, xs, ys, ts, plot=F, max_time = 600)
-  if(!is.null(ff_data$disps)){
-    events$AB_before_disp[i] <- ff_data$disps['AB','before']
-    events$A_during_disp[i] <- ff_data$disps['A','during']
-    events$B_during_disp[i] <- ff_data$disps['B','during']
-  }
-  events$split_angle[i] <- ff_data$split_angle
-  events$turn_angle_A[i] <- ff_data$turn_angle_A
-  events$turn_angle_B[i] <- ff_data$turn_angle_B
-  events$before_time[i] <- ff_data$before_time
-  events$start_time[i] <- ff_data$start_time
-  events$end_time[i] <- ff_data$end_time
-  events$after_time[i] <- ff_data$after_time
-}
+hist(diff_speed, breaks = 100, freq = FALSE, main = " ", xlab = "Speed difference during displacement", ylab = "Density", col = "darkslategray3")
+lines(density(na.omit(diff_speed)), col = "darkorange", lwd = 2)
 
 
 
-#adding age class as a number in coati_ids
-coati_ids$age_class <- NA
-coati_ids$age_class[coati_ids$age == "Juvenile"] <- 1
-coati_ids$age_class[coati_ids$age == "Sub-adult"] <- 2
-coati_ids$age_class[coati_ids$age == "Adult"] <- 3
+#distribution of speed for fissions
+fiss_speed <- rbind(events$B_during_speed[events$event_type == "fission"], events$A_during_speed[events$event_type == "fission"])
+
+hist(log(fiss_speed), breaks = 100, freq = FALSE, main = " ", xlab = "Log speed during displacement (m/s)", ylab = "Density", col = "darkslategray3")
 
 
-#this for loop is running through each groups IDs and assigning their age class and getting the groups average age
-events$A_average_grp_age <- NA
-events$A_age_each_ind <- events$group_A_idxs
-events$B_average_grp_age <- NA
-events$B_age_each_ind <- events$group_B_idxs
+#decided to cut-off the "non-moving" from the "moving" group at 10 m based on visual inspection of the plots and from biological reasoning 
+#Create column 'subgroup_move' using ifelse
 
-for (i in 1:nrow(events)){
-  
-  if (group == "galaxy"){
-    v1 <- unlist(events$A_age_each_ind[i])
-    v1[v1 == 1] <- 1
-    v1[v1 == 2] <- 3
-    v1[v1 == 3] <- 3
-    v1[v1 == 4] <- 3
-    v1[v1 == 5] <- 3
-    v1[v1 == 6] <- 3
-    v1[v1 == 7] <- 2
-    v1[v1 == 8] <- 2
-    v1[v1 == 9] <- 2
-    v1[v1 == 10] <- 3
-    v1[v1 == 11] <- 3
-    events$A_average_grp_age[i] <- mean(v1)
-    events$A_n_adults[i] <- length(v1[v1=="3"])
-    events$A_n_subadults[i] <- length(v1[v1=="2"])
-    events$A_n_juveniles[i] <- length(v1[v1=="1"])
-    events$A_proportion_adults[i] <- length(v1[v1=="3"])/length(v1)
-    events$A_proportion_subadults[i] <- length(v1[v1=="2"])/length(v1)
-    events$A_proportion_juveniles[i] <- length(v1[v1=="1"])/length(v1)
-    events$A_subgroup_size[i] <- length(v1)
-    events$A_age_each_ind[i] <- relist((v1), skeleton=events$A_age_each_ind[i])
-    
-    #for  group
-    v1 <- unlist(events$B_age_each_ind[i])
-    v1[v1 == 1] <- 1
-    v1[v1 == 2] <- 3
-    v1[v1 == 3] <- 3
-    v1[v1 == 4] <- 3
-    v1[v1 == 5] <- 3
-    v1[v1 == 6] <- 3
-    v1[v1 == 7] <- 2
-    v1[v1 == 8] <- 2
-    v1[v1 == 9] <- 2
-    v1[v1 == 10] <- 3
-    v1[v1 == 11] <- 3
-    events$B_average_grp_age[i] <- mean(v1)
-    events$B_n_adults[i] <- length(v1[v1=="3"])
-    events$B_n_subadults[i] <- length(v1[v1=="2"])
-    events$B_n_juveniles[i] <- length(v1[v1=="1"])
-    events$B_proportion_adults[i] <- length(v1[v1=="3"])/length(v1)
-    events$B_proportion_subadults[i] <- length(v1[v1=="2"])/length(v1)
-    events$B_proportion_juveniles[i] <- length(v1[v1=="1"])/length(v1)
-    events$B_subgroup_size[i] <- length(v1)
-    events$B_age_each_ind[i] <- relist((v1), skeleton=events$B_age_each_ind[i])
-    
-  } else if (group == "presedente"){
-    
-    v1 <- unlist(events$A_age_each_ind[i])
-    v1[v1 == 1] <- 3
-    v1[v1 == 2] <- 1
-    v1[v1 == 3] <- 1
-    v1[v1 == 4] <- 1
-    v1[v1 == 5] <- 3
-    v1[v1 == 6] <- 2
-    v1[v1 == 7] <- 2
-    v1[v1 == 8] <- 3
-    v1[v1 == 9] <- 3
-    v1[v1 == 10] <- 2
-    v1[v1 == 11] <- 1
-    v1[v1 == 12] <- 1
-    v1[v1 == 13] <- 3
-    v1[v1 == 14] <- 2
-    v1[v1 == 15] <- 1
-    v1[v1 == 16] <- 1
-    v1[v1 == 17] <- 2
-    v1[v1 == 18] <- 3
-    v1[v1 == 19] <- 2
-    v1[v1 == 20] <- 3
-    v1[v1 == 21] <- 3
-    v1[v1 == 22] <- 1
-    
-    events$A_average_grp_age[i] <- mean(v1)
-    events$A_n_adults[i] <- length(v1[v1=="3"])
-    events$A_n_subadults[i] <- length(v1[v1=="2"])
-    events$A_n_juveniles[i] <- length(v1[v1=="1"])
-    events$A_proportion_adults[i] <- length(v1[v1=="3"])/length(v1)
-    events$A_proportion_subadults[i] <- length(v1[v1=="2"])/length(v1)
-    events$A_proportion_juveniles[i] <- length(v1[v1=="1"])/length(v1)
-    
-    events$A_subgroup_size[i] <- length(v1)
-    events$A_age_each_ind[i] <- relist((v1), skeleton=events$A_age_each_ind[i])
-    
-    #for  group
-    v1 <- unlist(events$B_age_each_ind[i])
-    v1[v1 == 1] <- 3
-    v1[v1 == 2] <- 1
-    v1[v1 == 3] <- 1
-    v1[v1 == 4] <- 1
-    v1[v1 == 5] <- 3
-    v1[v1 == 6] <- 2
-    v1[v1 == 7] <- 2
-    v1[v1 == 8] <- 3
-    v1[v1 == 9] <- 3
-    v1[v1 == 10] <- 2
-    v1[v1 == 11] <- 1
-    v1[v1 == 12] <- 1
-    v1[v1 == 13] <- 3
-    v1[v1 == 14] <- 2
-    v1[v1 == 15] <- 1
-    v1[v1 == 16] <- 1
-    v1[v1 == 17] <- 2
-    v1[v1 == 18] <- 3
-    v1[v1 == 19] <- 2
-    v1[v1 == 20] <- 3
-    v1[v1 == 21] <- 3
-    v1[v1 == 22] <- 1
-    events$B_average_grp_age[i] <- mean(v1)
-    events$B_n_adults[i] <- length(v1[v1=="3"])
-    events$B_n_subadults[i] <- length(v1[v1=="2"])
-    events$B_n_juveniles[i] <- length(v1[v1=="1"])
-    events$B_proportion_adults[i] <- length(v1[v1=="3"])/length(v1)
-    events$B_proportion_subadults[i] <- length(v1[v1=="2"])/length(v1)
-    events$B_proportion_juveniles[i] <- length(v1[v1=="1"])/length(v1)
-    
-    events$B_subgroup_size[i] <- length(v1)
-    events$B_age_each_ind[i] <- relist((v1), skeleton=events$B_age_each_ind[i])
-  }else {print("fail")}
-}
+dist_thresh <- 10
+type <- "fission"
 
-events2 <- events
+events$subgroup_move <- ifelse(events$A_during_disp > dist_thresh & events$B_during_disp > dist_thresh, "Both moved",
+                               ifelse(events$A_during_disp > dist_thresh, "Either moved",
+                                      ifelse(events$B_during_disp > dist_thresh, "Either moved",
+                                             "Neither moved")))
+
+# Create the new column to see if the distances moved are similar 
+events$speed_comparison <- ifelse(abs(events$A_during_disp - events$B_during_disp) < dist_thresh, "Similar distance travelled", "Different distance travelled")
+
+#was it a group or an individual who moved
+events$individual_movement <- ifelse((events$A_during_disp > dist_thresh & events$n_A == 1) | 
+                                       (events$B_during_disp > dist_thresh & events$n_B == 1), 
+                                     "singleton", "multiple individuals")
 
 
-#save the events dataframe to be read into markdown
-save(events, file = paste0('C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/',group,'_manual_events_withinfo2.RData'))
+during_dist_fission <- na.omit(as.vector(t(rbind(events$A_during_disp[events$event_type == "fission"], events$B_during_disp[events$event_type == "fission"]))))
+# Compute density
+density_data <- density(during_dist_fission)
 
-#save(events, file = paste0('C:/Users/egrout/Dropbox/coatithon/coatithon_code/Split_mechanics/',group,'_auto_events_withinfo.RData'))
+# plot 1: Create a histogram with density on the y-axis
+p1 <- ggplot() +
+  geom_histogram(aes(x = during_dist_fission, y = after_stat(density)), breaks = seq(min(density_data$x), max(density_data$x), length.out = 100), fill = "darkslategray4", color = "black", alpha = 0.5) +
+  geom_line(data = data.frame(x = density_data$x, y = density_data$y), aes(x = x, y = y), color = "darkorange", linewidth = 2) +
+  labs(title = "", x = "Distance during fission", y = "Density")+
+  geom_vline(xintercept = 10, linetype = "dashed", color = "black")+
+  xlim(0, max(during_dist_fission))+
+  theme_classic()
+p1
+
+#plot 2: both groups moved
+both_moved <- events[events$subgroup_move == "Both moved",]
+
+p2 <- ggplot(na.omit(both_moved[both_moved$event_type == type,]), aes(x= speed_comparison, fill = individual_movement))+
+  geom_bar(position = "dodge")+
+  scale_fill_manual(values = c("yellow3", "darkslategray4")) + 
+  labs(title = "Both subgroups moved",
+       x = " ",
+       y = "Count",
+       fill = " ") +
+  ylim(0,22)+
+  theme_minimal()
+
+p2
+
+#plot 3: either group moved
+either_moved <- events[events$subgroup_move == "Either moved",]
+
+p3 <- ggplot(na.omit(either_moved[either_moved$event_type == type,]), aes(x= individual_movement, fill = individual_movement))+
+  geom_bar(position = "stack")+
+  scale_fill_manual(values = c("yellow3", "darkslategray4"))+ 
+  labs(title = "Either subgroups moved",
+       x = " ",
+       y = "Count",
+       fill = " ") +
+  guides(fill="none")+
+  theme_minimal()
+p3
+
+
+#plot 4: distribution of subgroup sizes
+
+sub_size <- as.vector(t(rbind(events$n_A[events$event_type == "fission"], events$n_B[events$event_type == "fission"])))
+
+p4 <- ggplot() +
+  geom_histogram(aes(x = sub_size, y = after_stat(density)),bins = 10, fill = "darkslategray4", color = "white")+
+  labs(title = "Number of individuals in subgroups during fission events",
+       x = "Number of Individuals",
+       y = "Frequency")
+
+g <- (p1 + p4)/( p2 + p3)
+g
+
+#could split the plot 3 into the bogger vs smaller subgroup to move
+
+
+
+
+
+
 
 
 ### FISSION PLOTTING ###
@@ -348,7 +297,6 @@ legend(x = "topright",
        cex = 2, pt.cex = 2,
        bty = "n")
 dev.off()
-
 
 
 
