@@ -204,7 +204,7 @@ p4 <- ggplot() +
 g <- (p1 + p4)/( p2 + p3)
 g
 
-#could split the plot 3 into the bogger vs smaller subgroup to move
+#could split the plot 3 into the bigger vs smaller subgroup to move
 
 
 
