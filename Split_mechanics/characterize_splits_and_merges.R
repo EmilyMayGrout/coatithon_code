@@ -153,6 +153,7 @@ events$before_time <- events$start_time <- events$end_time <- events$after_time 
 events$AB_before_disp <- events$AB_after_disp <- events$A_during_disp <- events$B_during_disp <- NA
 events$split_angle <- events$turn_angle_A <- events$turn_angle_B <- NA
 
+i = 3
 for(i in c(1:nrow(events))){
   print(i)
   ff_data <- analyse_ff_event(i, events, xs, ys, ts, plot=T, max_time = 700) #with 700s, catches more start time of events which are still accurate to the event (not picking up a time from a different event)

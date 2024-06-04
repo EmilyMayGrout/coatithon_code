@@ -67,7 +67,7 @@ if(use_manual_events){
 setwd(groupdir)
 
 #read in timestamp data
-load(file=paste0(group,'_xy_highres_level1.RData'))
+load(file=paste0(group,'_xy_highres_level2.RData'))
 
 load(file=paste0(group,'_coati_ids.RData'))
 #modify coati ids to only include first 3 letters
@@ -196,7 +196,7 @@ p3
 sub_size <- as.vector(t(rbind(events$n_A[events$event_type == "fission"], events$n_B[events$event_type == "fission"])))
 
 p4 <- ggplot() +
-  geom_histogram(aes(x = sub_size, y = after_stat(density)),bins = 10, fill = "darkslategray4", color = "white")+
+  geom_histogram(aes(x = sub_size, y = after_stat(density)),bins = 16, fill = "darkslategray4", color = "white")+
   labs(title = "Number of individuals in subgroups during fission events",
        x = "Number of Individuals",
        y = "Frequency")
