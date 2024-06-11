@@ -16,7 +16,7 @@ Sys.setenv(TZ='UTC')
 user <- 'emily'
 
 #which group - galaxy or presedente
-group <- 'presedente' #subdirectory where the group data is stored
+group <- 'galaxy' #subdirectory where the group data is stored
 
 #whether to identify splits and merges automatically (if F) or use manually identified events (if T)
 use_manual_events <- F
@@ -142,9 +142,13 @@ events$subgroup_move <- ifelse(events$A_during_disp > dist_thresh & events$B_dur
 events$speed_comparison <- ifelse(abs(events$A_during_disp - events$B_during_disp) < dist_thresh, "Similar distance travelled", "Different distance travelled")
 
 #was it a group or an individual who moved
-events$individual_movement <- ifelse((events$A_during_disp > dist_thresh & events$n_A == 1) | 
-                                       (events$B_during_disp > dist_thresh & events$n_B == 1), 
-                                     "singleton", "multiple individuals")
+#not sure this makes sense as it says singleton if just one of the groups contained a singleton
+#events$individual_movement <- ifelse((events$A_during_disp > dist_thresh & events$n_A == 1) | 
+#                                       (events$B_during_disp > dist_thresh & events$n_B == 1), 
+#                                     "singleton", "multiple individuals")
+
+
+
 
 
 during_dist_fission <- na.omit(as.vector(t(rbind(events$A_during_disp[events$event_type == "fission"], events$B_during_disp[events$event_type == "fission"]))))
@@ -164,9 +168,8 @@ p1
 #plot 2: both groups moved
 both_moved <- events[events$subgroup_move == "Both moved",]
 
-p2 <- ggplot(na.omit(both_moved[both_moved$event_type == type,]), aes(x= speed_comparison, fill = individual_movement))+
-  geom_bar(position = "dodge")+
-  scale_fill_manual(values = c("yellow3", "darkslategray4")) + 
+p2 <- ggplot(na.omit(both_moved[both_moved$event_type == type,]), aes(x= speed_comparison))+
+  geom_bar(position = "dodge", fill =c("yellow3", "darkslategray4") )+
   labs(title = "Both subgroups moved",
        x = " ",
        y = "Count",
@@ -179,9 +182,8 @@ p2
 #plot 3: either group moved
 either_moved <- events[events$subgroup_move == "Either moved",]
 
-p3 <- ggplot(na.omit(either_moved[either_moved$event_type == type,]), aes(x= individual_movement, fill = individual_movement))+
-  geom_bar(position = "stack")+
-  scale_fill_manual(values = c("yellow3", "darkslategray4"))+ 
+p3 <- ggplot(na.omit(either_moved[either_moved$event_type == type,]), aes(x= speed_comparison))+
+  geom_bar(position = "stack", fill = c("yellow3", "darkslategray4"))+
   labs(title = "Either subgroups moved",
        x = " ",
        y = "Count",
@@ -205,6 +207,153 @@ g <- (p1 + p4)/( p2 + p3)
 g
 
 #could split the plot 3 into the bigger vs smaller subgroup to move
+
+#-------------------------------------------------------------------------------
+#just look at fissions to fill the table in where we count the number of each type of event
+#need to know for events where group was stationary to both moving
+
+dist_thresh
+
+fissions <- events[events$event_type == "fission",]
+
+#filter dataframe to columns we need for extracting counts of each type of split
+fissions <- select(fissions, tidx, datetime, event_type, group_A, group_B, n_A, n_B, event_idx, B_during_disp, A_during_disp, AB_before_disp, B_during_speed, A_during_speed)
+
+#when group is stationary and both move
+fissions$split_type <- ifelse(fissions$AB_before_disp < 10 & fissions$B_during_disp > 10 & fissions$A_during_disp > 10, "bothstill_bothmove",
+                       ifelse(fissions$AB_before_disp < 10 & fissions$B_during_disp > 10 & fissions$A_during_disp < 10, "bothstill_onemove",
+                       ifelse(fissions$AB_before_disp < 10 & fissions$B_during_disp < 10 & fissions$A_during_disp > 10, "bothstill_onemove",
+                       ifelse(fissions$AB_before_disp > 10 & fissions$B_during_disp < 10 & fissions$A_during_disp > 10, "bothmove_onemove",
+                       ifelse(fissions$AB_before_disp > 10 & fissions$B_during_disp > 10 & fissions$A_during_disp < 10, "bothmove_onemove",
+                       ifelse(fissions$AB_before_disp > 10 & fissions$B_during_disp > 10 & fissions$A_during_disp > 10, "bothmove_bothmove",
+                       ifelse(fissions$AB_before_disp < 10 & fissions$B_during_disp < 10 & fissions$A_during_disp < 10, "bothstill_bothstill",
+                              "other")))))))
+
+fissions$subgroup_comp <- ifelse(fissions$n_A == 1 & fissions$n_B == 1, "1/1",
+                          ifelse(fissions$n_A > 1 & fissions$n_B == 1, "1/many",
+                          ifelse(fissions$n_A == 1 & fissions$n_B > 1, "1/many", 
+                          ifelse(fissions$n_A > 1 & fissions$n_B > 1, "many/many", "other"))))
+
+#remove rows with NA
+fissions <- na.omit(fissions)
+#remove rows where both are still to both are still as not really an event
+fissions <- fissions[!fissions$split_type == "bothstill_bothstill",]
+
+contingency_table <- table(fissions$split_type, fissions$subgroup_comp)
+contingency_matrix <- as.matrix(contingency_table)
+print(contingency_matrix)
+
+# Convert the matrix to a data frame for ggplot2
+contingency_df <- as.data.frame(as.table(contingency_matrix))
+
+
+# Plot the heatmap
+all <- ggplot(contingency_df, aes(Var2, Var1, fill = Freq)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), color = "black", size = 4) +
+  scale_fill_gradient(low = "white", high = "darkcyan") +
+  labs(title = "Heatmap of Event Types by Subgroup Composition",
+       x = "Subgroup Composition",
+       y = "Event Type",
+       fill = "Count") +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+all
+
+file_path <- file.path(plot_dir, "matrix_Eventype.png")
+ggsave(file_path, all, width = 10, height = 8)
+
+
+
+
+#redo matrix with and without males to see how this affects the patterns observed
+
+#find the events where males are involved 
+male_coatis <- c("Sam", "Ken", "Gen", "Lul")
+
+# Function to check if all individuals in a group are males
+all_males <- function(group, male_names) {
+  individuals <- strsplit(group, ",\\s*")[[1]]
+  all(individuals %in% male_names)
+}
+
+# Filter the dataframe
+filtered_fission_df <- fissions %>%
+  rowwise() %>%
+  filter(all_males(group_A, male_coatis) | all_males(group_B, male_coatis))
+
+# Filter the dataframe for events where not all individuals leaving are males
+filtered_fission_df_no_males <- fissions %>%
+  rowwise() %>%
+  filter(!(all_males(group_A, male_coatis) | all_males(group_B, male_coatis)))
+
+#choose whether want the male events or non-male events
+with_males <- T
+
+# Create a new dataframe based on the choice
+df <- if (with_males) {
+  filtered_fission_df # DataFrame with male events
+  
+} else {
+  filtered_fission_df_no_males  # DataFrame without male events
+} 
+
+
+if(with_males){
+  name <- "With Males"
+}else{
+  name <- "Without Males"
+}
+
+
+contingency_table <- table(df$split_type, df$subgroup_comp)
+contingency_matrix <- as.matrix(contingency_table)
+# Convert the matrix to a data frame for ggplot2
+contingency_df <- as.data.frame(as.table(contingency_matrix))
+
+
+g <- ggplot(contingency_df, aes(Var2, Var1, fill = Freq)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), color = "black", size = 4) +
+  scale_fill_gradient(low = "white", high = "darkcyan") +
+  labs(title = paste("Heatmap of Event Types by Subgroup Composition", name),
+       x = "Subgroup Composition",
+       y = "Event Type",
+       fill = "Count") +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+g
+
+
+file_path <- file.path(plot_dir, paste(name,"events.png"))
+ggsave(file_path, g, width = 10, height = 8)
+
+
+
+
+#now want to look at the individual who moves to see if this is the singleton or the group 
+#for events where both are still and one moved, was it the single individual who moved?
+
+#choose whether to look at individual counts with or without the males 
+fissions_filt <- filtered_fission_df #filtered_fission_df or filtered_fission_df_no_males
+
+fissions_filt$singleton_move <- ifelse(fissions_filt$split_type == "bothstill_onemove" & fissions_filt$subgroup_comp == "1/many" & fissions_filt$n_A == 1 & fissions_filt$A_during_disp > 10, "singleton_move",
+                           ifelse(fissions_filt$split_type == "bothstill_onemove" & fissions_filt$subgroup_comp == "1/many" & fissions_filt$n_B == 1 & fissions_filt$B_during_disp > 10, "singleton_move",
+                           ifelse(fissions_filt$split_type == "bothmove_onemove" & fissions_filt$subgroup_comp == "1/many" & fissions_filt$n_A == 1 & fissions_filt$A_during_disp < 10, "singleton_stop",
+                           ifelse(fissions_filt$split_type == "bothmove_onemove" & fissions_filt$subgroup_comp == "1/many" & fissions_filt$n_B == 1 & fissions_filt$B_during_disp < 10, "singleton_stop",  "other"))))
+
+fissions_filt <- fissions_filt %>% 
+  filter(singleton_move != "other")
+
+table(fissions_filt$singleton_move)
+barplot(table(fissions_filt$singleton_move), col = "skyblue", xlab = )
+#In Presidente group from 44 events where there is one individual involved, if the group was still, and one group moves, 38/44 events are a single individual leaving (34 of these are males). If the group were moving and one stops, 6/16 are a single individual (4 are males)
+
+#so seems like the majority of fissions are driven by the males
+
+
+
+
 
 
 

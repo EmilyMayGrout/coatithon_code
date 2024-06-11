@@ -10,7 +10,7 @@ id_file <- 'galaxy_coati_ids.RData'
 
 #list of Rs
 Rs <- c(10,20,30,40,50,100)
-R <- 70
+R <- 50
 
 #-------SETUP-------
 
@@ -88,7 +88,7 @@ green <- rgb(120, 170, 80, maxColorValue = 255)
 darkgreen <- rgb(120, 160, 80, maxColorValue = 255)
 
 subgroup_data <- get_subgroup_data(xs, ys, R)
-hist(subgroup_data$n_subgroups[all_tracked_idxs], main = "", xlab =  'Number of subgroups (radius = 70 m)', col = green, breaks = seq(.5,11,1), cex.lab = 2.9, cex.main = 3, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 6), border = "darkolivegreen3", las = 1, yaxt = "n", xaxt = "n")
+hist(subgroup_data$n_subgroups[all_tracked_idxs], main = "", xlab =  'Number of subgroups (radius = 50 m)', col = green, breaks = seq(.5,11,1), cex.lab = 2.9, cex.main = 3, cex.axis=3, freq = FALSE, ylim=c(0,.6), xlim = c(0, 6), border = "darkolivegreen3", las = 1, yaxt = "n", xaxt = "n")
 axis(2, at = c(0,0.3,0.6), cex.axis = 3, las = 1, pos = 0, hadj = 1.2)
 axis(1, at = c(0:7), cex.axis = 3, las = 1, pos = 0, padj = 0.8)
 text(x = 0.3, y = 0.55,label = "(a)", cex = 3)
