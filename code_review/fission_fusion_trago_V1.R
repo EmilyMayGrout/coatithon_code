@@ -99,7 +99,9 @@ for(i in 1:n_inds){
 }
 
 diag(ff_net) <- NA
-new_order <- c(2,3,7:9,1,5,4,6)
+new_order <- c(2,3,7:9,1,5,4,6) #order for matrices for microbiome
+#"Amarulla","Limoncello","Whisky","Cerveza","Sake","Tiger","Bailey","Rum","Tequila" 
+
 new_order <- c(4,1:3, 5:7)
 ffnet_reorder <- ff_net[new_order, new_order]
 
@@ -110,7 +112,7 @@ visualize_network_matrix_trago(ffnet_reorder, coati_ids[new_order,])
 dev.off()
 
 #save matrix for mrqap analysis
-write.table(ffnet_reorder,file="C:/Users/egrout/Dropbox/coatithon/processed/2022/trago/trago_matrix_10min_proptimeinsamesubgroup.txt",row.names=FALSE)
+write.table(ffnet_reorder,file="C:/Users/egrout/Dropbox/coatithon/processed/2022/trago/trago_matrix_50min_proptimeinsamesubgroup.txt",row.names=FALSE)
 
 
 #---------------------------------------------------------------------------------------------

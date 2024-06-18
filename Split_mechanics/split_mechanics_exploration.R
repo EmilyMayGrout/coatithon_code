@@ -6,6 +6,7 @@ library(lubridate)
 library(scales)
 library(ggplot2)
 library(patchwork)
+library(dplyr)
 
 #set time zone to UTC to avoid confusing time zone issues
 Sys.setenv(TZ='UTC')
@@ -16,7 +17,7 @@ Sys.setenv(TZ='UTC')
 user <- 'emily'
 
 #which group - galaxy or presedente
-group <- 'galaxy' #subdirectory where the group data is stored
+group <- 'presedente' #subdirectory where the group data is stored
 
 #whether to identify splits and merges automatically (if F) or use manually identified events (if T)
 use_manual_events <- F
@@ -148,6 +149,11 @@ events$speed_comparison <- ifelse(abs(events$A_during_disp - events$B_during_dis
 #                                     "singleton", "multiple individuals")
 
 
+if(group == 'presedente'){
+  high_col <- "mediumpurple4"
+} else if(group == "galaxy"){
+  high_col <- "darkcyan"
+}
 
 
 
@@ -157,13 +163,18 @@ density_data <- density(during_dist_fission)
 
 # plot 1: Create a histogram with density on the y-axis
 p1 <- ggplot() +
-  geom_histogram(aes(x = during_dist_fission, y = after_stat(density)), breaks = seq(min(density_data$x), max(density_data$x), length.out = 100), fill = "darkslategray4", color = "black", alpha = 0.5) +
+  geom_histogram(aes(x = during_dist_fission, y = after_stat(density)), breaks = seq(min(density_data$x), max(density_data$x), length.out = 100), fill = high_col, color = "black", alpha = 0.5) +
   geom_line(data = data.frame(x = density_data$x, y = density_data$y), aes(x = x, y = y), color = "darkorange", linewidth = 2) +
   labs(title = "", x = "Distance during fission", y = "Density")+
   geom_vline(xintercept = 10, linetype = "dashed", color = "black")+
   xlim(0, max(during_dist_fission))+
   theme_classic()
 p1
+
+file_path <- file.path(plot_dir, paste0(group, "_distance_displacement.png"))
+ggsave(file_path, p1, width = 8, height = 4)
+
+
 
 #plot 2: both groups moved
 both_moved <- events[events$subgroup_move == "Both moved",]
@@ -246,12 +257,11 @@ print(contingency_matrix)
 # Convert the matrix to a data frame for ggplot2
 contingency_df <- as.data.frame(as.table(contingency_matrix))
 
-
 # Plot the heatmap
 all <- ggplot(contingency_df, aes(Var2, Var1, fill = Freq)) +
   geom_tile() +
   geom_text(aes(label = Freq), color = "black", size = 4) +
-  scale_fill_gradient(low = "white", high = "darkcyan") +
+  scale_fill_gradient(low = "white", high = high_col) +
   labs(title = "Heatmap of Event Types by Subgroup Composition",
        x = "Subgroup Composition",
        y = "Event Type",
@@ -269,7 +279,11 @@ ggsave(file_path, all, width = 10, height = 8)
 #redo matrix with and without males to see how this affects the patterns observed
 
 #find the events where males are involved 
-male_coatis <- c("Sam", "Ken", "Gen", "Lul")
+if(group == 'presedente'){
+ male_coatis <- c("Sam", "Ken", "Gen", "Lul")
+} else if(group == "galaxy"){
+  male_coatis <- "Gus"
+}
 
 # Function to check if all individuals in a group are males
 all_males <- function(group, male_names) {
@@ -315,7 +329,7 @@ contingency_df <- as.data.frame(as.table(contingency_matrix))
 g <- ggplot(contingency_df, aes(Var2, Var1, fill = Freq)) +
   geom_tile() +
   geom_text(aes(label = Freq), color = "black", size = 4) +
-  scale_fill_gradient(low = "white", high = "darkcyan") +
+  scale_fill_gradient(low = "white", high = high_col) +
   labs(title = paste("Heatmap of Event Types by Subgroup Composition", name),
        x = "Subgroup Composition",
        y = "Event Type",
@@ -346,10 +360,12 @@ fissions_filt <- fissions_filt %>%
   filter(singleton_move != "other")
 
 table(fissions_filt$singleton_move)
-barplot(table(fissions_filt$singleton_move), col = "skyblue", xlab = )
+barplot(table(fissions_filt$singleton_move), col = "skyblue" )
 #In Presidente group from 44 events where there is one individual involved, if the group was still, and one group moves, 38/44 events are a single individual leaving (34 of these are males). If the group were moving and one stops, 6/16 are a single individual (4 are males)
 
 #so seems like the majority of fissions are driven by the males
+
+
 
 
 

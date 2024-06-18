@@ -173,6 +173,7 @@ prop_2.3 <- (sum_2.3/ sum_all)*100
 #-------------------------------------------------------------------------------------
 
 #Figure 3c: which individuals tend to be in the same subgroup for only the group
+R = 15
 
 subgroup_data <- get_subgroup_data(xs, ys, R=R)
 
@@ -206,7 +207,7 @@ visualize_network_matrix_presedente(ffnet_reorder, coati_ids[new_order,])
 dev.off()
 
 #save matrix for mrqap analysis
-write.table(ffnet_reorder,file="C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/presedente_matrix_10min_proptimeinsamesubgroup_50m.txt",row.names=FALSE)
+write.table(ffnet_reorder,file="C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/presedente_matrix_10min_proptimeinsamesubgroup_15m.txt",row.names=FALSE)
 
 #-------------------------------------------------------------------------------------
 

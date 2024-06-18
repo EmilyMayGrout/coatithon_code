@@ -59,6 +59,7 @@ trago_matrix <- as.matrix(trago_matrix)
 trago_neworder_indx <- c(4,1:3, 5:7) 
 trago_inds_neworder <- c("G32","G37","G36", "G38", "G34", "G39", "G35") 
 
+
 #first column is index numbers but I want this to be the IDs  
 rownames(all_matrix) <- all_matrix$X  
 #remove first column as this is incorrect for the subsetting to work  
@@ -75,4 +76,5 @@ png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir ,'trago_
 par(mfrow=c(1,1), mar = c(6,6,1,1)) #bottom, left, top, and right
 visualize_network_matrix_trago(gen_matrix, coati_ids[trago_neworder_indx,])  
 dev.off()  
+
 

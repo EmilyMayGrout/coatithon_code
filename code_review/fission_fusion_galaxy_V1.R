@@ -181,7 +181,7 @@ diag(ff_net) <- NA
 new_order <- c(5,1,11,4,10,2,3,6,7,8,9)
 ffnet_reorder <- ff_net[new_order, new_order]
 #save matrix for mrqap analysis
-write.table(ffnet_reorder,file="C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/gal_matrix_10min_proptimeinsamesubgroup_50m.txt",row.names=FALSE)
+#write.table(ffnet_reorder,file="C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/gal_matrix_10min_proptimeinsamesubgroup_50m.txt",row.names=FALSE)
 
 
 png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'subgroup_network_level1_cut.png'))
@@ -189,14 +189,19 @@ png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'subgrou
 visualize_network_matrix_galaxy(ffnet_reorder, coati_ids[new_order,])
 dev.off()
 
+#order: gus, quasar, cometa, lucero, luna, estrella, venus, orbita, planeta, saturno, pluto  
+
+
+
 #--------------------------------------------------------------------------
 
 #Probability of individuals being in the same sub-group using absolute dyadic distances 
 #removing Gus (adult male) from the full group to get proximity data within group
+#commented the changes for making within group matrices 
 
-xs_nogus <- xs[-c(5), ]
-ys_nogus <- ys[-c(5), ]
-coati_ids_nogus <- coati_ids[-c(5),]
+xs_nogus <- xs#[-c(5), ]
+ys_nogus <- ys#[-c(5), ]
+coati_ids_nogus <- coati_ids#[-c(5),]
 
 subgroup_data <- get_subgroup_data(xs_nogus, ys_nogus, R)
 
@@ -219,7 +224,9 @@ subset_y <- ys_nogus[, full_group_index]
 #get proximity network
 within_group_data <- get_proximity_data(subset_x, subset_y, 10)
 
-new_order <- c(1,10,4,9,2,3,5,6,7,8)
+#new_order <- c(1,10,4,9,2,3,5,6,7,8)
+new_order <- c(5,1,11,4,10,2,3,6,7,8,9)
+
 
 png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'withingroup_network_withoutgus_level1.png'))
 visualize_network_matrix_galaxy(within_group_data$proximity_net, coati_ids_nogus[new_order,])

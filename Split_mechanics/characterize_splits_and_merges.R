@@ -387,5 +387,182 @@ dev.off()
 hist(rbind(events$A_during_disp, events$B_during_disp), breaks = 40)
 
 
+#visualising the events with Eli's code
+
+#new function currently get's error after "Identifying changes in group membership"
+ff_output <- identify_splits_and_merges(R_inner = R_inner, R_outer = R_outer, xs, ys, ts, breaks = c(1, length(ts)+1), names = coati_ids)
+                                        
+
+events <- ff_data$events_detected
 
 
+
+#-------------------------------------------------------------------------
+
+# plot_animated_events(1, ff_output, xs, ys, ts, surrounding_mins = 5, 60, color_only_main_groups = F, coati_ids$name, plot_dir, plot_interpolated = F, interpolated_xs = NULL, interpolated_ys = NULL, interpolated_timestamps = NULL,interpolated_fixes_per_minute = NULL)
+# 
+# 
+# fixes_per_minute <- 60
+# surrounding_mins = 5
+# plot_interpolated <- F
+# interpolated_xs <- NULL
+# interpolated_ys <- NULL
+# interpolated_timestamps <- NULL
+# interpolated_fixes_per_minute <- NULL
+# timestamps <- ts
+# r <- 1
+# ids <- coati_ids$name
+# 
+# plot_animated_events <- function(r, ff_output, xs, ys, timestamps, surrounding_mins = 5, fixes_per_minute, color_only_main_groups = F, ids, plot_dir,
+#                                  plot_interpolated = F, interpolated_xs = NULL, interpolated_ys = NULL, interpolated_timestamps = NULL,
+#                                  interpolated_fixes_per_minute = NULL){
+#   
+#   events <- ff_output$events_detected
+#   
+#   if(plot_interpolated){
+#     if(is.null(interpolated_xs) | is.null(interpolated_ys | is.null(interpolated_timestamps) | is.null(interpolated_fixes_per_minute)))
+#       stop('if plotting interpolated data, please provide interpolated xs, ys, and timestamps')
+#     
+#     ## Make the event timestamps and the plotting timestamps and the links between them
+#     ## Create mapping between timestamps and interpolated_timestamps
+#     timestamps_mapping <- as.vector(tidyr::fill(data.frame(x = match(interpolated_timestamps, timestamps)), x)$x)
+#     
+#     time_of_event_interpolated <- which(interpolated_timestamps == timestamps[events$tidx[r]])
+#     time_of_event <- which(timestamps == timestamps[events$tidx[r]])
+#     time_idxs_plotting <- (time_of_event_interpolated - (surrounding_mins*interpolated_fixes_per_minute)) : (time_of_event_interpolated + (surrounding_mins*interpolated_fixes_per_minute))
+#     time_idxs_event <- (time_of_event - (surrounding_mins*fixes_per_minute)) : (time_of_event + (surrounding_mins*fixes_per_minute))
+#   }else{
+#     time_of_event <- which(timestamps == timestamps[events$tidx[r]])
+#     time_idxs_plotting <- time_idxs_event <- (time_of_event - (surrounding_mins*fixes_per_minute)) : (time_of_event + (surrounding_mins*fixes_per_minute))
+#   }
+#   
+#   ids_in_event <- ids[events$big_group_idxs[r][[1]]]
+#   ids_in_A <-ids[events$group_A_idxs[r][[1]]]
+#   ids_in_B <-ids[events$group_B_idxs[r][[1]]]
+#   ids_in_C <-ids[events$group_C_idxs[r][[1]]]
+#   ids_in_D <-ids[events$group_D_idxs[r][[1]]]
+#   
+#   ## Data frame for drawing lines between individuals who are within inner threshold
+#   togethers <- ff_output$together[,,time_idxs_event]
+#   together_df_list <- list()
+#   for(tid in time_idxs_event){
+#     together_idxs <- which(ff_output$together[,,tid], arr.ind = T)
+#     
+#     ## get the 1hz time indexes that are greater than tid and less then the next time
+#     if(plot_interpolated){
+#       matching_1hz_tids <- which(interpolated_timestamps >= timestamps[tid] & interpolated_timestamps < timestamps[tid+1])
+#       together_df_list[[length(together_df_list)+1]] <- data.frame(x = as.vector(interpolated_xs[together_idxs[,1], matching_1hz_tids]),xend = as.vector(interpolated_xs[together_idxs[,2], matching_1hz_tids]), y = as.vector(interpolated_ys[together_idxs[,1], matching_1hz_tids]),yend = as.vector(interpolated_ys[together_idxs[,2], matching_1hz_tids]),time = rep(interpolated_timestamps[matching_1hz_tids], each = nrow(together_idxs)))
+#     }else{
+#       together_df_list[[length(together_df_list)+1]] <- data.frame(x = as.vector(xs[together_idxs[,1], timestamps[tid]]), xend = as.vector(xs[together_idxs[,2], timestamps[tid]]), y = as.vector(ys[together_idxs[,1], timestamps[tid]]), yend = as.vector(ys[together_idxs[,2], timestamps[tid]]), time = rep(timestamps[tid], nrow(together_idxs)))
+#     }
+#   }
+#   together_df <- do.call(rbind, together_df_list)
+#   
+#   ## Combine into data frame for plotting
+#   if(plot_interpolated){
+#     plot_df <- ariformat_to_df(time_indices_selected = time_idxs_plotting, xs = interpolated_xs, ys = interpolated_ys, ids = ids, timestamps = interpolated_timestamps)
+#   }else{
+#     plot_df <- ariformat_to_df(time_indices_selected = time_idxs_plotting, xs = xs, ys = ys, ids = ids, timestamps = timestamps)
+#   }
+#   ## Assign individuals to subgroups for coloring points
+#   plot_df$group <- 'uninvolved'
+#   if(events$event_type[r] == 'fission'){
+#     ## Before event time, all involved individuals are in the big group
+#     plot_df[plot_df$id %in% ids_in_event & plot_df$time < timestamps[events$tidx[r]],'group'] <- 'big_group'
+#     
+#     ## After (or equal to) assign to the subgroups
+#     for(letter in c('A', 'B', 'C', 'D')){
+#       subgroup_ids <- get(paste0('ids_in_', letter))
+#       
+#       ## If subgroup is empty, skip (common for C and D, should never happen for A and B)
+#       if(all(is.na(subgroup_ids))){
+#         next
+#       }
+#       plot_df[plot_df$id %in% subgroup_ids & plot_df$time >= timestamps[events$tidx[r]],'group'] <- letter
+#     }
+#   }else if(events$event_type[r] == 'fusion'){
+#     ## Before event time, all involved individuals are in the big group
+#     plot_df[plot_df$id %in% ids_in_event & plot_df$time >= timestamps[events$tidx[r]],'group'] <- 'big_group'
+#     
+#     ## After (or equal to) assign to the subgroups
+#     for(letter in c('A', 'B', 'C', 'D')){
+#       subgroup_ids <- get(paste0('ids_in_', letter))
+#       
+#       ## If subgroup is empty, skip (common for C and D, should never happen for A and B)
+#       if(all(is.na(subgroup_ids))){
+#         next
+#       }
+#       plot_df[plot_df$id %in% subgroup_ids & plot_df$time < timestamps[events$tidx[r]],'group'] <- letter
+#     }
+#   }
+#   
+#   if(color_only_main_groups){
+#     color_lookup <- data.frame(col =  c('firebrick2', 'blue1', 'purple4', 'gray', 'orange', 'dodgerblue'),
+#                                group = c('A', 'B', 'big_group', 'uninvolved', 'C', 'D'))
+#     plot_df$col <- left_join(plot_df, color_lookup)$col
+#   }else{
+#     color_lookup <- data.frame(id = ids,
+#                                r = runif(length(ids), 0,1),
+#                                g = runif(length(ids), 0,1),
+#                                b = runif(length(ids), 0,1))
+#     
+#     if(plot_interpolated){
+#       ### For every 1 second, get matching 30s timestamp index using the 1hz to 30s mapping
+#       ts <- timestamps_mapping[match(plot_df$time, interpolated_timestamps)]
+#     }else{
+#       ts <- match(plot_df$time, timestamps)
+#     }
+#     
+#     
+#     plot_df$col <- NA
+#     for(i in 1:nrow(plot_df)){
+#       
+#       ## Skip for individuals who have no gps data (e.g., LEXI)
+#       if(is.na(plot_df[i,'x']))
+#         next
+#       
+#       id <- match(plot_df$id[i], ids)
+#       ## Get group number for the row
+#       group_num <- ffs$groups[id,ts[i]]
+#       
+#       ## Find matching group in groups_list
+#       group <- ffs$groups_list[[ts[i]]][[group_num]]
+#       
+#       ## Assign color based on mean of individual values
+#       rgbs <- apply(X = color_lookup[group,c('r', 'g', 'b')], FUN = mean, MARGIN = 2)
+#       plot_df$col[i] <- rgb(rgbs[1], rgbs[2], rgbs[3])
+#       
+#     }
+#   }
+#   
+#   ## Center the plot and standardize axes to meters from center
+#   centroid_group <- c(mean(plot_df[plot_df$id %in% ids_in_event,'x'], na.rm = T),
+#                       mean(plot_df[plot_df$id %in% ids_in_event,'y'], na.rm = T))
+#   plot_df$x <- plot_df$x - centroid_group[1]
+#   plot_df$y <- plot_df$y - centroid_group[2]
+#   
+#   together_df$x <- together_df$x - centroid_group[1]
+#   together_df$xend <- together_df$xend - centroid_group[1]
+#   together_df$y <- together_df$y - centroid_group[2]
+#   together_df$yend <- together_df$yend - centroid_group[2]
+#   together_df <- together_df[together_df$time <= max(plot_df$time),]
+#   
+#   p <- ggplot(data = plot_df, aes(x = x, y = y, group = id, color = col))+
+#     geom_segment(data = together_df, aes(xend = xend, yend = yend, x = x, y = y), color = 'gray', alpha = 0.1, inherit.aes = F)+
+#     geom_point(alpha = 0.3) + 
+#     xlim(c(-500, 500))+
+#     ylim(c(-500, 500))+
+#     scale_color_identity()+
+#     theme_classic()+
+#     coord_equal()+
+#     theme(legend.position = 'none')+
+#     transition_time(time)
+#   #shadow_wake(wake = 0.3, exclude_layer = 1)
+#   
+#   
+#   
+#   pa <- animate(p, height = 4, width = 4, units = 'in', res = 300, type = 'cairo', renderer = gifski_renderer())
+#   anim_save(paste0('animated_event_', r,'.gif'), pa, path = plot_dir)
+# }
+# 
+# 

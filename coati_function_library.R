@@ -824,7 +824,7 @@ angle_between_vectors <- function(x1_i, y1_i, x1_f, y1_f, x2_i, y2_i, x2_f, y2_f
 
 }
 
-#DETECT FF EVENTS
+#DETECT FF EVENTS ***OLD VERSION OF FUNCTION, NEW VERSION CALLED IDENTIFY_SPLITS_AND_MERGES***
 #Detect fissions and fusions using "sticky-DBSCAN" method from Libera et al.
 #Start by defining an adjacency matrix ('together' in the code) of which dyads
 #are "connected" at any moment in time. Dyads are considered to be connected if
@@ -874,6 +874,7 @@ angle_between_vectors <- function(x1_i, y1_i, x1_f, y1_f, x2_i, y2_i, x2_f, y2_f
 #     connected (1) or not (0) or unknown (NA)
 #   changes: data frame containing all the subgroups membership changes (not
 #     just ones identified as fissions or fusions)
+
 detect_fissions_and_fusions <- function(R_inner, R_outer, xs = xs, ys = ys, ts = ts, coati_ids = coati_ids, verbose = T){
 
   #----Identify subgroups at each point
@@ -1184,6 +1185,482 @@ detect_fissions_and_fusions <- function(R_inner, R_outer, xs = xs, ys = ys, ts =
 
 
 
+#IDENTIFY SPLITS AND MERGES (FORMERLY DETECT_FISSIONS_AND_FUSIONS)
+#Detect fissions and fusions using "sticky-DBSCAN" method from Libera et al.
+#Start by defining an adjacency matrix ('together' in the code) of which dyads
+#are "connected" at any moment in time. Dyads are considered to be connected if
+#they go within a distance R_inner of one another, and they continue to be
+#connected until they leave a distance R_outer of one another on both ends
+#(before and after) of the period where their distance dropped below R_inner.
+#This double threshold makes periods of connectedness more stable by removing
+#the "flicker" that would result from having a single threshold.
+#NAs are handled by ending a period of connectedness if an individual has an NA
+#at the point immediately before / after (if the were connected after / before
+#that NA). Individuals with NAs are not included in the together matrix and will
+#not be included in the groups.
+#Once connectedness of dyads is determined, merge dyads together into groups by
+#using DBSCAN on 1 - together as the distance matrix, with eps = something small
+#(.01 in the code). Store these groups in groups_list, a list of lists whose length
+#is equal to n_times.
+
+#Stepping through the groups_list, identify all changes in group membership,
+#i.e. consecutive time points when the groups do not match. The algorithm flags
+# any change, including instances where individuals disappear or reappear in
+# groups due to missing data (but these are later ignored). Store in "changes"
+# data frame.
+#In a last step, find all changes where the individuals were preserved
+#(i.e. individuals did not disappear) and where the number of subgroups either
+#increased (a fission) or decreased (a fusion). Store these in a data frame
+# called events_detected.
+#In cases where the number of subgroups went from 1 to 2 (for a fission) or
+#2 to 1 (for a fusion), identify the members of the 2 subgroups as group A and B
+#(labels arbitrary). In cases where there were more subgroups, first
+#INPUTS:
+# R_inner, R_outer: [numeric] inner and outer thresholds respectively
+# xs, ys: [n_inds x n_times matrices] of x and y UTM coordinates
+# ts: vector of timestamps
+# coati_ids: coati ids data frame
+# breaks: indexes to breaks in the data (default NULL treats data as a contiguous sequence) - overrides break_by_day
+# break_by_day: whether to break up data by date (boolean)
+#OUTPUTS:
+# out: a list of outputs containing
+#   out$events_detected: data frame with info on detected fissions and fusions, 
+#   and limited info for shuffles
+#     $event_idx: unique id number of the event
+#     $tidx: (initial) time index of the event
+#     $event_type: "fission" or "fusion" or "shuffle
+#     $n_groups_before: number of groups prior to the event
+#     $n_groups_after: number of groups after the event
+#     $big_group_idxs: indexes of all the individuals involved in the event
+#     $big_group: names of all the individuals involved in the event
+#     $group_A_idxs, $group_B_idxs, $group_C_idxs, etc.: individual idxs of subgroup members
+#     $group_A, $group_B, $group_C, etc.: names of subgroup members
+#     $n_A, $n_B, $n_C etc.: number of individuals in each subgroup
+#     $n_big_group: number of individuals in the big group (original group for fissions, subseq group for fusions)
+#       NOTE: big_group_idxs, big_group, group_A_idxs etc., 
+#       group_A etc. n_A etc. and n_big_group are set to NA for shuffles... 
+#       you can get more detailed info for shuffles from all_events_info object) 
+#   out$all_events_info: list of information about all fission-fusion (or shuffle) 
+#     events. all_events_info[[i]] contains the following info for event i:
+#     $t: time index of the event
+#     $groups_before: [list of lists] list of groups before the event (at time t)
+#     $groups_after: [list of lists] list of groups after the event (at time t + 1)
+#     $event_type: [character] fission, fusion, or shuffle
+#     $n_groups_before: number of groups before the event
+#     $n_groups_after: number of groups after the event
+#   out$groups_list: list of subgroups in each timestep
+#     groups_list[[t]] gives a list of the subgroups
+#     groups_list[[t]][[1]] gives the vector of the first subgroup, etc.
+#   out$together: [n_inds x n_inds x n_times matrix] of whether individuals are
+#     connected (1) or not (0) or unknown (NA)
+#   out$R_inner: inner radius used in the computations
+#   out$R_outer: outer radius used in the computations
+identify_splits_and_merges <- function(R_inner, R_outer, xs = xs, ys = ys, ts = ts, breaks = c(1, length(ts)+1), names = NULL, break_by_day = F, verbose = T){
+  
+  #----Identify subgroups at each point
+  if(verbose){print('Identifying subgroups at each point using sticky DBSCAN')}
+  #number of inds and times
+  n_inds <- nrow(xs)
+  n_times <- ncol(xs)
+  
+  #day start indexes
+  if(break_by_day){
+    days <- date(ts)
+    day_start_idxs <- c(1, which(diff(days)==1)+1)
+    day_start_idxs <- c(day_start_idxs, length(ts)+1)
+    if(!exists('breaks')){
+      breaks <- day_start_idxs
+    }
+  }
+  
+  #Get dyadic distances for each pair, then use double threshold method to determine if they are together at any moment
+  dyad_dists <- together <- array(NA, dim = c(n_inds, n_inds, n_times))
+  for(i in 1:(n_inds-1)){
+    for(j in (i+1):n_inds){
+      
+      #dyadic distance
+      dx <- xs[i,] - xs[j,]
+      dy <- ys[i,] - ys[j,]
+      dyad_dists[i,j,] <- sqrt(dx^2 + dy^2)
+      
+      #together or not
+      #loop over days (if breaking by day) or treat whole dataset as one "day". for each day...
+      for(d in 1:(length(breaks)-1)){
+        
+        #get times for that day
+        t_day <- breaks[d]:(breaks[d+1]-1)
+        
+        #dyadic distances on that day
+        dyad_dists_ij <- dyad_dists[i,j,t_day]
+        
+        if(sum(!is.na(dyad_dists_ij))==0){
+          next
+        }
+        
+        #times when together within inner radius
+        together_inner <- dyad_dists_ij <= R_inner
+        
+        #times when together within outer radius
+        together_outer <- dyad_dists_ij <= R_outer
+        
+        together_ij <- together_inner
+        
+        #if they are never together, store that and skip to next individual
+        if(sum(together_inner,na.rm=T)==0){
+          together[i,j,t_day] <- together[j,i,t_day] <- together_ij
+          next
+        }
+        
+        #go backwards from crossing points into inner radius to find the 'starts' when crossed the outer radius
+        inner_starts <- which(diff(together_inner)==1)+1  ## Add 1 to make indices of differences line up with indices of together_inner
+        if(length(inner_starts)==0){
+          together[i,j,t_day] <- together[j,i,t_day] <- together_ij
+          next
+        }
+        for(k in 1:length(inner_starts)){
+          crossing <- inner_starts[k]
+          curr_time <- crossing
+          for(curr_time in seq(crossing,1,-1)){
+            ## If NA, treat as though they are outside of together_outer
+            if(is.na(together_outer[curr_time])){
+              start <- curr_time + 1
+              break
+            }
+            ## If time index 1 is reached, they started together so start of event = start of study
+            if(curr_time == 1){
+              start <- curr_time
+              break
+            }
+            ## If together_outer switches to F, mark the last T as the start of the event
+            if(together_outer[curr_time]==F){
+              start <- curr_time + 1
+              break
+            }
+            
+          }
+          together_ij[start:crossing] <- T
+        }
+        
+        #go forwards from crossing points out of outer radius to find the 'ends' when crossed the outer radius
+        inner_ends <- which(diff(together_inner)==-1)
+        if(length(inner_ends)==0){
+          together[i,j,t_day] <- together[j,i,t_day] <- together_ij
+          next
+        }
+        for(k in 1:length(inner_ends)){
+          crossing <- inner_ends[k]
+          curr_time <- crossing
+          for(curr_time in seq(crossing,length(together_ij),1)){
+            ## If NA, treat as though they are outside of together_outer
+            if(is.na(together_outer[curr_time])){
+              end <- curr_time - 1
+              break
+            }
+            ## If the last time index is reached, end of event = end of day
+            if(curr_time == length(together_outer)){
+              end <- curr_time
+              break
+            }
+            ## If together_outer switches to F, mark the last T as the end of the event
+            if(together_outer[curr_time]==F){
+              end <- curr_time - 1
+              break
+            }
+            
+          }
+          together_ij[crossing:end] <- T
+        }
+        
+        together[i,j,t_day] <- together[j,i,t_day] <- together_ij
+        
+      }
+    }
+  }
+  
+  #Identify groups from together matrices and store in group matrix
+  groups <- matrix(NA, nrow = n_inds, ncol = n_times)
+  for(t in 1:n_times){
+    ## Work only with individuals who have a location for this timepoint
+    non.nas <- which(colSums(!is.na(together[,,t]))>0)
+    if(length(non.nas)<=1){
+      next
+    }
+    non.nas.together <- together[non.nas,non.nas,t]
+    diag(non.nas.together) <- 1
+    ## Use DBSCAN to pull out groups (i.e. connected subcomponents of together matrix)
+    grps.non.nas <- dbscan(x = as.dist(1 - non.nas.together), eps = .1,minPts=1)$cluster
+    groups[non.nas, t] <- grps.non.nas
+  }
+  
+  #also store groups as lists of lists
+  groups_list <- list()
+  for(t in 1:n_times){
+    
+    #create a list to hold the groups at that timestep
+    groups_list[[t]] <- list()
+    if(sum(!is.na(groups[,t]))==0){
+      next
+    }
+    
+    #
+    max_group_id <- max(groups[,t],na.rm=T)
+    for(i in seq(1,max_group_id)){
+      groups_list[[t]][[i]] <- which(groups[,t]==i)
+    }
+  }
+  
+  #Identifying changes in group membership in consecutive time steps
+  if(verbose){print('Identifying changes in group membership')}
+  event_times <- c()
+  for(d in 1:(length(breaks)-1)){
+    t_day <- breaks[d]:(breaks[d+1]-1)
+    for(t in t_day[1:(length(t_day)-1)]){
+      
+      if(length(groups_list[[t]])==0 | length(groups_list[[t+1]])==0){
+        next
+      }
+      ## If any groups arent present in next step, store this time as a time in which a change event occurred
+      if(!all(groups_list[[t]] %in% groups_list[[t+1]])){
+        event_times <- c(event_times, t)
+      }
+    }
+  }
+  
+  #for each time when the subgrouping patterns changed...
+  all_events_info <- list()
+  event_idx <- 1
+  for(tidx in 1:length(event_times)){
+    #print(tidx)
+    t <- event_times[tidx]
+    
+    #get groups before and after
+    groups_curr <- groups_list[[t]]
+    groups_next <- groups_list[[t+1]]
+    
+    #remove any individuals who are not present in one or the other time step from both timesteps
+    inds_present_curr <- unlist(groups_curr)
+    inds_present_next <- unlist(groups_next)
+    inds_to_remove <- setdiff(inds_present_curr, inds_present_next) 
+    if(length(inds_to_remove)>0){
+      for(g in 1:length(groups_curr)){
+        for(i in 1:length(groups_curr[[g]])){
+          if(groups_curr[[g]][i] %in% inds_to_remove){
+            groups_curr[[g]] <- groups_curr[[g]][-i]
+          }
+        }
+      }
+      for(g in 1:length(groups_next)){
+        for(i in 1:length(groups_next[[g]])){
+          if(groups_next[[g]][i] %in% inds_to_remove){
+            groups_next[[g]] <- groups_next[[g]][-i]
+          }
+        }
+      }
+    }
+    
+    #remove any now-empty groups from groups_curr and groups_next
+    groups_curr[!unlist(lapply(groups_curr, length))] <- NULL
+    groups_next[!unlist(lapply(groups_next, length))] <- NULL
+    
+    
+    #find sets of connected groups across the current and future timestep
+    #construct a directed network connection_net[i,j] where the rows represent groups in the 
+    #current timestep and the cols represent groups in the next timestep. Define
+    #connection_net[i,j] = 1 if group i from the current timestep and group j from the next
+    #timestep share a member, and 0 otherwise. 
+    n_groups_curr <- length(groups_curr)
+    n_groups_next <- length(groups_next)
+    connection_net <- matrix(F, nrow = n_groups_curr, ncol = n_groups_next)
+    for(i in 1:n_groups_curr){
+      for(j in 1:n_groups_next){
+        if(length(intersect(groups_curr[[i]], groups_next[[j]])) > 0){
+          connection_net[i,j] <- T
+        }
+      }
+    }
+    
+    #get connected components of the bipartite network by iteratively selecting 
+    #a "seed" group at time t, pulling it's connections at time t+1,
+    #saving that as a component, then removing it from remaining groups 
+    
+    ### initialize full set of remaining groups at each time point
+    ## we will go through and move groups from here to component_groups_A/B
+    remaining_groups_A <- 1:nrow(connection_net)
+    remaining_groups_B <- 1:ncol(connection_net)
+    #component id
+    idx <- 1
+    component_groups_A <- component_groups_B <- list()
+    ## iterate as long as there are remaining groups at the first time point to process
+    while(length(remaining_groups_A) > 0){
+      
+      #start with seed group from first time point (A)
+      seed_A <- remaining_groups_A[1]
+      
+      #initiatlize the object tracking which groups are connected
+      grps_A <- c(seed_A)
+      grps_B <- c()
+      
+      #make a duplicate to track whether it changes after the upcoming while loop
+      grps_A_orig <- c()
+      grps_B_orig <- c()
+      
+      ##while loop terminates once the operations has an effect on grps_A and grps_B
+      while(!setequal(grps_A_orig, grps_A) | !setequal(grps_B_orig,grps_B)){
+        
+        #set to same so that while loop stops if while loop has no effect
+        grps_A_orig <- grps_A
+        grps_B_orig <- grps_B
+        
+        #for each identified group in A, add unique groups in B that are connected
+        #to that group in A
+        for(i in 1:length(grps_A)){
+          grps_B <- union(grps_B, which(connection_net[grps_A[i],]))
+        }
+        
+        #then do the same but in reverse (B->A) to catch rare cases where two groups in A
+        #might both be connected to the same group in B
+        for(i in 1:length(grps_B)){
+          grps_A <- union(grps_A, which(connection_net[,grps_B[i]]))
+        }
+      }
+      
+      #Save A and B components, linked by shared component id
+      component_groups_A[[idx]] <- c(grps_A)
+      component_groups_B[[idx]] <- c(grps_B)
+      
+      #iterate component id
+      idx <- idx + 1
+      
+      #remove processed groups from remaining groups and continue with remaining groups
+      remaining_groups_A <- setdiff(remaining_groups_A, grps_A)
+      remaining_groups_B <- setdiff(remaining_groups_B, grps_B)
+      
+    }
+    
+    #remove instances where group did not change (one to one connections between groups)
+    i <- 1
+    while(i <= length(component_groups_A)){
+      if(length(component_groups_A[[i]])==1 & length(component_groups_B[[i]])==1){
+        component_groups_A[[i]] <- component_groups_B[[i]] <- NULL
+        i <- i - 1
+      }
+      i <- i + 1
+    }
+    
+    #for each of the component events
+    if(length(component_groups_A)>0){
+      for(i in 1:length(component_groups_A)){
+        #classify into event types and store subgroup memberships in a data frame
+        component_groups_before <- component_groups_A[[i]]
+        component_groups_after <- component_groups_B[[i]]
+        n_groups_before <- length(component_groups_before)
+        n_groups_after <- length(component_groups_after)
+        #fission = 1 group becomes multiple
+        if(n_groups_before == 1){
+          event_type <- 'fission'
+        } else{
+          #fusion = multiple groups become 1  
+          if(n_groups_after == 1){
+            event_type <- 'fusion'
+          } else{
+            #shuffle = multiple groups become multiple groups      
+            event_type <- 'shuffle'
+          }
+        }
+        
+        ## save information on the subgroups that change
+        groups_before <- list()
+        groups_after <- list()
+        for(g in 1:n_groups_before){
+          groups_before[[g]] <- list(groups_curr[[component_groups_before[[g]]]])
+        }
+        for(g in 1:n_groups_after){
+          groups_after[[g]] <- list(groups_next[[component_groups_after[[g]]]])
+        }
+        
+        #store data
+        n_groups_before <- length(groups_before)
+        n_groups_after <- length(groups_after)
+        event_info <- list(t = t, groups_before = groups_before, groups_after = groups_after, event_type = event_type, n_groups_before = n_groups_before, n_groups_after = n_groups_after)
+        all_events_info[[event_idx]] <- event_info
+        event_idx <- event_idx + 1
+      }
+    }
+  }
+  
+  #get maximum number of subgroups during fissions or fusions, used subsequently for storing data
+  n_subgroups <- rep(NA, length(all_events_info))
+  for(i in 1:length(all_events_info)){
+    n_subgroups[i] <- max(all_events_info[[i]]$n_groups_before, all_events_info[[i]]$n_groups_after)
+  }
+  max_n_subgroups <- max(n_subgroups, na.rm=T)
+  
+  
+  ##store data in dataframe
+  events_detected <- data.frame()
+  for(i in 1:length(all_events_info)){
+    event_type <- all_events_info[[i]]$event_type
+    n_groups_before <- all_events_info[[i]]$n_groups_before
+    n_groups_after <- all_events_info[[i]]$n_groups_after
+    row <- data.frame(event_idx = i, 
+                      tidx = all_events_info[[i]]$t, 
+                      event_type = all_events_info[[i]]$event_type,
+                      n_groups_before = n_groups_before, 
+                      n_groups_after = n_groups_after)
+    
+    #initialize columns for storing data
+    row$big_group_idxs <- list(c(NA))
+    row$big_group <- list(c(NA))
+    ## create columns based on maximum number subgroups during events in data
+    for(j in 1:max_n_subgroups){
+      row[paste('group',LETTERS[j],'idxs',sep='_')] <- list(c(NA))
+    }
+    for(j in 1:max_n_subgroups){
+      row[paste('group',LETTERS[j],sep='_')] <- list(c(NA))
+    }
+    for(j in 1:max_n_subgroups){
+      row[paste('n',LETTERS[j], sep = '_')] <- NA
+    }
+    row$n_big_group <- NA
+    
+    #if event is a fission, the large group is from the first time step
+    if(event_type == 'fission'){
+      row$big_group_idxs <- all_events_info[[i]]$groups_before[[1]]
+      row$big_group <- list(names[unlist(all_events_info[[i]]$groups_before[[1]])])
+      for(j in 1:n_groups_after){
+        row[,paste('group',LETTERS[j],'idxs',sep='_')] <- all_events_info[[i]]$groups_after[j]
+        row[,paste('group',LETTERS[j],sep='_')] <- list(list(c(names[unlist(all_events_info[[i]]$groups_after[j])])))
+        row[,paste('n',LETTERS[j],sep='_')] <- length(all_events_info[[i]]$groups_after[j][[1]][[1]])
+      }
+      row$n_big_group <- length(row$big_group_idxs[[1]])
+    }
+    
+    #if event is a fusion, the large group is from the second time step
+    if(event_type == 'fusion'){
+      row$big_group_idxs <- all_events_info[[i]]$groups_after[[1]]
+      row$big_group <- list(names[unlist(all_events_info[[i]]$groups_after[[1]])])
+      for(j in 1:n_groups_before){
+        row[,paste('group',LETTERS[j],'idxs',sep='_')] <- all_events_info[[i]]$groups_before[j]
+        row[,paste('group',LETTERS[j],sep='_')] <- list(list(c(names[unlist(all_events_info[[i]]$groups_before[j])])))
+        row[,paste('n',LETTERS[j],sep='_')] <- length(all_events_info[[i]]$groups_before[j][[1]][[1]])
+      }
+      row$n_big_group <- length(row$big_group_idxs[[1]])
+    }
+    
+    
+    
+    events_detected <- rbind(events_detected, row)
+  }
+  
+  #return things
+  out <- list(events_detected = events_detected, all_events_info = all_events_info, groups_list = groups_list, groups = groups, together = together, R_inner = R_inner, R_outer = R_outer)
+  return(out)
+  
+}
+
+
+
+
 #Spatially discretized headings function from move_comm_analysis/audio_gps_processing/spatially_discretized_headings.R in Ari's github
 
 #Function to get 'spatially discretized heading' for a given trajectory (x,y)
@@ -1263,6 +1740,203 @@ spatial.headings <- function(x,y,R,t.idxs=1:length(x),backward=F){
   return(spat.heads)
 }
 
+#' Convert from Ari format to dataframe
+#' 
+#' Creates a dataframe out of GPS data in "Ari format," which is three separate matrices with
+#' matching dimensions and shared indexing (e.g., xs, ys, timestamps). 
+#' 
+#' @param time_indices_selected Time indices for data to include in the dataframe, to be matched with xs, ys, timestamps
+#' @param ids_selected Identities of individuals to include in dataframe. If none provided, all individuals are included
+#' @param xs NxT matrix of UTM-E values for N individuals at T times
+#' @param ys NxT matrix of UTM-N values for N individuals at T times
+#' @param ids Vector of individuals ordered the same as the rows of xs and ys
+#' @param timestamps 1xT vector of timestamps
+#' @param lats NxT matrix of latitude values for N individuals at T times
+#' @param lons NxT matrix of longitude values for N individuals at T times
+
+
+## A function for converting from Ari format to a dataframe for plotting
+ariformat_to_df <- function(time_indices_selected, ids_selected = NULL, 
+                            xs, ys, ids, timestamps, lats = NULL, lons = NULL){
+  
+  ## If no IDs provided, use all
+  if(is.null(ids_selected))
+    ids_selected <- ids
+  
+  df <- data.frame(
+    id = rep(ids_selected, each = length(time_indices_selected)),
+    # Coerce xs and ys to a vector by rows
+    x = as.vector(t(xs[match(ids_selected, ids), time_indices_selected])),
+    y = as.vector(t(ys[match(ids_selected, ids), time_indices_selected])),
+    time = rep(timestamps[time_indices_selected], length(ids_selected))
+  )
+  
+  if(!is.null(lats) & !is.null(lons)){
+    df$lons <- as.vector(t(lons[match(ids_selected, ids), time_indices_selected]))
+    df$lats <- as.vector(t(lats[match(ids_selected, ids), time_indices_selected]))
+  }
+  return(df)
+}
+
+
+
+
+#' Animate an event and some surrounding minutes
+#' 
+#' Animate movement of individuals and the corresponding connectedness and subgroup structure
+
+
+plot_animated_events <- function(r, ff_output, xs, ys, timestamps, surrounding_mins = 5, fixes_per_minute, color_only_main_groups = F, ids, plot_dir,
+                                 plot_interpolated = F, interpolated_xs = NULL, interpolated_ys = NULL, interpolated_timestamps = NULL,
+                                 interpolated_fixes_per_minute = NULL){
+  
+  events <- ff_output$events_detected
+  
+  if(plot_interpolated){
+    if(is.null(interpolated_xs) | is.null(interpolated_ys | is.null(interpolated_timestamps) | is.null(interpolated_fixes_per_minute)))
+      stop('if plotting interpolated data, please provide interpolated xs, ys, and timestamps')
+    
+    ## Make the event timestamps and the plotting timestamps and the links between them
+    ## Create mapping between timestamps and interpolated_timestamps
+    timestamps_mapping <- as.vector(tidyr::fill(data.frame(x = match(interpolated_timestamps, timestamps)), x)$x)
+    
+    time_of_event_interpolated <- which(interpolated_timestamps == timestamps[events$tidx[r]])
+    time_of_event <- which(timestamps == timestamps[events$tidx[r]])
+    time_idxs_plotting <- (time_of_event_interpolated - (surrounding_mins*interpolated_fixes_per_minute)) : (time_of_event_interpolated + (surrounding_mins*interpolated_fixes_per_minute))
+    time_idxs_event <- (time_of_event - (surrounding_mins*fixes_per_minute)) : (time_of_event + (surrounding_mins*fixes_per_minute))
+  }else{
+    time_of_event <- which(timestamps == timestamps[events$tidx[r]])
+    time_idxs_plotting <- time_idxs_event <- (time_of_event - (surrounding_mins*fixes_per_minute)) : (time_of_event + (surrounding_mins*fixes_per_minute))
+  }
+  
+  ids_in_event <- ids[events$big_group_idxs[r][[1]]]
+  ids_in_A <-ids[events$group_A_idxs[r][[1]]]
+  ids_in_B <-ids[events$group_B_idxs[r][[1]]]
+  ids_in_C <-ids[events$group_C_idxs[r][[1]]]
+  ids_in_D <-ids[events$group_D_idxs[r][[1]]]
+  
+  ## Data frame for drawing lines between individuals who are within inner threshold
+  togethers <- ff_output$together[,,time_idxs_event]
+  together_df_list <- list()
+  for(tid in time_idxs_event){
+    together_idxs <- which(ff_output$together[,,tid], arr.ind = T)
+    
+    ## get the 1hz time indexes that are greater than tid and less then the next time
+    if(plot_interpolated){
+      matching_1hz_tids <- which(interpolated_timestamps >= timestamps[tid] & interpolated_timestamps < timestamps[tid+1])
+      together_df_list[[length(together_df_list)+1]] <- data.frame(x = as.vector(interpolated_xs[together_idxs[,1], matching_1hz_tids]),xend = as.vector(interpolated_xs[together_idxs[,2], matching_1hz_tids]), y = as.vector(interpolated_ys[together_idxs[,1], matching_1hz_tids]),yend = as.vector(interpolated_ys[together_idxs[,2], matching_1hz_tids]),time = rep(interpolated_timestamps[matching_1hz_tids], each = nrow(together_idxs)))
+    }else{
+      together_df_list[[length(together_df_list)+1]] <- data.frame(x = as.vector(xs[together_idxs[,1], timestamps[tid]]), xend = as.vector(xs[together_idxs[,2], timestamps[tid]]), y = as.vector(ys[together_idxs[,1], timestamps[tid]]), yend = as.vector(ys[together_idxs[,2], timestamps[tid]]), time = rep(timestamps[tid], nrow(together_idxs)))
+    }
+  }
+  together_df <- do.call(rbind, together_df_list)
+  
+  ## Combine into data frame for plotting
+  if(plot_interpolated){
+    plot_df <- ariformat_to_df(time_indices_selected = time_idxs_plotting, xs = interpolated_xs, ys = interpolated_ys, ids = ids, timestamps = interpolated_timestamps)
+  }else{
+    plot_df <- ariformat_to_df(time_indices_selected = time_idxs_plotting, xs = xs, ys = ys, ids = ids, timestamps = timestamps)
+  }
+  ## Assign individuals to subgroups for coloring points
+  plot_df$group <- 'uninvolved'
+  if(events$event_type[r] == 'fission'){
+    ## Before event time, all involved individuals are in the big group
+    plot_df[plot_df$id %in% ids_in_event & plot_df$time < timestamps[events$tidx[r]],'group'] <- 'big_group'
+    
+    ## After (or equal to) assign to the subgroups
+    for(letter in c('A', 'B', 'C', 'D')){
+      subgroup_ids <- get(paste0('ids_in_', letter))
+      
+      ## If subgroup is empty, skip (common for C and D, should never happen for A and B)
+      if(all(is.na(subgroup_ids))){
+        next
+      }
+      plot_df[plot_df$id %in% subgroup_ids & plot_df$time >= timestamps[events$tidx[r]],'group'] <- letter
+    }
+  }else if(events$event_type[r] == 'fusion'){
+    ## Before event time, all involved individuals are in the big group
+    plot_df[plot_df$id %in% ids_in_event & plot_df$time >= timestamps[events$tidx[r]],'group'] <- 'big_group'
+    
+    ## After (or equal to) assign to the subgroups
+    for(letter in c('A', 'B', 'C', 'D')){
+      subgroup_ids <- get(paste0('ids_in_', letter))
+      
+      ## If subgroup is empty, skip (common for C and D, should never happen for A and B)
+      if(all(is.na(subgroup_ids))){
+        next
+      }
+      plot_df[plot_df$id %in% subgroup_ids & plot_df$time < timestamps[events$tidx[r]],'group'] <- letter
+    }
+  }
+  
+  if(color_only_main_groups){
+    color_lookup <- data.frame(col =  c('firebrick2', 'blue1', 'purple4', 'gray', 'orange', 'dodgerblue'),
+                               group = c('A', 'B', 'big_group', 'uninvolved', 'C', 'D'))
+    plot_df$col <- left_join(plot_df, color_lookup)$col
+  }else{
+    color_lookup <- data.frame(id = ids,
+                               r = runif(length(ids), 0,1),
+                               g = runif(length(ids), 0,1),
+                               b = runif(length(ids), 0,1))
+    
+    if(plot_interpolated){
+      ### For every 1 second, get matching 30s timestamp index using the 1hz to 30s mapping
+      ts <- timestamps_mapping[match(plot_df$time, interpolated_timestamps)]
+    }else{
+      ts <- match(plot_df$time, timestamps)
+    }
+    
+    
+    plot_df$col <- NA
+    for(i in 1:nrow(plot_df)){
+      
+      ## Skip for individuals who have no gps data (e.g., LEXI)
+      if(is.na(plot_df[i,'x']))
+        next
+      
+      id <- match(plot_df$id[i], ids)
+      ## Get group number for the row
+      group_num <- ffs$groups[id,ts[i]]
+      
+      ## Find matching group in groups_list
+      group <- ffs$groups_list[[ts[i]]][[group_num]]
+      
+      ## Assign color based on mean of individual values
+      rgbs <- apply(X = color_lookup[group,c('r', 'g', 'b')], FUN = mean, MARGIN = 2)
+      plot_df$col[i] <- rgb(rgbs[1], rgbs[2], rgbs[3])
+      
+    }
+  }
+  
+  ## Center the plot and standardize axes to meters from center
+  centroid_group <- c(mean(plot_df[plot_df$id %in% ids_in_event,'x'], na.rm = T),
+                      mean(plot_df[plot_df$id %in% ids_in_event,'y'], na.rm = T))
+  plot_df$x <- plot_df$x - centroid_group[1]
+  plot_df$y <- plot_df$y - centroid_group[2]
+  
+  together_df$x <- together_df$x - centroid_group[1]
+  together_df$xend <- together_df$xend - centroid_group[1]
+  together_df$y <- together_df$y - centroid_group[2]
+  together_df$yend <- together_df$yend - centroid_group[2]
+  together_df <- together_df[together_df$time <= max(plot_df$time),]
+  
+  p <- ggplot(data = plot_df, aes(x = x, y = y, group = id, color = col))+
+    geom_segment(data = together_df, aes(xend = xend, yend = yend, x = x, y = y), color = 'gray', alpha = 0.1, inherit.aes = F)+
+    geom_point(alpha = 0.3) + 
+    xlim(c(-500, 500))+
+    ylim(c(-500, 500))+
+    scale_color_identity()+
+    theme_classic()+
+    coord_equal()+
+    theme(legend.position = 'none')+
+    transition_time(time)
+  #shadow_wake(wake = 0.3, exclude_layer = 1)
+  
+  
+  
+  pa <- animate(p, height = 4, width = 4, units = 'in', res = 300, type = 'cairo', renderer = gifski_renderer())
+  anim_save(paste0('animated_event_', r,'.gif'), pa, path = plot_dir)
+}
 
 
 
