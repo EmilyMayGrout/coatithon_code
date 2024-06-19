@@ -1,0 +1,303 @@
+#this script is to make a dataframe for every time step for which individual is in which subgroup, whether its in the full group and whether all individuals were tracked at that time. Getting speed for each individual at each time step.
+#then running anova of the speeds to look at variance between individuals
+
+#---PARAMS----
+R <- 50
+dt <- 10 #time interval between points (=10 for coati low res). 10 is meters per minute.
+min_tracked <- 7 #minimum number of individuals tracked to include in analysis (=7)
+
+#---DIRECTORIES----
+
+data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
+code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
+gps_file <- "galaxy_xy_10min_level1.RData"
+id_file <- 'coati_ids.RData'
+
+#-----LIBRARIES-----
+
+library(fields)
+library(viridis)
+library(dplyr)
+library(hms) 
+library(ggplot2)
+library(vioplot)
+library(ggpubr)
+library(tidyverse)
+library(broom)
+library(AICcmodavg)
+library(doBy)
+library(FSA)
+library(lubridate)
+library(hms)
+
+#read in library of functions
+setwd(code_dir)
+source('coati_function_library.R')
+
+
+#----LOAD DATA----
+#load data
+setwd(data_dir)
+load(gps_file)
+load(id_file)
+
+#-----MAIN------
+
+n_inds <- nrow(xs)
+n_times <- ncol(xs)
+
+
+#number of individuals tracked at each time point
+n_tracked <- colSums(!is.na(xs))
+
+#indexes to time points where all individuals were tracked
+all_tracked_idxs <- which(n_tracked==n_inds)
+
+#get the subgroup data when radius is 50m
+subgroup_data <- get_subgroup_data(xs, ys, R)
+
+#------------------------
+
+#make a dataframe with time and individual
+
+speed_df <- data.frame(t = rep(1:(n_times-1), n_inds), UTC_time = rep(ts[1:(n_times-1)], n_inds) ,ind = rep(1:n_inds, each = (n_times-1)), n_tracked = rep(n_tracked[1:(n_times-1)], n_inds), subgroup_size = NA, split = NA, speed = NA, context = NA, name = rep(coati_ids$name, each = n_times-1))
+
+
+
+
+#loop through to calculate subgroup size, whether there is a split, and ind speed
+i=1
+for (i in 1:nrow(speed_df)){
+  
+  #get the current individual and time for that row
+  time <- speed_df$t[i]
+  ind <- speed_df$ind[i]
+  
+  #get current subgroups for all individuals at that time
+  sub_data <- subgroup_data$ind_subgroup_membership[,time]
+  
+  #get current subgroup for the focal individual at that time
+  ind_subgroup <- subgroup_data$ind_subgroup_membership[ind,time]
+  
+  #if that individual is not tracked, leave the NA and go to next row
+  if(is.na(ind_subgroup)){
+    next
+  }
+  
+  #get subgroup size for the focal individual
+  subgroup_size <- sum(sub_data == ind_subgroup, na.rm=T)
+  
+  #store subgroup size in df
+  speed_df$subgroup_size[i] <- subgroup_size
+  
+  #determine whether group is "split" i.e. has at least 2 subgroups with at least 2 members each
+  sub_counts <- subgroup_data$subgroup_counts[,time]
+  n_subgroups_with_at_least_2_members <- sum(sub_counts >= 2, na.rm=T)
+  split <- n_subgroups_with_at_least_2_members >= 2
+  
+  #store the split in the dataframe
+  speed_df$split[i] <- split
+  
+  #calculate speed with the xs and ys
+  ind_xs_current <- xs[ind, time]
+  ind_ys_current <- ys[ind, time]
+  
+  next_time <- time + 1
+  ind_xs_next <- xs[ind, next_time]
+  ind_ys_next <- ys[ind, next_time]
+  
+  dx <- ind_xs_next - ind_xs_current
+  dy <- ind_ys_next - ind_ys_current
+  
+  #getting speed
+  speed <- (sqrt((dx)^2 + (dy)^2))/dt
+  
+  speed_df$speed[i] <- speed
+  
+  #adding context: alone, split or group together
+  if(subgroup_size == 1){
+    speed_df$context[i] <-  "alone"
+  }
+  
+  if(split == TRUE & subgroup_size > 1){
+    speed_df$context[i] <- "split"
+  }
+  
+  if(split == FALSE & subgroup_size > 1){
+    speed_df$context[i] <- "together"
+  }
+  
+  
+}
+
+
+#filter to just day (remove weird speed values for overnight)
+speed_days <- speed_df
+speed_days$time_only <- format(speed_days$UTC_time, format = "%H:%M:%S")
+speed_days$time_only <- as_hms(speed_days$time_only)
+speed_days <- speed_days %>%  filter(time_only > as_hms("11:30:00") & time_only < as_hms("22:30:00")) 
+
+#split time of day into three categories, morning (6-10 or 11-15UTC) midday (10-14 or 15-19UTC) afternoon (14-18 or 19-23UTC)
+#first convert to time object from datetime
+speed_days$time_only <- as_hms(speed_days$time_only)
+
+speed_days$day_period <- ifelse(speed_days$time_only > as_hms("10:50:00") & speed_days$time_only < as_hms("15:01:00"), "Morning", 
+                                ifelse(speed_days$time_only > as_hms("15:01:00") & speed_days$time_only < as_hms("19:01:00"),  "Midday", 
+                                       ifelse(speed_days$time_only > as_hms("19:01:00") & speed_days$time_only < as_hms("23:01:00"), "Afternoon", NA)))
+
+
+#remove NA's (when individual was not tracked) or when too few individuals were tracked
+speed_days <- speed_days %>%  filter(n_tracked > min_tracked)
+speed_days <- speed_days %>% filter(!is.na(speed))
+
+
+
+#histogram of speeds
+hist(speed_days$speed)
+
+#plot speeds for each context
+
+vioplot(log(speed_days$speed) ~ speed_days$context)
+
+# function for number of observations 
+give.n <- function(x){
+  return(c(y = median(x)*1.05, label = length(x))) 
+  # experiment with the multiplier to find the perfect position
+}
+
+
+#remove times when alone
+speed_days <- speed_days[!(speed_days$context == "alone"),]
+
+
+png(height = 600, width = 900, units = 'px', filename = paste0(plot_dir,'speeds_in_subgroups_all.png'))
+
+ggplot(speed_days, aes(x = context, y = speed, fill = context)) + 
+  geom_violin() +theme_classic()+
+  scale_fill_manual(values=c("darkslategray2", "darkslategray4"))+
+  theme(axis.text=element_text(size=20),
+        axis.title=element_text(size=24),
+        legend.title = element_text(size=24),
+        legend.text = element_text(size=20), 
+        strip.text = element_text(size = 20)) + 
+  stat_summary(fun.data = give.n, geom = "text", cex = 6, position = position_nudge(x=0.2, y = 5))+ 
+  ylim(0, 30)
+
+
+dev.off()
+#facet_wrap(~name)
+
+#+facet_wrap(~name)
+#TODO: add number of data points for each of the contexts for each individual
+#TODO: look at this depending on the subgroup size
+
+
+png(height = 1200, width = 1500, units = 'px', filename = paste0(plot_dir,'speeds_in_subgroups_perind.png'))
+
+ggplot(speed_days, aes(x = context, y = speed, fill = context)) + 
+  geom_violin() +theme_classic()+
+  scale_fill_manual(values=c("darkslategray2", "darkslategray4"))+
+  theme(axis.text=element_text(size=20),
+        axis.title=element_text(size=24),
+        legend.title = element_text(size=24),
+        legend.text = element_text(size=20), 
+        strip.text = element_text(size = 20)) + 
+  stat_summary(fun.data = give.n, geom = "text", cex = 6, position = position_nudge(x=0.25, y = 5))+ 
+  ylim(0, 25)+ facet_wrap(~name)
+
+dev.off()
+
+
+
+#removing Gus
+speed_df <- speed_df[!(speed_df$name == "Gus"),]
+#log the speed to make data normally distributed
+speed_df$logspeed <- log(speed_df$speed)
+
+# --------------------------------------------------------------------------
+# STATS
+
+#Run ANOVA -- THIS DATA IS NON PARAMETRIC SO WE WILL USE A KRUSKAL WALLIS TEST
+
+summary(speed_df)
+#one way anova testing whether the individual is affected by the speed
+one.way <- aov(speed ~ name, data = speed_df)
+summary(one.way)
+#two way anova testing whether individual and the context affects speed
+two.way <- aov(logspeed ~ name + context, data = speed_df)
+summary(two.way)
+
+model.set <- list(one.way, two.way)
+model.names <- c("one.way", "two.way")
+#look at which model best predicts the data
+aictab(model.set, modnames = model.names)
+
+#checking the data is normally distributed - IT IS NOT NORMAL
+png(height = 1000, width = 1000, units = 'px', filename = paste0(plot_dir,'residuals.png'))
+par(mfrow=c(2,2))
+plot(two.way)
+par(mfrow=c(1,1))
+dev.off()
+
+#  KRUSKAL WALLIS test
+summary(speed_df)
+summaryBy(speed ~ context,
+          data = speed_df,
+          FUN = median,
+          na.rm = TRUE
+)
+
+dev.off()
+#plotting the distributions
+ggplot(speed_df) +
+  aes(x = name, y = speed, fill = name) +
+  geom_boxplot() +
+  theme(legend.position = "none")
+
+#removing NA's
+speed_df <- speed_df %>% drop_na(context)
+speed_df <- speed_df %>% drop_na(name)
+speed_df <- speed_df %>% drop_na(speed)
+
+
+kruskal.test(speed ~ name, data = speed_df)
+
+
+#doing test when alone inds are not included
+kruskal.test(speed ~ context, data = speed_days)
+
+#doing Mann Whitney test to compare the speeds when the group is split or together
+wilcox.test(speed ~ context, data = speed_days,
+            exact = FALSE)
+
+dunnTest(speed ~ name,
+         data = speed_df,
+         method = "holm")
+
+
+
+
+#speeds before a split
+
+#variation of speeds depending on group size
+
+#variance in individual travel speeds will be greater in groups that split than stay cohesive 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
