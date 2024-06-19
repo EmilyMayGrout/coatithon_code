@@ -1,16 +1,14 @@
 #This script is for looking at how call rates relate to fission-fusion dynamics in coatis
 #need to do this with level2 data
 
-library(dplyr)
-library(ggplot2)
 library(tidyverse)
 library(reshape2)
 
 #directory holding all the data
 #datadir <- '~/Dropbox/coatithon/calling_during_fissions_and_fusions/data'
-datadir <- "C:/Users/egrout/Dropbox/coatithon/calling_during_fissions_and_fusions/data"
-callfile <- 'all_data_hms_synched.csv'
-ff_file <- 'galaxy_auto_ff_events_characterized.RData' #this has been rerun with level2 data
+datadir <- "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed"
+callfile <- 'all_data_hms_synched.csv' #made in coati_synch using the cleaned labels from cleaning_labels
+ff_file <- 'galaxy_detailed_events.RData' #this has been rerun with level2 data in characterize_splits_and_merges, detailed version made in split_mechanics_Exploration - this df includes the different event types using the 10m radius as a cut off
 gps_file <- 'galaxy_xy_highres_level2.RData'
 id_file <- 'galaxy_coati_ids.RData'
 
@@ -19,7 +17,6 @@ setwd(datadir)
 calls <- read.csv(callfile, header=T, sep = ',')
 load(id_file)
 load(gps_file)
-rm("xs","ys")  #only need the time indices
 
 #identify labeled periods for each individual
 startstop <- calls[which(calls$label %in% c('start','stop')),]
@@ -75,43 +72,43 @@ calls$name[calls$id == "G9467"] <- "Gus"
 
 #Load fission-fusion events
 load(ff_file)
-group_events_data <- events
-rm('events')
+group_events_data <- detailed_events
+rm('detailed_events')
 
 # get times to posix format and to UTC time zone
-calls$datetime_synch_pos<-as.POSIXct(calls$datetime_synch, format = "%Y-%m-%d %H:%M:%OS", tz = "UTC") 
-labeled_periods$tstart<-as.POSIXct(labeled_periods$starttime, format = "%Y-%m-%d %H:%M:%OS", tz = "UTC") 
-labeled_periods$tstop<-as.POSIXct(labeled_periods$stoptime, format = "%Y-%m-%d %H:%M:%OS", tz = "UTC") 
+calls$datetime_synch_pos <- as.POSIXct(calls$datetime_synch, format = "%Y-%m-%d %H:%M:%OS", tz = "UTC") 
+labeled_periods$tstart <- as.POSIXct(labeled_periods$starttime, format = "%Y-%m-%d %H:%M:%OS", tz = "UTC") 
+labeled_periods$tstop <- as.POSIXct(labeled_periods$stoptime, format = "%Y-%m-%d %H:%M:%OS", tz = "UTC") 
 
 # get the call rate for each individual for each event before, during and after the event (also some additional info, like the subgroup id and the distance moved)
 ind_events_data<-data.frame()
 head(group_events_data)
 for(i in 1:nrow(group_events_data)){
-  event.times<-group_events_data[i,c(10:14)]
-  times<-ts[as.numeric(event.times[,c(2:5)])]  # start - end backwards
-  date<-substring(times[1], 1,10) # date of the event for a quick check of label presence
+  event.times <- group_events_data[i,c(10:14)]
+  times <- ts[as.numeric(event.times[,c(2:5)])]  # start - end backwards
+  date <- substring(times[1], 1,10) # date of the event for a quick check of label presence
   
   if(all(!is.na(times))){
 
     # find individuals where labels are available for duration of event.
-    l.date<-labeled_periods[which(substring(labeled_periods$starttime,1,10) == date),] 
+    l.date <- labeled_periods[which(substring(labeled_periods$starttime,1,10) == date),] 
     
     # there are quite a few dates with no labeled sound data, so ignore those
-    if(nrow(l.date) >0){
-      l.inds<-l.date[which(l.date$tstart <= times[4] & l.date$tstop >= times[1]),"ind_idx"]
+    if(nrow(l.date) > 0){
+      l.inds <- l.date[which(l.date$tstart <= times[4] & l.date$tstop >= times[1]), "ind_idx"]
       
       # only use events were at least one individual has labeled sound data
-      if(length(l.inds) >0){
+      if(length(l.inds) > 0){
         # get all calls during event periods
-        before<-calls[which(calls$datetime_synch_pos >= times[4] & calls$datetime_synch_pos < times[3]),]
-        during<-calls[which(calls$datetime_synch_pos >= times[3] & calls$datetime_synch_pos < times[2]),]
-        after<-calls[which(calls$datetime_synch_pos >= times[2] & calls$datetime_synch_pos < times[1]),]
+        before <- calls[which(calls$datetime_synch_pos >= times[4] & calls$datetime_synch_pos < times[3]),]
+        during <- calls[which(calls$datetime_synch_pos >= times[3] & calls$datetime_synch_pos < times[2]),]
+        after <- calls[which(calls$datetime_synch_pos >= times[2] & calls$datetime_synch_pos < times[1]),]
         
         for(j in l.inds){
-          event<-group_events_data[i,c("event_idx","event_type")] 
-          event<-rbind(event,event,event) # as there are three time periods I will rbind the events 3 times
-          event$period<-c("before","during","after")
-          event$duration<-c(as.numeric(difftime(times[3],times[4], units = "secs")),
+          event <- group_events_data[i,c("event_idx","event_type")] 
+          event <- rbind(event,event,event) # as there are three time periods I will rbind the events 3 times
+          event$period <- c("before","during","after")
+          event$duration <- c(as.numeric(difftime(times[3],times[4], units = "secs")),
                             as.numeric(difftime(times[2],times[3], units = "secs")),
                             as.numeric(difftime(times[1],times[2], units = "secs")))
           event$ind_idx <- j
@@ -119,28 +116,28 @@ for(i in 1:nrow(group_events_data)){
           # get the call number for each call type (contact/ agression) for each period
           # before
           event[event$period == "before","contact_calls"] <- nrow(before[which(before$name == coati_ids[j,"name"] & before$calltype == "contact call"),])
-          event[event$period == "before","agg_calls"] <-nrow(before[which(before$name == coati_ids[j,"name"] & before$calltype == "aggression call"),])
+          event[event$period == "before","agg_calls"] <- nrow(before[which(before$name == coati_ids[j,"name"] & before$calltype == "aggression call"),])
           
           # during
-          event[event$period == "during","contact_calls"] <-nrow(during[which(during$name == coati_ids[j,"name"] & during$calltype == "contact call"),])
-          event[event$period == "during","agg_calls"] <-nrow(during[which(during$name == coati_ids[j,"name"] & during$calltype == "aggression call"),])
+          event[event$period == "during","contact_calls"] <- nrow(during[which(during$name == coati_ids[j,"name"] & during$calltype == "contact call"),])
+          event[event$period == "during","agg_calls"] <- nrow(during[which(during$name == coati_ids[j,"name"] & during$calltype == "aggression call"),])
           
           #after
-          event[event$period == "after","contact_calls"] <-nrow(after[which(after$name == coati_ids[j,"name"] & after$calltype == "contact call"),])
-          event[event$period == "after","agg_calls"] <-nrow(after[which(after$name == coati_ids[j,"name"] & after$calltype == "aggression call"),])
+          event[event$period == "after","contact_calls"] <- nrow(after[which(after$name == coati_ids[j,"name"] & after$calltype == "contact call"),])
+          event[event$period == "after","agg_calls"] <- nrow(after[which(after$name == coati_ids[j,"name"] & after$calltype == "aggression call"),])
           
           # get the subgroup for each ID
-          a_inds<-unlist(group_events_data[group_events_data$event_idx == unique(event$event_idx),"group_A_idxs"])
-          b_inds<-unlist(group_events_data[group_events_data$event_idx == unique(event$event_idx),"group_B_idxs"])
-          event$subgroup<-ifelse(j %in% a_inds, "A",ifelse(j %in% b_inds,"B","NA"))
+          a_inds <- unlist(group_events_data[group_events_data$event_idx == unique(event$event_idx),"group_A_idxs"])
+          b_inds <- unlist(group_events_data[group_events_data$event_idx == unique(event$event_idx),"group_B_idxs"])
+          event$subgroup <- ifelse(j %in% a_inds, "A",ifelse(j %in% b_inds,"B","NA"))
           
           # # Optional: get distance the subgroup the individual is in moved during the event
-          # a_move<-group_events_data[group_events_data$event_idx == unique(event$event_idx),"A_during_disp"]
-          # b_move<-group_events_data[group_events_data$event_idx == unique(event$event_idx),"B_during_disp"]
-          # 
-          # event$sub_move_dist_during<-ifelse(j %in% a_inds,a_move,b_move)
-          
-          event$n_ind_labeled<-length(l.inds) # total number of individuals that have labeled data for this event
+          a_move <- group_events_data[group_events_data$event_idx == unique(event$event_idx),"A_during_disp"]
+          b_move <- group_events_data[group_events_data$event_idx == unique(event$event_idx),"B_during_disp"]
+    
+          event$sub_move_dist_during <- ifelse(j %in% a_inds,a_move,b_move)
+           
+          event$n_ind_labeled <- length(l.inds) # total number of individuals that have labeled data for this event
           ind_events_data<-rbind( ind_events_data,event)
         }
       }
@@ -148,11 +145,39 @@ for(i in 1:nrow(group_events_data)){
   }
 }
 
-rm(list = setdiff(ls(),c("ind_events_data","calls","group_events_data", "ts", "coati_ids")))
+#rm(list = setdiff(ls(),c("ind_events_data","calls","group_events_data", "ts", "coati_ids")))
 
 ind_events_data$agg_call_rate <- ind_events_data$agg_calls/ind_events_data$duration
 ind_events_data$contact_call_rate <- ind_events_data$contact_calls/ind_events_data$duration
 #TODO check events where the before and start time are the same - because overlap with previous event
+
+
+
+# Perform a left join to add the split_type from group_events_data to ind_events_data
+ind_events_data <- ind_events_data %>%
+  left_join(group_events_data %>% select(event_idx, split_type, subgroup_moved), by = "event_idx")
+
+# Update the split_type column only for rows where period is "during"
+ind_events_data <- ind_events_data %>%
+  mutate(split_type = ifelse(period == "during", split_type, NA))%>%
+  mutate(subgroup_moved = ifelse(period == "during", subgroup_moved, NA))
+
+#save this data frame for Odd
+save(ind_events_data, file = paste0(datadir, "/calling_eventtype.RData"))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 leadership_metric <- c("position","crosstime","crosstime_ownfinishline")
@@ -239,12 +264,6 @@ for(i in 1:nrow(group_events_data)){
 dist_travel_df <- group_events_data[, c("event_type", "event_idx", "B_during_disp", "A_during_disp", "AB_before_disp", "AB_after_disp" )]
 
 dist_travel_df<-merge(dist_travel_df, event, by = c("event_idx","event_type"), all = T)
-
-
-
-
-
-
 
 
 #---------FISSIONS------------------------------------------------------------------------------------------------------------

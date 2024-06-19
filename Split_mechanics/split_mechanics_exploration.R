@@ -34,9 +34,13 @@ if(user %in% c('Ari','ari')){
   codedir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
   if(group == 'galaxy'){
     groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
+    groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/"
+    
     plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
   } else if(group == 'presedente'){
     groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
+    groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/"
+    
     plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
   }
 }
@@ -220,37 +224,73 @@ g
 #could split the plot 3 into the bigger vs smaller subgroup to move
 
 #-------------------------------------------------------------------------------
-#just look at fissions to fill the table in where we count the number of each type of event
-#need to know for events where group was stationary to both moving
 
-dist_thresh
+#making dataframe where we classify type of events and save in a dataframe called filt_events
 
-fissions <- events[events$event_type == "fission",]
+#Add split_type and subgroup_comp columns to the events dataframe
 
-#filter dataframe to columns we need for extracting counts of each type of split
-fissions <- select(fissions, tidx, datetime, event_type, group_A, group_B, n_A, n_B, event_idx, B_during_disp, A_during_disp, AB_before_disp, B_during_speed, A_during_speed)
+events <- events %>%
+  mutate(
+    split_type = case_when(
+      event_type == "fission" & AB_before_disp < 10 & B_during_disp > 10 & A_during_disp > 10 ~ "bothstill_bothmove",
+      event_type == "fission" & AB_before_disp < 10 & B_during_disp > 10 & A_during_disp < 10 ~ "bothstill_onemove",
+      event_type == "fission" & AB_before_disp < 10 & B_during_disp < 10 & A_during_disp > 10 ~ "bothstill_onemove",
+      event_type == "fission" & AB_before_disp > 10 & B_during_disp < 10 & A_during_disp > 10 ~ "bothmove_onemove",
+      event_type == "fission" & AB_before_disp > 10 & B_during_disp > 10 & A_during_disp < 10 ~ "bothmove_onemove",
+      event_type == "fission" & AB_before_disp > 10 & B_during_disp > 10 & A_during_disp > 10 ~ "bothmove_bothmove",
+      event_type == "fission" & AB_before_disp < 10 & B_during_disp < 10 & A_during_disp < 10 ~ "bothstill_bothstill",
+      
+      event_type == "fusion" & AB_after_disp < 10 & B_during_disp > 10 & A_during_disp > 10 ~ "bothmove_bothstill",
+      event_type == "fusion" & AB_after_disp < 10 & B_during_disp > 10 & A_during_disp < 10 ~ "onemove_bothstill",
+      event_type == "fusion" & AB_after_disp < 10 & B_during_disp < 10 & A_during_disp > 10 ~ "onemove_bothstill",
+      event_type == "fusion" & AB_after_disp > 10 & B_during_disp < 10 & A_during_disp > 10 ~ "onemove_bothmove",
+      event_type == "fusion" & AB_after_disp > 10 & B_during_disp > 10 & A_during_disp < 10 ~ "onemove_bothmove",
+      event_type == "fusion" & AB_after_disp > 10 & B_during_disp > 10 & A_during_disp > 10 ~ "bothmove_bothmove",
+      event_type == "fusion" & AB_after_disp < 10 & B_during_disp < 10 & A_during_disp < 10 ~ "bothstill_bothstill",
+      TRUE ~ "other"
+    ),
+    subgroup_comp = case_when(
+      n_A == 1 & n_B == 1 ~ "1/1",
+      n_A > 1 & n_B == 1 ~ "1/many",
+      n_A == 1 & n_B > 1 ~ "1/many",
+      n_A > 1 & n_B > 1 ~ "many/many",
+      TRUE ~ "other"
+    ),
+    subgroup_moved = case_when(
+      A_during_disp > 10 & B_during_disp <= 10 ~ "A",
+      B_during_disp > 10 & A_during_disp <= 10 ~ "B",
+      A_during_disp > 10 & B_during_disp > 10 ~ "both",
+      A_during_disp <= 10 & B_during_disp <= 10 ~ "neither",
+      TRUE ~ "unknown"
+    )
+  ) %>%
+  na.omit()  # Remove rows with NA
 
-#when group is stationary and both move
-fissions$split_type <- ifelse(fissions$AB_before_disp < 10 & fissions$B_during_disp > 10 & fissions$A_during_disp > 10, "bothstill_bothmove",
-                       ifelse(fissions$AB_before_disp < 10 & fissions$B_during_disp > 10 & fissions$A_during_disp < 10, "bothstill_onemove",
-                       ifelse(fissions$AB_before_disp < 10 & fissions$B_during_disp < 10 & fissions$A_during_disp > 10, "bothstill_onemove",
-                       ifelse(fissions$AB_before_disp > 10 & fissions$B_during_disp < 10 & fissions$A_during_disp > 10, "bothmove_onemove",
-                       ifelse(fissions$AB_before_disp > 10 & fissions$B_during_disp > 10 & fissions$A_during_disp < 10, "bothmove_onemove",
-                       ifelse(fissions$AB_before_disp > 10 & fissions$B_during_disp > 10 & fissions$A_during_disp > 10, "bothmove_bothmove",
-                       ifelse(fissions$AB_before_disp < 10 & fissions$B_during_disp < 10 & fissions$A_during_disp < 10, "bothstill_bothstill",
-                              "other")))))))
+detailed_events <- events
+#save events 
+if(group == 'galaxy'){
+save(detailed_events, file = paste0(groupdir, group, "_detailed_events.RData"))
+}else if(group == "presedente"){
+  save(detailed_events, file = paste0(groupdir, group, "_detailed_events.RData"))
+}
 
-fissions$subgroup_comp <- ifelse(fissions$n_A == 1 & fissions$n_B == 1, "1/1",
-                          ifelse(fissions$n_A > 1 & fissions$n_B == 1, "1/many",
-                          ifelse(fissions$n_A == 1 & fissions$n_B > 1, "1/many", 
-                          ifelse(fissions$n_A > 1 & fissions$n_B > 1, "many/many", "other"))))
+#-------------------------------------------------------
+#-------------------------------------------------------
 
-#remove rows with NA
-fissions <- na.omit(fissions)
+#define type of event to look at
+event_type <- "fission"
+
+#------------------------------------------------------
+#------------------------------------------------------
+
+
+event_type_df <- events[events$event_type == event_type,]
+
 #remove rows where both are still to both are still as not really an event
-fissions <- fissions[!fissions$split_type == "bothstill_bothstill",]
+event_type_df <- event_type_df[!event_type_df$split_type == "bothstill_bothstill",]
+event_type_df <- event_type_df[!event_type_df$split_type == "other",]
 
-contingency_table <- table(fissions$split_type, fissions$subgroup_comp)
+contingency_table <- table(event_type_df$split_type, event_type_df$subgroup_comp)
 contingency_matrix <- as.matrix(contingency_table)
 print(contingency_matrix)
 
@@ -262,7 +302,7 @@ all <- ggplot(contingency_df, aes(Var2, Var1, fill = Freq)) +
   geom_tile() +
   geom_text(aes(label = Freq), color = "black", size = 4) +
   scale_fill_gradient(low = "white", high = high_col) +
-  labs(title = "Heatmap of Event Types by Subgroup Composition",
+  labs(title = paste(event_type, "heatmap"),
        x = "Subgroup Composition",
        y = "Event Type",
        fill = "Count") +
@@ -270,7 +310,7 @@ all <- ggplot(contingency_df, aes(Var2, Var1, fill = Freq)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 all
 
-file_path <- file.path(plot_dir, "matrix_Eventype.png")
+file_path <- file.path(plot_dir, paste(event_type, "matrix.png"))
 ggsave(file_path, all, width = 10, height = 8)
 
 
@@ -292,31 +332,31 @@ all_males <- function(group, male_names) {
 }
 
 # Filter the dataframe
-filtered_fission_df <- fissions %>%
+filtered_event_type <- event_type_df %>%
   rowwise() %>%
   filter(all_males(group_A, male_coatis) | all_males(group_B, male_coatis))
 
 # Filter the dataframe for events where not all individuals leaving are males
-filtered_fission_df_no_males <- fissions %>%
+filtered_event_type_no_males <- event_type_df %>%
   rowwise() %>%
   filter(!(all_males(group_A, male_coatis) | all_males(group_B, male_coatis)))
 
 #choose whether want the male events or non-male events
-with_males <- T
+with_males <- F
 
 # Create a new dataframe based on the choice
 df <- if (with_males) {
-  filtered_fission_df # DataFrame with male events
+  filtered_event_type # DataFrame with male events
   
 } else {
-  filtered_fission_df_no_males  # DataFrame without male events
+  filtered_event_type_no_males  # DataFrame without male events
 } 
 
 
 if(with_males){
-  name <- "With Males"
+  name <- "with males"
 }else{
-  name <- "Without Males"
+  name <- "without males"
 }
 
 
@@ -330,7 +370,7 @@ g <- ggplot(contingency_df, aes(Var2, Var1, fill = Freq)) +
   geom_tile() +
   geom_text(aes(label = Freq), color = "black", size = 4) +
   scale_fill_gradient(low = "white", high = high_col) +
-  labs(title = paste("Heatmap of Event Types by Subgroup Composition", name),
+  labs(title = paste(event_type, "heatmap", name),
        x = "Subgroup Composition",
        y = "Event Type",
        fill = "Count") +
@@ -339,7 +379,7 @@ g <- ggplot(contingency_df, aes(Var2, Var1, fill = Freq)) +
 g
 
 
-file_path <- file.path(plot_dir, paste(name,"events.png"))
+file_path <- file.path(plot_dir, paste(name, event_type, "events.png"))
 ggsave(file_path, g, width = 10, height = 8)
 
 
@@ -349,18 +389,18 @@ ggsave(file_path, g, width = 10, height = 8)
 #for events where both are still and one moved, was it the single individual who moved?
 
 #choose whether to look at individual counts with or without the males 
-fissions_filt <- filtered_fission_df #filtered_fission_df or filtered_fission_df_no_males
+df_filt <- filtered_event_type #filtered_fission_df or filtered_fission_df_no_males
 
-fissions_filt$singleton_move <- ifelse(fissions_filt$split_type == "bothstill_onemove" & fissions_filt$subgroup_comp == "1/many" & fissions_filt$n_A == 1 & fissions_filt$A_during_disp > 10, "singleton_move",
-                           ifelse(fissions_filt$split_type == "bothstill_onemove" & fissions_filt$subgroup_comp == "1/many" & fissions_filt$n_B == 1 & fissions_filt$B_during_disp > 10, "singleton_move",
-                           ifelse(fissions_filt$split_type == "bothmove_onemove" & fissions_filt$subgroup_comp == "1/many" & fissions_filt$n_A == 1 & fissions_filt$A_during_disp < 10, "singleton_stop",
-                           ifelse(fissions_filt$split_type == "bothmove_onemove" & fissions_filt$subgroup_comp == "1/many" & fissions_filt$n_B == 1 & fissions_filt$B_during_disp < 10, "singleton_stop",  "other"))))
+df_filt$singleton_move <- ifelse(df_filt$split_type == "bothstill_onemove" & df_filt$subgroup_comp == "1/many" & df_filt$n_A == 1 & df_filt$A_during_disp > 10, "singleton_move",
+                           ifelse(df_filt$split_type == "bothstill_onemove" & df_filt$subgroup_comp == "1/many" & df_filt$n_B == 1 & df_filt$B_during_disp > 10, "singleton_move",
+                           ifelse(df_filt$split_type == "bothmove_onemove" & df_filt$subgroup_comp == "1/many" & df_filt$n_A == 1 & df_filt$A_during_disp < 10, "singleton_stop",
+                           ifelse(df_filt$split_type == "bothmove_onemove" & df_filt$subgroup_comp == "1/many" & df_filt$n_B == 1 & df_filt$B_during_disp < 10, "singleton_stop",  "other"))))
 
-fissions_filt <- fissions_filt %>% 
+df_filt <- df_filt %>% 
   filter(singleton_move != "other")
 
-table(fissions_filt$singleton_move)
-barplot(table(fissions_filt$singleton_move), col = "skyblue" )
+table(df_filt$singleton_move)
+barplot(table(df_filt$singleton_move), col = "skyblue" )
 #In Presidente group from 44 events where there is one individual involved, if the group was still, and one group moves, 38/44 events are a single individual leaving (34 of these are males). If the group were moving and one stops, 6/16 are a single individual (4 are males)
 
 #so seems like the majority of fissions are driven by the males

@@ -3,13 +3,13 @@
 
 #--------PARAMS-------
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
-code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/'
+code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/ch1_cleancode/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
 gps_file <- "galaxy_xy_highres_level1.RData" #level0 is when Venus is not removed
 id_file <- 'galaxy_coati_ids.RData'
 
 #load in events
-load("C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/galaxy_auto_ff_events_characterized.RData") #level 1
+load("C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/galaxy_auto_ff_events_characterized.RData") #level 1
 
 #list of Rs
 R <- 50
@@ -55,74 +55,72 @@ subgroup_data <- get_subgroup_data(xs, ys, R)
 
 
 #finding times when the number of subgroups is 1
-together_times<-as.data.frame(ts[which(subgroup_data$n_subgroups ==1)]); names(together_times) = "time"
-together_times$tdiff<-c(NA,difftime(together_times$time[2:nrow(together_times)], together_times$time[1:(nrow(together_times)-1)], units = "secs"))
+together_times <- as.data.frame(ts[which(subgroup_data$n_subgroups == 1)]); names(together_times) = "time"
+together_times$tdiff <- c(NA,difftime(together_times$time[2:nrow(together_times)], 
+                                      together_times$time[1:(nrow(together_times)-1)], units = "secs"))
 
 # find "bouts" of group being together
+together_times$bout <- numeric(nrow(together_times))
+together_times$bout[1] <- 1  # Initialize the first row
+
 n = 1
 for(i in 2:nrow(together_times)){
-  if(together_times$tdiff[i]>1){ n = n + 1}
-  together_times$bout[i]<-n
+  if(together_times$tdiff[i] > 1){ n = n + 1}
+  together_times$bout[i] <- n
 }
 
 # now get the start and stop time of each together bout (the output is a list with the start and end time for each together bout)
-tts <- split(together_times,together_times$bout)
-ttsl <- lapply(tts, function(tts_){
-  tts_ss <- tts_[c(1, nrow(tts_)),"time"]
-  
-  return(tts_ss)
+# Extract start and stop times per bout
+split_bouts <- lapply(split(together_times, together_times$bout), function(split_bout) {
+  split_bout[c(1, nrow(split_bout)), "time"]
 })
 
-# set new start or end times in case the original bout times overlap with an event
+# Filter events with valid before_time and after_time
+et <- events[!is.na(events$before_time) & !is.na(events$after_time), c("before_time", "after_time")]
 
-et<-events[!is.na(events$before_time),c("before_time","after_time")]
-et<-et[!is.na(et$after_time),]
-ttsl2<-lapply(ttsl, function(together_bout){
+# Adjust start and stop times based on event overlaps
+adjusted_bouts <- lapply(split_bouts, function(together_bout) {
+  # Initialize remove flag
+  remove <- FALSE
   
-  # super non efficient way of doing things, but hopefully works...if you ever have nothing better to do (unlikely) feel free to make it more efficient
-  # ok, so: we loop though every event for each bout and check whether the before or after time overlaps with the bout. If it does we exchange the start or end time for the before or after time of the event
-  remove<-c("F")
-  for(i in 1:nrow(et)){
-    bt<-ts[et$before_time[i]]
-    # bt<-bt[!is.na(bt)]
+  # Loop through events and adjust bout times if they overlap with events
+  for (i in seq_len(nrow(et))) {
+    bt <- et$before_time[i]
+    at <- et$after_time[i]
     
-    at<-ts[et$after_time[i]]
-    # at<-at[!is.na(at)]
-    
-    
-    # check whether start overlaps with end of event (basically we don't know where the event is in relation to the together bout)
-    if(together_bout[[1]]< at & together_bout[[2]] > at){
-      together_bout[[1]]<-at
+    # Check if start overlaps with end of event
+    if (together_bout[1] < at & together_bout[2] > at) {
+      together_bout[1] <- at
     }
     
-    # check whether end overlaps with before of event
-    if(together_bout[[2]]> bt & together_bout[[1]]<bt){
-      together_bout[[2]]<-bt
+    # Check if end overlaps with before of event
+    if (together_bout[2] > bt & together_bout[1] < bt) {
+      together_bout[2] <- bt
     }
     
-    # check if the together bout is completely within thevents
-    if(together_bout[[1]]>bt & together_bout[[2]]<at){
-      remove<-c(remove,"T")
-      message("YEAY")
-    }else{
-      remove<-c(remove,"F")
+    # Check if the together bout is completely within the events
+    if (together_bout[1] > bt & together_bout[2] < at) {
+      remove <- TRUE
+      break
     }
   }
-  if(any(remove == "T")){
-    
-  }else{
+  
+  # Return the adjusted bout or NULL if it should be removed
+  if (!remove) {
     return(together_bout)
+  } else {
+    return(NULL)
   }
-  
 })
 
-
+# Remove NULL entries from the adjusted bouts list
+adjusted_bouts <- Filter(Negate(is.null), adjusted_bouts)
 
 
 
 
 #get the call files 
-datadir <- "C:/Users/egrout/Dropbox/coatithon/calling_during_fissions_and_fusions/data"
+datadir <- "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed"
 callfile <- 'all_data_hms_synched.csv'
 id_file <- 'galaxy_coati_ids.RData'
 
@@ -194,12 +192,11 @@ calling_together <- calls[which(calls$datetime_synch_pos %in% together_times$tim
 # calculate call rate for each together bout
 # get the duration of the bout
 
-# together_bout<-ttsl[[34]]
-crt_ <- as.data.frame(coati_ids[,1]); names(crt_)<-"name"
+crt_ <- as.data.frame(coati_ids[,1]); names(crt_) <- "name"
 crt_$ind_idx <- 1:nrow(crt_)
 call_rates_together <- data.frame()
 n = 1
-for(together_bout in ttsl){
+for(together_bout in adjusted_bouts){
      ct_ <- calling_together[which(calling_together$datetime_synch_pos >= together_bout[1] & calling_together$datetime_synch_pos <= together_bout[2]), ]
     ct_ <- ct_[!is.na(ct_$calltype),]
     
@@ -210,6 +207,8 @@ for(together_bout in ttsl){
       calls_all$call_rate <- calls_all$count/calls_all$bout_dur
       calls_all$n_ind_in_bout <- length(unique(calls_all$name))
       calls_all$bout <- n
+      calls_all$start_bout <- together_bout[1]
+      calls_all$end_bout <- together_bout[2]
       call_rates_together <- rbind(call_rates_together, calls_all)
       
       n = n+1
@@ -217,13 +216,12 @@ for(together_bout in ttsl){
 }
 
 #kick out bouts that are shorter than 2min
-call_rates_together<-call_rates_together[which(call_rates_together$bout_dur > 120),]
+call_rates_together <- call_rates_together[which(call_rates_together$bout_dur > 120), ]
+
 
 #find total duration of times when group together to get call rates
 
 sum(unique(call_rates_together$bout_dur))/60/60 #in hours
-
-
 save(call_rates_together, file = "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/call_rates_together_gal.RData")
 #load("C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/call_rates_together_gal.RData")
 
@@ -233,13 +231,61 @@ length(unique(call_rates_together$bout))
 par(mar = c(14,4,1,1))
 boxplot(call_rate ~ name*call_type, data = call_rates_together[call_rates_together$n_ind_in_bout > 5,], las = 2, xlab = "", ylim = c(0, 0.6))
 
+#finding the travel speed of each individual for each bout duration
 
-#now want to compare the call rates when the group isn't together to see if the call rates are higher than baseline during a fission event
+call_rates_together$mean_speed <- NA
+call_rates_together$max_speed <- NA
+call_rates_together$distance <- NA
+call_rates_together$duration <- NA
+
+#i = 1
+
+for (i in 1:nrow(call_rates_together)){
+  
+  #get index of the individual in the row
+  ind_idx <- call_rates_together$ind_idx[i]
+  #get the time index for the duration to extract the speed value
+  start_idx <- which(ts == call_rates_together$start_bout[i])
+  end_idx <- which(ts == call_rates_together$end_bout[i])
+  
+  xs_sub <- na.omit(xs[ind_idx, c(start_idx:end_idx)])
+  ys_sub <-na.omit(ys[ind_idx, c(start_idx:end_idx)])
+  
+  time_interval <- 30  # Interval to filter every 10 seconds
+  
+  # Filter xs and ys vectors to every 10 seconds
+  filtered_xs <- na.omit(xs_sub[seq(1, length(xs_sub), by = time_interval)])
+  filtered_ys <- na.omit(ys_sub[seq(1, length(ys_sub), by = time_interval)])
+  
+  
+  # Calculate the distance between consecutive points
+  distances <- sqrt(diff(filtered_xs)^2 + diff(filtered_ys)^2)
+  
+  duration <- end_idx - start_idx
+  
+  # Calculate speed in meters per second (m/s)
+  call_rates_together$mean_speed[i] <- mean(distances/duration)
+  call_rates_together$max_speed[i]<- max(distances/duration)
+  call_rates_together$distance[i] <- sum(distances)
+  call_rates_together$duration[i] <- duration
+  
+}
+
+hist(call_rates_together$mean_speed, breaks = 100)
+
+
+#no bimodal relationship in the speeds, so to decide if the group was moving or not, we could filter by distance and duration
+
+#0.001 as cut off for not moving
+
+#save this data frame for Odd
+save(call_rates_together, file = paste0(datadir, "/calling_baseline.RData"))
+
+
+
 
 
 #TODO
-#need to remove times that are in the before and after the event
-
 #could make aggression calls binary
 
 
