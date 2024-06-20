@@ -7,6 +7,8 @@ library(scales)
 library(ggplot2)
 library(patchwork)
 library(dplyr)
+library(ggtext)
+library(glue)
 
 #set time zone to UTC to avoid confusing time zone issues
 Sys.setenv(TZ='UTC')
@@ -314,6 +316,25 @@ file_path <- file.path(plot_dir, paste(event_type, "matrix.png"))
 ggsave(file_path, all, width = 10, height = 8)
 
 
+#adding logos to the y axis instead of text
+logo <- as.data.frame(matrix(nrow = 4, ncol = 2))
+logo$V2[1] <-  "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/arrows/bothstill_bothmove.png"
+logo$V2[2] <-  "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/arrows/bothstill_bothmove.png"
+logo$V2[3] <-  "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/arrows/bothmove_onemove.png"
+logo$V2[4] <-  "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/arrows/bothmove_bothmove.png"
+
+ggplot(contingency_df, aes(Var2, Var1, fill = Freq)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), color = "black", size = 4) +
+  scale_fill_gradient(low = "white", high = high_col) +
+  labs(title = paste(event_type, "heatmap"),
+       x = "Subgroup Composition",
+       y = "Event Type",
+       fill = "Count") +
+  theme_minimal(base_size = 20) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.text.y = ggtext::element_markdown())+
+  scale_y_discrete(labels = function(x) glue::glue(" <img src = 'C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/arrows/{x}.png' height = 50 /> "))
 
 
 #redo matrix with and without males to see how this affects the patterns observed
@@ -327,7 +348,7 @@ if(group == 'presedente'){
 
 # Function to check if all individuals in a group are males
 all_males <- function(group, male_names) {
-  individuals <- strsplit(group, ",\\s*")[[1]]
+  individuals <- strsplit(group, ",//s*")[[1]]
   all(individuals %in% male_names)
 }
 
@@ -404,6 +425,103 @@ barplot(table(df_filt$singleton_move), col = "skyblue" )
 #In Presidente group from 44 events where there is one individual involved, if the group was still, and one group moves, 38/44 events are a single individual leaving (34 of these are males). If the group were moving and one stops, 6/16 are a single individual (4 are males)
 
 #so seems like the majority of fissions are driven by the males
+
+
+
+
+#now looking at the age/sex class for each event type for who moved/didn't move
+
+i = 1
+
+age_sex_df <- detailed_events[,c("event_idx", "event_type", "n_A", "n_B", "split_type", "subgroup_comp", "subgroup_moved")]
+
+age_sex_df$A_Adult_Female <- NA
+age_sex_df$A_Adult_Male <- NA
+age_sex_df$A_Subadult_Female <- NA
+age_sex_df$A_Subadult_Male <- NA
+age_sex_df$A_Juvenile_Female <- NA
+age_sex_df$A_Juvenile_Male <- NA
+age_sex_df$B_Adult_Female <- NA
+age_sex_df$B_Adult_Male <- NA
+age_sex_df$B_Subadult_Female <- NA
+age_sex_df$B_Subadult_Male <- NA
+age_sex_df$B_Juvenile_Female <- NA
+age_sex_df$B_Juvenile_Male <- NA
+
+for (i in 1:nrow(detailed_events)){
+  
+  A_age_sex <- coati_ids[detailed_events$group_A_idxs[i][[1]],c("age", "sex")]
+  A_age_sex <- paste("A", A_age_sex$age, A_age_sex$sex, sep = "_")
+  age_sex_df[which(age_sex_df$event_idx == detailed_events$event_idx[i]),which(names(age_sex_df)%in% A_age_sex)]<- 1
+  
+  B_age_sex <- coati_ids[detailed_events$group_B_idxs[i][[1]],c("age", "sex")]
+  B_age_sex <- paste("B", B_age_sex$age, B_age_sex$sex, sep = "_")
+  age_sex_df[which(age_sex_df$event_idx == detailed_events$event_idx[i]),which(names(age_sex_df)%in% B_age_sex)]<- 1
+  
+
+}
+
+# Filter the dataframe to include only rows where subgroup_moved is "B"
+
+movers_alltypes <- data.frame()
+
+for (i in 1:length(unique(age_sex_df$split_type))){
+
+  
+  split_type <- unique(age_sex_df$split_type[i])
+  
+B_movers <- age_sex_df %>%
+  filter(subgroup_moved == "B" & event_type == "fission" & split_type == !!split_type)
+
+# Summarize the counts for each age class in group B
+summary_B_movers <- B_movers %>%
+  summarise(
+    B_Adult_Male = sum(B_Adult_Male, na.rm = TRUE),
+    B_Subadult_Male = sum(B_Subadult_Male, na.rm = TRUE),
+    B_Juvenile_Male = sum(B_Juvenile_Male, na.rm = TRUE),
+    B_Adult_Female = sum(B_Adult_Female, na.rm = TRUE),
+    B_Subadult_Female = sum(B_Subadult_Female, na.rm = TRUE),
+    B_Juvenile_Female = sum(B_Juvenile_Female, na.rm = TRUE)
+  )
+
+colnames(summary_B_movers) <- sub("B_", "", colnames(summary_B_movers))
+
+A_movers <- age_sex_df %>%
+  filter(subgroup_moved == "A" & event_type == "fission" & split_type == !!split_type)
+
+# Summarize the counts for each age class in group A
+summary_A_movers <- A_movers %>%
+  summarise(
+    A_Adult_Male = sum(A_Adult_Male, na.rm = TRUE),
+    A_Subadult_Male = sum(A_Subadult_Male, na.rm = TRUE),
+    A_Juvenile_Male = sum(A_Juvenile_Male, na.rm = TRUE),
+    A_Adult_Female = sum(A_Adult_Female, na.rm = TRUE),
+    A_Subadult_Female = sum(A_Subadult_Female, na.rm = TRUE),
+    A_Juvenile_Female = sum(A_Juvenile_Female, na.rm = TRUE)
+  )
+
+colnames(summary_A_movers) <- sub("A_", "", colnames(summary_A_movers))
+
+# Combine the summaries by row binding
+combined_summary <- bind_rows(summary_B_movers, summary_A_movers)
+
+# Sum the values of the combined summary to create a single row data frame
+movers <- as.data.frame(t(colSums(combined_summary)))
+
+movers$split_type <- split_type
+
+movers_alltypes <- rbind(movers_alltypes, movers)
+
+}
+
+
+print(movers_alltypes)
+
+
+#TODO: make this dataframe with the 1/many, many/many seperately ... I assume will need to put it into a bigger forloop
+
+
+
 
 
 

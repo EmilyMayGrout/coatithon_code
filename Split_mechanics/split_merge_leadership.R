@@ -556,6 +556,7 @@ save(out, file = filename)
 
 if(make_plots){
   
+  dev.off()
   #Make a histogram of the distances moved by the groups during splits and merges
   #and plot the distance moved threshold on top of it as a sanity check
   #quartz()
