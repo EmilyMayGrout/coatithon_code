@@ -9,6 +9,7 @@ library(patchwork)
 library(dplyr)
 library(ggtext)
 library(glue)
+library(tidyr)
 
 #set time zone to UTC to avoid confusing time zone issues
 Sys.setenv(TZ='UTC')
@@ -19,7 +20,7 @@ Sys.setenv(TZ='UTC')
 user <- 'emily'
 
 #which group - galaxy or presedente
-group <- 'presedente' #subdirectory where the group data is stored
+group <- 'galaxy' #subdirectory where the group data is stored
 
 #whether to identify splits and merges automatically (if F) or use manually identified events (if T)
 use_manual_events <- F
@@ -35,15 +36,11 @@ if(user %in% c('Ari','ari')){
 } else{
   codedir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
   if(group == 'galaxy'){
-    groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
     groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/"
-    
-    plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
+    plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level2/'
   } else if(group == 'presedente'){
-    groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
     groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/"
-    
-    plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
+    plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level2/'
   }
 }
 
@@ -252,9 +249,9 @@ events <- events %>%
       TRUE ~ "other"
     ),
     subgroup_comp = case_when(
-      n_A == 1 & n_B == 1 ~ "1/1",
-      n_A > 1 & n_B == 1 ~ "1/many",
-      n_A == 1 & n_B > 1 ~ "1/many",
+      n_A == 1 & n_B == 1 ~ "one/one",
+      n_A > 1 & n_B == 1 ~ "one/many",
+      n_A == 1 & n_B > 1 ~ "one/many",
       n_A > 1 & n_B > 1 ~ "many/many",
       TRUE ~ "other"
     ),
@@ -317,11 +314,11 @@ ggsave(file_path, all, width = 10, height = 8)
 
 
 #adding logos to the y axis instead of text
-logo <- as.data.frame(matrix(nrow = 4, ncol = 2))
-logo$V2[1] <-  "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/arrows/bothstill_bothmove.png"
-logo$V2[2] <-  "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/arrows/bothstill_bothmove.png"
-logo$V2[3] <-  "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/arrows/bothmove_onemove.png"
-logo$V2[4] <-  "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/arrows/bothmove_bothmove.png"
+# logo <- as.data.frame(matrix(nrow = 4, ncol = 2))
+# logo$V2[1] <-  "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/arrows/bothstill_bothmove.png"
+# logo$V2[2] <-  "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/arrows/bothstill_bothmove.png"
+# logo$V2[3] <-  "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/arrows/bothmove_onemove.png"
+# logo$V2[4] <-  "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/arrows/bothmove_bothmove.png"
 
 ggplot(contingency_df, aes(Var2, Var1, fill = Freq)) +
   geom_tile() +
@@ -363,7 +360,7 @@ filtered_event_type_no_males <- event_type_df %>%
   filter(!(all_males(group_A, male_coatis) | all_males(group_B, male_coatis)))
 
 #choose whether want the male events or non-male events
-with_males <- F
+with_males <- T
 
 # Create a new dataframe based on the choice
 df <- if (with_males) {
@@ -412,26 +409,28 @@ ggsave(file_path, g, width = 10, height = 8)
 #choose whether to look at individual counts with or without the males 
 df_filt <- filtered_event_type #filtered_fission_df or filtered_fission_df_no_males
 
-df_filt$singleton_move <- ifelse(df_filt$split_type == "bothstill_onemove" & df_filt$subgroup_comp == "1/many" & df_filt$n_A == 1 & df_filt$A_during_disp > 10, "singleton_move",
-                           ifelse(df_filt$split_type == "bothstill_onemove" & df_filt$subgroup_comp == "1/many" & df_filt$n_B == 1 & df_filt$B_during_disp > 10, "singleton_move",
-                           ifelse(df_filt$split_type == "bothmove_onemove" & df_filt$subgroup_comp == "1/many" & df_filt$n_A == 1 & df_filt$A_during_disp < 10, "singleton_stop",
-                           ifelse(df_filt$split_type == "bothmove_onemove" & df_filt$subgroup_comp == "1/many" & df_filt$n_B == 1 & df_filt$B_during_disp < 10, "singleton_stop",  "other"))))
+df_filt$singleton_move <- ifelse(df_filt$split_type == "bothstill_onemove" & df_filt$subgroup_comp == "one/many" & df_filt$n_A == 1 & df_filt$A_during_disp > 10, "singleton_move",ifelse(df_filt$split_type == "bothstill_onemove" & df_filt$subgroup_comp == "one/many" & df_filt$n_B == 1 & df_filt$B_during_disp > 10, "singleton_move",ifelse(df_filt$split_type == "bothmove_onemove" & df_filt$subgroup_comp == "one/many" & df_filt$n_A == 1 & df_filt$A_during_disp < 10, "singleton_stop",ifelse(df_filt$split_type == "bothmove_onemove" & df_filt$subgroup_comp == "one/many" & df_filt$n_B == 1 & df_filt$B_during_disp < 10, "singleton_stop",  "other"))))
 
 df_filt <- df_filt %>% 
   filter(singleton_move != "other")
 
 table(df_filt$singleton_move)
-barplot(table(df_filt$singleton_move), col = "skyblue" )
+
+if (event_type == "fission") {
+barplot(table(df_filt$singleton_move), col = "skyblue" )}
 #In Presidente group from 44 events where there is one individual involved, if the group was still, and one group moves, 38/44 events are a single individual leaving (34 of these are males). If the group were moving and one stops, 6/16 are a single individual (4 are males)
 
 #so seems like the majority of fissions are driven by the males
 
-
+ 
 
 
 #now looking at the age/sex class for each event type for who moved/didn't move
 
 i = 1
+
+#change coat_ids sub-adults to subadults
+coati_ids$age <- gsub("Sub-adult", "Subadult", coati_ids$age)
 
 age_sex_df <- detailed_events[,c("event_idx", "event_type", "n_A", "n_B", "split_type", "subgroup_comp", "subgroup_moved")]
 
@@ -461,73 +460,243 @@ for (i in 1:nrow(detailed_events)){
 
 }
 
+save(age_sex_df, file = paste0(groupdir, "age_sex_df.RData"))
+
+
+
 # Filter the dataframe to include only rows where subgroup_moved is "B"
 
-movers_alltypes <- data.frame()
+movers_alltypes_allcomps <- data.frame()
 
-for (i in 1:length(unique(age_sex_df$split_type))){
-
+for(subgroup in unique(age_sex_df$subgroup_comp)){
   
-  split_type <- unique(age_sex_df$split_type[i])
+  movers_alltypes <- data.frame()
   
-B_movers <- age_sex_df %>%
-  filter(subgroup_moved == "B" & event_type == "fission" & split_type == !!split_type)
-
-# Summarize the counts for each age class in group B
-summary_B_movers <- B_movers %>%
-  summarise(
-    B_Adult_Male = sum(B_Adult_Male, na.rm = TRUE),
-    B_Subadult_Male = sum(B_Subadult_Male, na.rm = TRUE),
-    B_Juvenile_Male = sum(B_Juvenile_Male, na.rm = TRUE),
-    B_Adult_Female = sum(B_Adult_Female, na.rm = TRUE),
-    B_Subadult_Female = sum(B_Subadult_Female, na.rm = TRUE),
-    B_Juvenile_Female = sum(B_Juvenile_Female, na.rm = TRUE)
-  )
-
-colnames(summary_B_movers) <- sub("B_", "", colnames(summary_B_movers))
-
-A_movers <- age_sex_df %>%
-  filter(subgroup_moved == "A" & event_type == "fission" & split_type == !!split_type)
-
-# Summarize the counts for each age class in group A
-summary_A_movers <- A_movers %>%
-  summarise(
-    A_Adult_Male = sum(A_Adult_Male, na.rm = TRUE),
-    A_Subadult_Male = sum(A_Subadult_Male, na.rm = TRUE),
-    A_Juvenile_Male = sum(A_Juvenile_Male, na.rm = TRUE),
-    A_Adult_Female = sum(A_Adult_Female, na.rm = TRUE),
-    A_Subadult_Female = sum(A_Subadult_Female, na.rm = TRUE),
-    A_Juvenile_Female = sum(A_Juvenile_Female, na.rm = TRUE)
-  )
-
-colnames(summary_A_movers) <- sub("A_", "", colnames(summary_A_movers))
-
-# Combine the summaries by row binding
-combined_summary <- bind_rows(summary_B_movers, summary_A_movers)
-
-# Sum the values of the combined summary to create a single row data frame
-movers <- as.data.frame(t(colSums(combined_summary)))
-
-movers$split_type <- split_type
-
-movers_alltypes <- rbind(movers_alltypes, movers)
-
+  for (split_type in unique(age_sex_df$split_type)){
+    
+    B_movers <- age_sex_df %>%
+      filter(subgroup_moved %in% c("B","both") & event_type == !!event_type & split_type == !!split_type & subgroup_comp == !!subgroup)
+    
+    #B_movers$groupsize_moved <- ifelse(B_movers$n_B == 1,1,"many")
+    
+    
+    # Summarize the counts for each age class in group B
+    summary_B_movers <- B_movers %>%
+      #group_by(groupsize_moved) %>% 
+      summarise( B_Adult_Male = sum(B_Adult_Male, na.rm = TRUE),
+                 B_Subadult_Male = sum(B_Subadult_Male, na.rm = TRUE),
+                 B_Juvenile_Male = sum(B_Juvenile_Male, na.rm = TRUE),
+                 B_Adult_Female = sum(B_Adult_Female, na.rm = TRUE),
+                 B_Subadult_Female = sum(B_Subadult_Female, na.rm = TRUE),
+                 B_Juvenile_Female = sum(B_Juvenile_Female, na.rm = TRUE))
+    
+    
+    colnames(summary_B_movers) <- sub("B_", "", colnames(summary_B_movers))
+    
+    A_movers <- age_sex_df %>%
+      filter(subgroup_moved %in% c("A","both") & !!event_type == event_type & split_type == !!split_type & subgroup_comp == !!subgroup)
+    
+    #A_movers$groupsize_moved<- ifelse(A_movers$n_A == 1,1,"many")
+    
+    # Summarize the counts for each age class in group A
+    summary_A_movers <- A_movers %>%
+      #group_by(groupsize_moved) %>% 
+      summarise(
+        A_Adult_Male = sum(A_Adult_Male, na.rm = TRUE),
+        A_Subadult_Male = sum(A_Subadult_Male, na.rm = TRUE),
+        A_Juvenile_Male = sum(A_Juvenile_Male, na.rm = TRUE),
+        A_Adult_Female = sum(A_Adult_Female, na.rm = TRUE),
+        A_Subadult_Female = sum(A_Subadult_Female, na.rm = TRUE),
+        A_Juvenile_Female = sum(A_Juvenile_Female, na.rm = TRUE)
+      )
+    
+    colnames(summary_A_movers) <- sub("A_", "", colnames(summary_A_movers))
+    
+    combined_summary <- bind_rows(summary_B_movers, summary_A_movers)
+  
+    # Sum the values of the combined summary to create a single row data frame
+    movers <- as.data.frame((combined_summary))
+    movers$split_type <- split_type
+    movers$subgroup_comp <- subgroup
+    movers_alltypes <- rbind(movers_alltypes, movers)
+  }
+  movers_alltypes_allcomps <- rbind(movers_alltypes_allcomps, movers_alltypes)
 }
 
+print(movers_alltypes_allcomps)
 
-print(movers_alltypes)
+movers_long_df <- movers_alltypes_allcomps %>%
+  pivot_longer(cols = -c(split_type, subgroup_comp), names_to = "age_sex", values_to = "count")
+
+#remove the counts which are 0
+movers_long_df <- movers_long_df[movers_long_df$count != 0,]
+#movers_long_df <- movers_long_df[!is.na(movers_long_df$groupsize_moved),]
+
+movers_long_df$age_sex <- sub("_", " ", movers_long_df$age_sex)
+movers_long_df$age_sex <- as.factor(movers_long_df$age_sex)
+movers_long_df$age_sex <- factor(movers_long_df$age_sex, levels = c("Adult Female", "Adult Male", "Subadult Female", "Subadult Male", "Juvenile Female", "Juvenile Male"))
+
+#movers_long_df$size_split<-paste(movers_long_df$groupsize_moved, movers_long_df$split_type)
+
+#movers_long_df$subgroup_comp <- sub("one/many", "single/many", movers_long_df$subgroup_comp)
+#movers_long_df$subgroup_comp <- sub("one/one", "single/single", movers_long_df$subgroup_comp)
+
+custom_colors <- c(
+  "Adult Male" = "cadetblue3",
+  "Subadult Male" = "coral3",
+  "Juvenile Male" = "darkolivegreen3",
+  "Adult Female" = "lightblue1",
+  "Subadult Female" = "salmon",
+  "Juvenile Female" = "darkolivegreen1"
+)
+
+movers_long_df$subgroup_comp <- factor(movers_long_df$subgroup_comp, levels = c("one/one", "one/many", "many/many"))
+
+# Summarize the data
+movers_summary <- movers_long_df %>%
+  group_by(split_type, age_sex, subgroup_comp) %>%
+  summarise(count = sum(count, na.rm = TRUE), .groups = 'drop')
+
+ggplot(movers_summary, aes(x = split_type, y = count, fill = age_sex)) +
+  geom_bar(stat = "identity", color = NA) +  # Ensure color = NA here
+  scale_fill_manual(values = custom_colors) +  # Custom color scale if needed
+  xlab(paste0(event_type, " type")) + ylab("Count") +
+  scale_x_discrete(labels = function(x) glue::glue("<img src='C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/arrows/{x}.png' height='30' />")) +
+  theme_minimal(base_size = 20) +
+  theme(
+    axis.text.x = ggtext::element_markdown(margin = margin(t = -10)),  # Adjust margin here
+    panel.grid.major = element_blank(),  # Remove major grid lines if desired
+    panel.grid.minor = element_blank(),  # Remove minor grid lines if desired
+    panel.border = element_blank(),      # Remove the outline around the plot
+    panel.background = element_rect(fill = "white", color = NA),  # Set the background to white
+    plot.background = element_rect(fill = "white", color = NA)   # Ensure plot background is blank
+  ) +
+  guides(fill = guide_legend(title = "Age/Sex class")) +
+  facet_wrap(~ subgroup_comp)
+ggsave(paste0(plot_dir, group,"_", event_type, "_agesex.png"), width = 12, height = 8)
 
 
-#TODO: make this dataframe with the 1/many, many/many seperately ... I assume will need to put it into a bigger forloop
+
+#-----------------------------------------------------------------------
+#now making a plot to show the age/sex class of the group that leaves in the one/many
+movers_alltypes_onemany <- data.frame()
+if(event_type == "fission"){
+age_sex_df_sub <- age_sex_df[age_sex_df$split_type %in% c("bothmove_bothmove","bothmove_onemove","bothstill_onemove","bothstill_bothmove"),]
+}else if(event_type == "fusion"){
+  age_sex_df_sub <- age_sex_df[age_sex_df$split_type %in% c("onemove_bothmove","bothmove_bothstill","onemove_bothstill","bothmove_onemove"),]
+}
+
+split_type <- "onemove_bothmove"
+
+for (split_type in unique(age_sex_df_sub$split_type)){
+    
+    B_movers <- age_sex_df %>%
+      filter(subgroup_moved %in% c("B","both") & event_type == !!event_type & split_type == !!split_type & subgroup_comp == "one/many")
+    
+    if (nrow(B_movers) == 0) next # Skip to the next iteration if B_movers is empty
+    
+    B_movers$groupsize_moved <- ifelse(B_movers$n_B == 1,"one","many")
+    
+    # Summarize the counts for each age class in group B
+    summary_B_movers <- B_movers %>%
+      group_by(groupsize_moved) %>% 
+      summarise( B_Adult_Male = sum(B_Adult_Male, na.rm = TRUE),
+                 B_Subadult_Male = sum(B_Subadult_Male, na.rm = TRUE),
+                 B_Juvenile_Male = sum(B_Juvenile_Male, na.rm = TRUE),
+                 B_Adult_Female = sum(B_Adult_Female, na.rm = TRUE),
+                 B_Subadult_Female = sum(B_Subadult_Female, na.rm = TRUE),
+                 B_Juvenile_Female = sum(B_Juvenile_Female, na.rm = TRUE))
+    
+    
+    colnames(summary_B_movers) <- sub("B_", "", colnames(summary_B_movers))
+    
+    A_movers <- age_sex_df %>%
+      filter(subgroup_moved %in% c("A","both") & event_type == !!event_type & split_type == !!split_type & subgroup_comp == "one/many")
+    
+    if (nrow(A_movers) == 0) next
+    
+    A_movers$groupsize_moved<- ifelse(A_movers$n_A == 1,"one","many")
+    
+    # Summarize the counts for each age class in group A
+    summary_A_movers <- A_movers %>%
+      group_by(groupsize_moved) %>% 
+      summarise(
+        A_Adult_Male = sum(A_Adult_Male, na.rm = TRUE),
+        A_Subadult_Male = sum(A_Subadult_Male, na.rm = TRUE),
+        A_Juvenile_Male = sum(A_Juvenile_Male, na.rm = TRUE),
+        A_Adult_Female = sum(A_Adult_Female, na.rm = TRUE),
+        A_Subadult_Female = sum(A_Subadult_Female, na.rm = TRUE),
+        A_Juvenile_Female = sum(A_Juvenile_Female, na.rm = TRUE)
+      )
+    
+    colnames(summary_A_movers) <- sub("A_", "", colnames(summary_A_movers))
+    
+    combined_summary <- bind_rows(summary_B_movers, summary_A_movers)
+    
+    # Sum the values of the combined summary to create a single row data frame
+    movers <- as.data.frame((combined_summary))
+    movers$split_type <- split_type
+    # movers$subgroup_comp <- "one/many"
+    movers_alltypes_onemany <- rbind(movers_alltypes_onemany, movers)
+  
+    }
 
 
+movers_long_df <- movers_alltypes_onemany %>%
+  pivot_longer(cols = -c(split_type, groupsize_moved), names_to = "age_sex", values_to = "count")
 
+#remove the counts which are 0
+movers_long_df <- movers_long_df[movers_long_df$count != 0,]
+movers_long_df <- movers_long_df[!is.na(movers_long_df$groupsize_moved),]
 
+movers_long_df$age_sex <- as.factor(movers_long_df$age_sex)
+movers_long_df$age_sex <- factor(movers_long_df$age_sex, levels = c("Adult_Female", "Adult_Male", "Subadult_Female", "Subadult_Male", "Juvenile_Female", "Juvenile_Male"))
+#movers_long_df$size_split<-paste(movers_long_df$groupsize_moved, movers_long_df$split_type)
+movers_long_df$age_sex <- sub("_", " ", movers_long_df$age_sex)
 
+custom_colors <- c(
+  "Adult Male" = "cadetblue3",
+  "Subadult Male" = "coral3",
+  "Juvenile Male" = "darkolivegreen3",
+  "Adult Female" = "lightblue1",
+  "Subadult Female" = "salmon",
+  "Juvenile Female" = "darkolivegreen1"
+)
 
+# Summarize the data
+movers_summary <- movers_long_df %>%
+  group_by(split_type, age_sex, groupsize_moved) %>%
+  summarise(count = sum(count, na.rm = TRUE), .groups = 'drop')
 
+movers_summary$groupsize_moved <- factor(movers_summary$groupsize_moved, levels = c("one", "many"))
 
+ggplot(movers_summary, aes(x = split_type, y = count, fill = age_sex)) +
+  geom_bar(position = "stack", stat = "identity") +
+  theme_classic(base_size = 20) +
+  theme(
+    axis.text.x = ggtext::element_markdown(margin = margin(t = -20)) # Adjust margin here
+  ) +
+  guides(fill=guide_legend(title="Age/Sex class"))+
+  scale_fill_manual(values = custom_colors) + 
+  xlab(paste0(event_type, " type")) + ylab("Count") +
+  scale_x_discrete(labels = function(x) glue::glue("<img src='C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/arrows/{x}.png' height='30' />")) +
+  theme_minimal(base_size = 20) +
+  theme(
+    axis.text.x = ggtext::element_markdown(margin = margin(t = -10)), # Adjust margin here
+    axis.text.y = element_text(size = 20), # Adjust y-axis text if needed
+    axis.title.x = element_text(size = 20, margin = margin(t = 10)),
+    axis.title.y = element_text(size = 20, margin = margin(r = 10)),
+    panel.border = element_blank(),       # Remove the outline around the plot
+    panel.grid.major = element_blank(),   # Remove major grid lines if desired
+    panel.grid.minor = element_blank(),   # Remove minor grid lines if desired
+    panel.background = element_blank()    # Ensure background is blank
+  ) +
+  guides(fill = guide_legend(title = "Age/Sex class")) +
+  facet_wrap(~groupsize_moved)
 
+ggsave(paste0(plot_dir, group,"_", event_type, "_agesex_one_manymove.png"), width = 8, height = 8)
+
+#--------------------------------------------------------------------------
 
 
 

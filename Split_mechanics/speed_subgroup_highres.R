@@ -7,12 +7,20 @@ dt <- 30 #time interval between points (=10 for coati low res). 10 is meters per
 min_tracked <- 7 #minimum number of individuals tracked to include in analysis (=7)
 
 #---DIRECTORIES----
+#which group - galaxy or presedente
+group <- 'galaxy'
 
-data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
-gps_file <- "galaxy_xy_highres_level1.RData"
-id_file <- 'galaxy_coati_ids.RData'
+
+if(group == 'galaxy'){
+  groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/"
+  plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level2/'
+
+  } else if(group == 'presedente'){
+  groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/"
+  plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level2/'
+  }
+
 
 #-----LIBRARIES-----
 
@@ -37,13 +45,31 @@ source('coati_function_library.R')
 
 
 #----LOAD DATA----
-#load data
-setwd(data_dir)
-load(gps_file)
-load(id_file)
+#read in coati ids
+setwd(groupdir)
+
+#read in timestamp data
+load(file=paste0(group,'_xy_highres_level2.RData'))
+load(file=paste0(group,'_coati_ids.RData'))
 
 #-----MAIN------
-
+#finding indexes of the adult males to remove from this analysis - as they're not really group members....
+males <- which(coati_ids$age == "Adult" & coati_ids$sex == "Male")
+#removing these males from the matrices
+if(group == "presedente"){
+  #remove Wildflower
+  wf <- which(coati_ids$name == "Wildflower")
+  md <- which(coati_ids$name == "Mandela")
+  xs <- xs[-c(males, wf, md),]
+  ys <- ys[-c(males, wf, md),]
+  coati_ids <- coati_ids[-c(males, wf, md),]
+  
+}else if(group == "galaxy"){
+  xs <- xs[-c(males),]
+  ys <- ys[-c(males),]
+  coati_ids <- coati_ids[-c(males),]
+  
+}
 
 #downsample the xs and ys for one point every 30 seconds as the 1Hz speeds will be much higher than real speeds due to GPS error
 
@@ -51,10 +77,8 @@ xs <- xs[,seq(1, ncol(xs), 30)]
 ys <- ys[,seq(1, ncol(ys), 30)]
 ts <- ts[seq(1, length(ts), 30)]
 
-
 n_inds <- nrow(xs)
 n_times <- ncol(xs)
-
 
 #number of individuals tracked at each time point
 n_tracked <- colSums(!is.na(xs))
@@ -68,8 +92,15 @@ subgroup_data <- get_subgroup_data(xs, ys, R)
 #------------------------
 
 #make a dataframe with time and individual
-
-speed_df <- data.frame(t = rep(1:(n_times-1), n_inds), UTC_time = rep(ts[1:(n_times-1)], n_inds) ,ind = rep(1:n_inds, each = (n_times-1)), n_tracked = rep(n_tracked[1:(n_times-1)], n_inds), subgroup_size = NA, split = NA, speed = NA, context = NA, name = rep(coati_ids$name, each = n_times-1))
+speed_df <- data.frame(t = rep(1:(n_times-1), n_inds), 
+                       UTC_time = rep(ts[1:(n_times-1)], n_inds) ,
+                       ind = rep(1:n_inds, each = (n_times-1)), 
+                       n_tracked = rep(n_tracked[1:(n_times-1)], n_inds), 
+                       subgroup_size = NA, 
+                       split = NA, 
+                       speed = NA, 
+                       context = NA, 
+                       name = rep(coati_ids$name, each = n_times-1))
 
 #loop through to calculate subgroup size, whether there is a split, and ind speed
 #i=1
@@ -156,20 +187,40 @@ give.n <- function(x){
 }
 
 
+if(group == "galaxy"){
+  colors <- c("coral1","coral3", "coral4")
+  label <- "Galaxy group"
+  
+} else if (group == "presedente"){
+  colors <- c("darkolivegreen2","olivedrab3", "olivedrab4")
+  label <- "Presidente group"
+}
+
+
+
 #if dt is 30, the speed is meters/second
 #should rerun this with the level2 data to remove errenious GPS points
 ggplot(speed_days, aes(x = context, y = speed, fill = context)) + 
   geom_violin() +
   theme_classic()+
-  scale_fill_manual(values=c("darkslategray2","darkslategray3", "darkslategray4"))+
+  scale_fill_manual(values= colors)+
   theme(axis.text=element_text(size=20),
         axis.title=element_text(size=24),
         legend.title = element_text(size=24),
         legend.text = element_text(size=20), 
-        strip.text = element_text(size = 20)) + 
-  stat_summary(fun.data = give.n, geom = "text", cex = 6, position = position_nudge(x=0.2, y = 5))
+        strip.text = element_text(size = 20)) +
+  labs(x = label, y = "Speed (m/s)")+
+  ylim(0, 2)+
+  guides(fill="none")+
+  stat_summary(fun.data = give.n, geom = "text", cex = 6, position = position_nudge(x=0.2, y = 1.4))
   
-plotdir <- "C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/"
-ggsave(paste0(plotdir, "speeds_highres.png"), width = 10, height = 5)
+ggsave(paste0(plot_dir, "speeds_highres.png"), width = 10, height = 5)
+
+
+
+
+
+
+
 
 
