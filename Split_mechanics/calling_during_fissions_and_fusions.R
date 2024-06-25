@@ -4,20 +4,66 @@
 library(tidyverse)
 library(reshape2)
 
+use_machine_labels <- T
+
 #directory holding all the data
 #datadir <- '~/Dropbox/coatithon/calling_during_fissions_and_fusions/data'
 datadir <- "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed"
-callfile <- 'all_data_hms_synched.csv' #made in coati_synch using the cleaned labels from cleaning_labels
+if(use_machine_labels){
+callfile <- 'all_data_hms_ml_synched.csv' #made in coati_synch using the cleaned labels from cleaning_labels
+}else{
+  callfile <- 'all_data_hms_synched.csv' #made in coati_synch using the cleaned labels from cleaning_labels
+}
 ff_file <- 'galaxy_detailed_events.RData' #this has been rerun with level2 data in characterize_splits_and_merges, detailed version made in split_mechanics_Exploration - this df includes the different event types using the 10m radius as a cut off
 gps_file <- 'galaxy_xy_highres_level2.RData'
 id_file <- 'galaxy_coati_ids.RData'
 
 #LOAD DATA
 setwd(datadir)
-calls <- read.csv(callfile, header=T, sep = ',')
+calls <- read.csv(callfile, header = T, sep = ',')
 load(id_file)
 load(gps_file)
 
+
+if(use_machine_labels){
+  
+  bound_info <- unique(paste(calls$file, calls$filestart_UTC_soroka))
+  
+  # Split bound_info into file and starttime
+  split_info <- strsplit(bound_info, " ")
+  file <- sapply(split_info, '[', 1)
+  date <- sapply(split_info, '[', 2)
+  time <- sapply(split_info, '[', 3)
+  
+  # Combine date and time into starttime
+  starttime <- paste(date, time)
+  # Extract id from file
+  id <- substring(file, 1, 5)
+
+  # Create the new dataframe
+  labeled_periods <- data.frame(file = file, id = id, starttime = starttime, stringsAsFactors = FALSE)
+  
+  # Initialize an empty vector to store the latest times
+  # I would have got the duration of the file by loading in the wave files but I didn't have permissions to read in these files so this is the second best option - finding the latest label to infer the file duration
+  latest_times <- vector("character", length = nrow(labeled_periods))
+  labeled_periods$stoptime <- NA
+  # Iterate over each unique file in new_data
+  for (i in seq_along(labeled_periods$file)) {
+    file <- labeled_periods$file[i]
+    date <- as.Date(labeled_periods$starttime[i])
+    # Subset calls dataframe for the current file
+    calls_onefile <- calls[calls$file == file, ]
+    # Find the latest time in the Start column
+    latest_time <- max(calls_onefile$Start)  # Assuming Start is in POSIXct format
+    #put it in the correct time (add 11:00:000)
+    #latest_time <- as.character(hms(latest_time) + hms("11:00:00.000"))
+    datetime <- paste(date, latest_time)
+    # Store the latest time in the corresponding index of latest_times
+    labeled_periods$stoptime[i] <- format(as.POSIXct(datetime, format = "%Y-%m-%d %H:%M:%OS", tz = "UTC")+ as.difftime("11:00:00"))
+    
+    } 
+  
+} else {  
 #identify labeled periods for each individual
 startstop <- calls[which(calls$label %in% c('start','stop')),]
 startstop <- startstop[order(startstop$file, startstop$datetime_synch),]
@@ -31,11 +77,15 @@ for(i in 1:nrow(labeled_periods)){
   next_stop <- min(stops_for_file$datetime_synch, na.rm=T)
   labeled_periods$stoptime[i] <- next_stop
 }
+rm("startstop","i","stops_for_file","next_stop","starts","stops","starttime")
+
+}
+
 #remove the leading G from the tag ids for matching
 labeled_periods$id <- gsub('G', '', labeled_periods$id)
 #add the individual index
 labeled_periods$ind_idx <- match(labeled_periods$id, coati_ids$tag_id)
-rm("startstop","i","stops_for_file","next_stop","starts","stops","starttime")
+
 
 #parse calls into types
 #combining the contact calls 
@@ -80,9 +130,11 @@ calls$datetime_synch_pos <- as.POSIXct(calls$datetime_synch, format = "%Y-%m-%d 
 labeled_periods$tstart <- as.POSIXct(labeled_periods$starttime, format = "%Y-%m-%d %H:%M:%OS", tz = "UTC") 
 labeled_periods$tstop <- as.POSIXct(labeled_periods$stoptime, format = "%Y-%m-%d %H:%M:%OS", tz = "UTC") 
 
+
 # get the call rate for each individual for each event before, during and after the event (also some additional info, like the subgroup id and the distance moved)
-ind_events_data<-data.frame()
+ind_events_data <- data.frame()
 head(group_events_data)
+#i = 10
 for(i in 1:nrow(group_events_data)){
   event.times <- group_events_data[i,c(10:14)]
   times <- ts[as.numeric(event.times[,c(2:5)])]  # start - end backwards
@@ -159,26 +211,58 @@ ind_events_data <- ind_events_data %>%
 
 # Update the split_type column only for rows where period is "during"
 ind_events_data <- ind_events_data %>%
-  mutate(split_type = ifelse(period == "during", split_type, NA))%>%
-  mutate(subgroup_moved = ifelse(period == "during", subgroup_moved, NA))
+  mutate(split_type = ifelse(period == c("before", "during", "after"), split_type, NA))%>%
+  mutate(subgroup_moved = ifelse(period == c("before", "during", "after"), subgroup_moved, NA))
+
+#making a column to get the moving group or the slowing down group
+ind_events_data$change <- NA
+
+ind_events_data <- ind_events_data %>%
+  mutate(
+    change = case_when(
+      event_type == "fission" & subgroup == "A" & split_type == "bothmove_onemove" & subgroup_moved == "A"  ~ "no_change",
+      event_type == "fission" & subgroup == "B" & split_type == "bothmove_onemove" & subgroup_moved == "B" ~ "no_change",
+      event_type == "fission" & subgroup == "A" & split_type == "bothmove_onemove" & subgroup_moved == "B" ~ "slowed_down",
+      event_type == "fission" & subgroup == "B" & split_type == "bothmove_onemove" & subgroup_moved == "A" ~ "slowed_down",
+      event_type == "fission" & subgroup == "A" & split_type == "bothmove_bothmove" & subgroup_moved == "both" ~ "no_change",
+      event_type == "fission" & subgroup == "B" & split_type == "bothmove_bothmove" & subgroup_moved == "both" ~ "no_change",
+      event_type == "fission" & subgroup == "B" & split_type == "bothstill_bothmove" & subgroup_moved == "both" ~ "both_change",
+      event_type == "fission" & subgroup == "A" & split_type == "bothstill_bothmove" & subgroup_moved == "both" ~ "both_change",
+      event_type == "fission" & subgroup == "A" & split_type == "bothstill_onemove" & subgroup_moved == "A" ~ "sped_up",
+      event_type == "fission" & subgroup == "B" & split_type == "bothstill_onemove" & subgroup_moved == "B" ~ "sped_up",
+      event_type == "fission" & subgroup == "A" & split_type == "bothstill_onemove" & subgroup_moved == "B" ~ "no_change",
+      event_type == "fission" & subgroup == "B" & split_type == "bothstill_onemove" & subgroup_moved == "A" ~ "no_change",
+      #for fusions
+      event_type == "fusion" & subgroup == "A" & split_type == "onemove_bothmove" & subgroup_moved == "A" ~ "no_change", 
+      event_type == "fusion" & subgroup == "B" & split_type == "onemove_bothmove" & subgroup_moved == "B" ~ "no_change", 
+      event_type == "fusion" & subgroup == "B" & split_type == "onemove_bothmove" & subgroup_moved == "A" ~ "sped_up", 
+      event_type == "fusion" & subgroup == "A" & split_type == "onemove_bothmove" & subgroup_moved == "B" ~ "sped_up", 
+      event_type == "fusion" & subgroup == "A" & split_type == "onemove_bothstill" & subgroup_moved == "A" ~ "slowed_down", 
+      event_type == "fusion" & subgroup == "B" & split_type == "onemove_bothstill" & subgroup_moved == "B" ~ "slowed_down", 
+      event_type == "fusion" & subgroup == "B" & split_type == "onemove_bothstill" & subgroup_moved == "A" ~ "no_change", 
+      event_type == "fusion" & subgroup == "A" & split_type == "onemove_bothstill" & subgroup_moved == "B" ~ "no_change", 
+      event_type == "fusion" & subgroup == "A" & split_type == "bothmove_bothmove" & subgroup_moved == "both" ~ "no_change",
+      event_type == "fusion" & subgroup == "B" & split_type == "bothmove_bothmove" & subgroup_moved == "both" ~ "no_change",
+      event_type == "fusion" & subgroup == "A" & split_type == "bothmove_bothstill" & subgroup_moved == "both" ~ "slowed_down",
+      event_type == "fusion" & subgroup == "B" & split_type == "bothmove_bothstill" & subgroup_moved == "both" ~ "slowed_down",
+      TRUE ~ "other"
+    ))
+
 
 #save this data frame for Odd
-save(ind_events_data, file = paste0(datadir, "/calling_eventtype.RData"))
+if(use_machine_labels){
+  save(ind_events_data, file = paste0(datadir, "/calling_eventtype_ml.RData"))
+} else {
+ save(ind_events_data, file = paste0(datadir, "/calling_eventtype.RData"))
+ 
+}
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
+#-----------------------------------------------------------------------
 
 leadership_metric <- c("position","crosstime","crosstime_ownfinishline")
 

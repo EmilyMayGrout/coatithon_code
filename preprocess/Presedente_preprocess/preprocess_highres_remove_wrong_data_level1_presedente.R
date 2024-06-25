@@ -9,13 +9,15 @@ data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/'
 gps_file <- "presedente_xy_highres_level0.RData" 
-id_file <- 'coati_ids.RData'
+latlon_file <- "presedente_latlon_highres_level0.RData" 
+id_file <- 'presedente_coati_ids.RData'
 
 outdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
 
 #load data
 setwd(data_dir)
 load(gps_file)
+load(latlon_file)
 load(id_file)
 
 #Peron collar fell off on 21.01.23 at 17:16 UTC
@@ -27,6 +29,9 @@ load(id_file)
 #add NA's for Peron
 xs[17,32401:75601] <- NA
 ys[17,32401:75601] <- NA
+lats[17,32401:75601] <- NA
+lons[17,32401:75601] <- NA
 
 
 save(list=c('xs','ys','ts'), file = paste0(outdir,'presedente_xy_highres_level1.RData'))
+save(list=c('lats','lons','ts'), file = paste0(outdir,'presedente_latlon_highres_level1.RData'))

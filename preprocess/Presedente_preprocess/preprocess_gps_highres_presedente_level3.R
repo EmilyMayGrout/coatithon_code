@@ -45,6 +45,7 @@ for(i in 1:n.inds){
   
 }
 
+
 #finding the maximum speed they are likely to travel
 max.speed <- quantile(speeds, max.speed.quantile, na.rm=T)
 

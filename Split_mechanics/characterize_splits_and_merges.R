@@ -10,7 +10,7 @@ library(scales)
 #----------PARAMETERS - MODIFY HERE--------------
 
 #which group (galaxy or presedente)
-group <- 'galaxy'
+group <- 'presedente'
 
 #who is using (ari or emily)
 user <- 'emily'
@@ -152,7 +152,8 @@ events$n_B <- unlist(lapply(events$group_B_idxs,length))
 
 events$before_time <- events$start_time <- events$end_time <- events$after_time <- NA
 events$AB_before_disp <- events$AB_after_disp <- events$A_during_disp <- events$B_during_disp <- NA
-events$split_angle <- events$turn_angle_A <- events$turn_angle_B <- NA
+events$split_angle <- events$turn_angle_A <- events$turn_angle_B <- NA 
+events$A_before_disp <- events$B_before_disp <- NA
 
 i = 3
 for(i in c(1:nrow(events))){
@@ -163,6 +164,8 @@ for(i in c(1:nrow(events))){
     events$AB_after_disp[i] <- ff_data$disps['AB','after']
     events$A_during_disp[i] <- ff_data$disps['A','during']
     events$B_during_disp[i] <- ff_data$disps['B','during']
+    events$A_before_disp[i] <- ff_data$disps['A','before']
+    events$B_before_disp[i] <- ff_data$disps['B','before']
   }
   events$split_angle[i] <- ff_data$split_angle
   events$turn_angle_A[i] <- ff_data$turn_angle_A

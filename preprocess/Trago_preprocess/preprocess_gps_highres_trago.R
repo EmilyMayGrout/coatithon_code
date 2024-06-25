@@ -1,5 +1,5 @@
-#this script will read in the raw txt files form e-obs collars and
-#output a preprocess r data file for the HIGH res data (1 gps point/sec)
+#preprocess 1Hz Trago
+
 library(lubridate)
 library(sf)
 library(tidyverse)
@@ -7,13 +7,12 @@ library(tidyverse)
 #load useful functions
 source('C:/Users/egrout/Dropbox/coatithon/coatithon_code/coati_function_library.R')
 
-firsttime <- as.POSIXct('2021-12-24 11:00', tz = 'UTC')
-lasttime <-  as.POSIXct('2022-01-09 23:00', tz = 'UTC')
-#to do: get the last day of data and rbind it to the same file - then change the last date
+firsttime <- as.POSIXct('2022-03-24 11:00', tz = 'UTC')
+lasttime <-  as.POSIXct('2022-04-10 23:00', tz = 'UTC')
 
-indir <-  "C:/Users/egrout/Dropbox/coatithon/rawdata/2022/galaxy/gps/binded_files"
-outdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
-metadatadir <-  "C:/Users/egrout/Dropbox/coatithon/rawdata/2022/galaxy/metadata/"
+indir <-  "C:/Users/egrout/Dropbox/coatithon/rawdata/2022/trago/gps/"
+outdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/trago/"
+metadatadir <-  "C:/Users/egrout/Dropbox/coatithon/rawdata/2022/trago/metadata/"
 
 #setting the working directory to the raw data file in dropbox
 setwd(indir)
@@ -108,13 +107,10 @@ coati_ids$color[which(coati_ids$age == 'Adult' & coati_ids$sex == 'Female')] <- 
 coati_ids$color[which(coati_ids$age == 'Sub-adult' & coati_ids$sex == 'Female')] <- '#FFAA66'
 coati_ids$color[which(coati_ids$age == 'Sub-adult' & coati_ids$sex == 'Male')] <- '#66AAFF'
 coati_ids$color[which(coati_ids$age == 'Juvenile')] <- '#666666'
-save(coati_ids, file = paste0(outdir, 'coati_ids.RData'))
+#save(coati_ids, file = paste0(outdir, 'coati_ids_all.RData'))
 
-save(list=c('xs','ys','ts'), file = paste0(outdir,'galaxy_xy_highres_level0.RData'))
-save(list=c('lats','lons','ts'), file = paste0(outdir,'galaxy_latlon_highres_level0.RData'))  
+save(list=c('xs','ys','ts'), file = paste0(outdir,'trago_xy_highres_level0.RData'))
+save(list=c('lats','lons','ts'), file = paste0(outdir,'trago_latlon_highres_level0.RData'))  
 
 #number of days recorded 1Hz:
 length(unique(as.Date(ts)))
-
-
-

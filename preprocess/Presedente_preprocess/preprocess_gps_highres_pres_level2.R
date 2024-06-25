@@ -16,6 +16,8 @@ load(file=paste0(group,'_coati_ids.RData'))
 
 #read in timestamp data - notice the level number, if 2, then its not got GPS speed errors
 load(file=paste0(group,'_xy_highres_level1.RData'))
+load(file=paste0(group,'_latlon_highres_level1.RData'))
+
 
 # 1 - "Ardera"    
 # 2 - "Castro"     
@@ -88,4 +90,52 @@ ys[7, 130820:130950] <- NA
 
 
 save(list=c('xs','ys','ts'), file = paste0(groupdir,'presedente_xy_highres_level2.RData'))
+
+#Khan
+lats[6,1200:1500] <- NA
+lons[6,1200:1500] <- NA
+
+lats[6,62500:62600] <- NA
+lons[6,62500:62600] <- NA
+
+#Ardern
+lats[1,12250:12350] <- NA
+lons[1,12250:12350] <- NA
+
+lats[1,76210:76280] <- NA
+lons[1,76210:76280] <- NA
+
+#Torrijos
+lats[19,17200:17290] <- NA
+lons[19,17200:17290] <- NA
+
+#Kenyatta
+lats[8,46400:46560] <- NA
+lons[8,46400:46560] <- NA
+
+#Merkel
+lats[13,59250:59350] <- NA
+lons[13,59250:59350] <- NA
+
+lats[13,72050:72080] <- NA
+lons[13,72050:72080] <- NA
+
+#Mandela
+lats[10,67700:67800] <- NA
+lons[10,67700:67800] <- NA
+
+lats[10,116980:117480] <- NA
+lons[10,116980:117480] <- NA
+
+#Meir
+lats[12,120640:120750] <- NA
+lons[12,120640:120750] <- NA
+
+#Gillard
+lats[7, 130820:130950] <- NA
+lons[7, 130820:130950] <- NA
+
+save(list=c('lats','lons','ts'), file = paste0(groupdir,'presedente_latlon_highres_level2.RData'))
+
+
 

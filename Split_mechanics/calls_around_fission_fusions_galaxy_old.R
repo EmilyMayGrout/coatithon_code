@@ -1,19 +1,24 @@
 #this script is to look at the calls used and call rates before and after events
 
-#read in labels 
+use_machine_labels <- T
 
-wd <- "C:/Users/egrout/Dropbox/coaticalls/Galaxy_labels/completed_labels/labels_cleaned_25.02.24/"
-plot_dir <- "C:/Users/egrout/Dropbox/coaticalls/results/"
-
+if(use_machine_labels){
+ wd <- "C:/Users/egrout/Dropbox/calls/Galaxy_labels/machine_labels/" 
+}else{wd <- "C:/Users/egrout/Dropbox/calls/Galaxy_labels/completed_labels/"}
 setwd <- wd
 
-#read in events - RData was made in split_mechanics_exploration 
-load('C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/galaxy_manual_events_withinfo2.RData')
+use_automated_events <- F
+
+if(use_automated_events){
+load("C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/galaxy_auto_ff_events_characterized.RData")  #RData was made in split_mechanics_exploration 
+} else{load('C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/galaxy_manual_events_withinfo2.RData')}
+
+plot_dir <- "C:/Users/egrout/Dropbox/calls/results/"
 
 #create column for the distnace travelled for the larger subgroup
-events$Distance_Larger_Group <- ifelse(events$A_subgroup_size >= events$B_subgroup_size, events$A_during_disp, events$B_during_disp)
+events$Distance_Larger_Group <- ifelse(events$n_A >= events$n_B, events$A_during_disp, events$B_during_disp)
 #create column for the distance travelled of the smaller subgroup
-events$Distance_Smaller_Group <- ifelse(events$A_subgroup_size >= events$B_subgroup_size,events$B_during_disp, events$A_during_disp)
+events$Distance_Smaller_Group <- ifelse(events$n_A >= events$n_B, events$B_during_disp, events$A_during_disp)
 
 #read in coati IDs 
 load('C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/galaxy_coati_ids.RData')
@@ -45,7 +50,7 @@ colnames(all_data) <- c("label","Start","Duration","Time","Format","Type","Descr
 for (i in 1:length(files)) {
   # read in the CSV data as a tibble
   # using header = TRUE assumes the first row of each CSV file is a header with column names
-  file_data <- read.csv(paste0(wd, files[i]), header = T)
+  file_data <- read.csv(paste0(wd, files[i]), header = T, sep = "\t")
   
   # add a column with the row names (i.e. the name of the CSV file)
   file_data$file_name <- files[i]
@@ -75,6 +80,18 @@ all_data$date <- as.Date(sub("(..)$", "20\\1", all_data$date), "%d.%m.%Y")
 all_data$Start <- all_data$Start
 table(str_length(all_data$Start))
 
+if (use_machine_labels) {
+#for the machine learning labels, we have most times with the same length (14), but some are 7
+#all_data[which(str_length(all_data$Start) == 14), ]
+#14 length: 0:37:14.972168
+#7 length: 1:20:53 #so it is 7 because its 1:20:53.000000
+  all_data_hms <- all_data
+  #as.POSIXct goes to the second
+  all_data_hms$datetime <- as.POSIXct(paste(all_data_hms$date, all_data_hms$Start), format = "%Y-%m-%d %H:%M:%OS")+ as.difftime("11:00:00")
+  write.csv(all_data_hms, "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/all_data_hms_ml.csv", row.names = F)
+ 
+} else {
+  
 #because the length of the time column is different due to some times less than an hour, need to split the data to get the times and then rbind them
 t <- filter(all_data, nchar(Start) == 8)
 t$time <- paste0("6:", t$Start)
@@ -91,8 +108,10 @@ all_data_hms <- rbind(t,s,v)
 
 #add as.POSIXct
 all_data_hms$datetime <- as.POSIXct(paste(all_data_hms$date, all_data_hms$time), format = "%Y-%m-%d %H:%M:%OS")
+write.csv(all_data_hms, "C:/Users/egrout/Dropbox/calls/processed/all_data_hms.csv", row.names = F)
 
-#write.csv(all_data_hms, "C:/Users/egrout/Dropbox/coaticalls/processed/all_data_hms.csv", row.names = F)
+}
+
 
 
 #in case want to split by id for plotting

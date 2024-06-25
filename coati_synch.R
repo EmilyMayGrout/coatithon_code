@@ -18,7 +18,14 @@
 utc_offset <- -5 #local time offset from UTC, in hours - should be negative 5 for panama
 #path_to_synch_file <- '~/Downloads/Synch calls coati collar project - Sheet1.csv' #where the synch table is located
 path_to_synch_file <- 'C:/Users/egrout/Dropbox/coatithon/synch_table.csv'
-path_to_call_labels_file <- 'C:/Users/egrout/Dropbox/coaticalls/processed/all_data_hms.csv' #made in calls_around_fission_fusions_galaxy with labels which were cleaned in the cleaning_labels 
+
+use_machine_labels <- T
+
+if(use_machine_labels){
+path_to_call_labels_file <- 'C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/all_data_hms_ml.csv' #made in calls_around_fission_fusions_galaxy with labels which were cleaned in the cleaning_labels 
+} else {
+  path_to_call_labels_file <- 'C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/all_data_hms.csv'
+}
 
 #-----SETUP----
 #LIBRARIES

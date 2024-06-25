@@ -77,6 +77,22 @@ load(file=paste0(group,'_coati_ids.RData'))
 #modify coati ids to only include first 3 letters
 coati_ids$name_short <- sapply(coati_ids$name, function(x){return(substr(x,1,3))})
 
+
+if(group == 'presedente'){
+  high_col <- "coral3"
+  comp_col <- "goldenrod1"
+  break_1 <- 12
+  break_2 <- 40
+} else if(group == "galaxy"){
+  high_col <- "darkolivegreen4"
+  comp_col <- "cadetblue2"
+  break_1 <- 10
+  break_2 <- 40
+}
+
+
+
+
 #Deciding cut-off points to categorise different types of fissions and fusions
 
 # Combine the two columns into a single vector, removing NA values
@@ -123,12 +139,42 @@ diff_speed <- abs(events$A_during_speed - events$B_during_speed)
 hist(diff_speed, breaks = 100, freq = FALSE, main = " ", xlab = "Speed difference during displacement", ylab = "Density", col = "darkslategray3")
 lines(density(na.omit(diff_speed)), col = "darkorange", lwd = 2)
 
-
-
 #distribution of speed for fissions
 fiss_speed <- rbind(events$B_during_speed[events$event_type == "fission"], events$A_during_speed[events$event_type == "fission"])
 
-hist(log(fiss_speed), breaks = 100, freq = FALSE, main = " ", xlab = "Log speed during displacement (m/s)", ylab = "Density", col = "darkslategray3")
+#what was the speed of the full group before a fission?
+events$AB_before_speed <- events$AB_before_disp/(events$start_time - events$before_time)
+
+#get the max value for the histograms to not cut info
+max <- max(cbind(max(events$AB_before_speed, na.rm = T), max(fiss_speed, na.rm = T)))
+
+png(height = 800, width = 1200, units = 'px', filename = paste0(plot_dir,group,'_speed_before_during_fission.png'))
+par(mar = c(5, 5, 2, 2)) #bottom, left, top, right
+hist(events$AB_before_speed[events$event_type == "fission"], breaks = break_1, freq = FALSE, main = " ", xlab = "Speeds before and during fissions (m/s)", ylab = "Density", cex.lab = 2.5, cex.axis = 2.5, col = alpha(high_col, 1), xlim = c(0, 2.5), yaxt = "n", xaxt = "n")
+axis(2, at = c(0,2,4,6,8,10,12), cex.axis = 2.5, las = 1, pos = 0, hadj = 1.2)
+axis(1, at = c(0,0.5, 1, 1.5, 2, 2.5), cex.axis = 2.5, las = 1, pos = 0, padj = 0.8)
+hist(fiss_speed, breaks = break_2, freq = FALSE, main = " ", col = alpha(comp_col,0.5), add = T)
+legend("topright", legend=c("Before fission", "During fission"),
+       fill=c(high_col, comp_col), lty=0, cex=2)
+dev.off()
+
+#distribution of speed for fusions
+events$B_before_speed <- events$B_before_disp/(events$start_time - events$before_time)
+events$A_before_speed <- events$A_before_disp/(events$start_time - events$before_time)
+fus_before_speed <- rbind(events$B_before_speed[events$event_type == "fusion"], events$A_before_speed[events$event_type == "fusion"])
+fus_during_speed <- rbind(events$B_during_speed[events$event_type == "fusion"], events$A_during_speed[events$event_type == "fusion"]) 
+
+png(height = 800, width = 1200, units = 'px', filename = paste0(plot_dir,group,'_speed_before_during_fusion.png'))
+par(mar = c(5, 5, 2, 2)) #bottom, left, top, right
+hist(fus_before_speed, breaks = 20, freq = FALSE, main = " ", xlab = "Speeds before and during fusions (m/s)", ylab = "Density", cex.lab = 2.5, cex.axis = 2.5, col = alpha(high_col, 1), xlim = c(0, 2),ylim = c(0,7),  yaxt = "n", xaxt = "n")
+axis(2, at = c(0,2,4,6,8,10,12), cex.axis = 2.5, las = 1, pos = 0, hadj = 1.2)
+axis(1, at = c(0,0.5, 1, 1.5, 2, 2.5), cex.axis = 2.5, las = 1, pos = 0, padj = 0.8)
+hist(fus_during_speed, breaks = 50, freq = FALSE, main = " ", col = alpha(comp_col,0.5), add = T)
+legend("topright", legend=c("Before fusion", "During fusion"),
+       fill=c(high_col, comp_col), lty=0, cex=2)
+dev.off()
+
+#TODO look at number of events with calls labelled given to Odd for the model
 
 
 #decided to cut-off the "non-moving" from the "moving" group at 10 m based on visual inspection of the plots and from biological reasoning 
@@ -151,12 +197,6 @@ events$speed_comparison <- ifelse(abs(events$A_during_disp - events$B_during_dis
 #                                       (events$B_during_disp > dist_thresh & events$n_B == 1), 
 #                                     "singleton", "multiple individuals")
 
-
-if(group == 'presedente'){
-  high_col <- "mediumpurple4"
-} else if(group == "galaxy"){
-  high_col <- "darkcyan"
-}
 
 
 
@@ -265,6 +305,7 @@ events <- events %>%
   ) %>%
   na.omit()  # Remove rows with NA
 
+
 detailed_events <- events
 #save events 
 if(group == 'galaxy'){
@@ -272,6 +313,7 @@ save(detailed_events, file = paste0(groupdir, group, "_detailed_events.RData"))
 }else if(group == "presedente"){
   save(detailed_events, file = paste0(groupdir, group, "_detailed_events.RData"))
 }
+
 
 #-------------------------------------------------------
 #-------------------------------------------------------
@@ -297,7 +339,7 @@ print(contingency_matrix)
 contingency_df <- as.data.frame(as.table(contingency_matrix))
 
 # Plot the heatmap
-all <- ggplot(contingency_df, aes(Var2, Var1, fill = Freq)) +
+ggplot(contingency_df, aes(Var2, Var1, fill = Freq)) +
   geom_tile() +
   geom_text(aes(label = Freq), color = "black", size = 4) +
   scale_fill_gradient(low = "white", high = high_col) +
@@ -307,11 +349,6 @@ all <- ggplot(contingency_df, aes(Var2, Var1, fill = Freq)) +
        fill = "Count") +
   theme_classic() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-all
-
-file_path <- file.path(plot_dir, paste(event_type, "matrix.png"))
-ggsave(file_path, all, width = 10, height = 8)
-
 
 #adding logos to the y axis instead of text
 # logo <- as.data.frame(matrix(nrow = 4, ncol = 2))
@@ -320,18 +357,29 @@ ggsave(file_path, all, width = 10, height = 8)
 # logo$V2[3] <-  "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/arrows/bothmove_onemove.png"
 # logo$V2[4] <-  "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/arrows/bothmove_bothmove.png"
 
-ggplot(contingency_df, aes(Var2, Var1, fill = Freq)) +
+all <- ggplot(contingency_df, aes(Var2, Var1, fill = Freq)) +
   geom_tile() +
   geom_text(aes(label = Freq), color = "black", size = 4) +
   scale_fill_gradient(low = "white", high = high_col) +
-  labs(title = paste(event_type, "heatmap"),
+  labs(title = paste(group, event_type, "heatmap"),
        x = "Subgroup Composition",
        y = "Event Type",
        fill = "Count") +
   theme_minimal(base_size = 20) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        axis.text.y = ggtext::element_markdown())+
+  theme(axis.text.x = element_text(angle = 0, vjust = 5, hjust = 0.5),
+        axis.text.y = ggtext::element_markdown(), # Adjust margin here
+        panel.grid.major = element_blank(),  # Remove major grid lines if desired
+        panel.grid.minor = element_blank(),  # Remove minor grid lines if desired
+        panel.border = element_blank(),      # Remove the outline around the plot
+        panel.background = element_rect(fill = "white", color = NA),  # Set the background to white
+        plot.background = element_rect(fill = "white", color = NA)   # Ensure plot background is blank
+      )+
   scale_y_discrete(labels = function(x) glue::glue(" <img src = 'C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/arrows/{x}.png' height = 50 /> "))
+all
+
+file_path <- file.path(plot_dir, paste(event_type, "matrix.png"))
+ggsave(file_path, all, width = 10, height = 8)
+
 
 
 #redo matrix with and without males to see how this affects the patterns observed
@@ -359,8 +407,12 @@ filtered_event_type_no_males <- event_type_df %>%
   rowwise() %>%
   filter(!(all_males(group_A, male_coatis) | all_males(group_B, male_coatis)))
 
+#-------------------------------------------------
+#-------------------------------------------------
 #choose whether want the male events or non-male events
 with_males <- T
+#-------------------------------------------------
+#-------------------------------------------------
 
 # Create a new dataframe based on the choice
 df <- if (with_males) {
@@ -383,19 +435,25 @@ contingency_matrix <- as.matrix(contingency_table)
 # Convert the matrix to a data frame for ggplot2
 contingency_df <- as.data.frame(as.table(contingency_matrix))
 
-
 g <- ggplot(contingency_df, aes(Var2, Var1, fill = Freq)) +
   geom_tile() +
   geom_text(aes(label = Freq), color = "black", size = 4) +
   scale_fill_gradient(low = "white", high = high_col) +
-  labs(title = paste(event_type, "heatmap", name),
+  labs(title = paste(group, event_type, "heatmap", name),
        x = "Subgroup Composition",
        y = "Event Type",
        fill = "Count") +
-  theme_classic() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme_minimal(base_size = 20) +
+  theme(axis.text.x = element_text(angle = 0, vjust = 5, hjust = 0.5),
+        axis.text.y = ggtext::element_markdown(), # Adjust margin here
+        panel.grid.major = element_blank(),  # Remove major grid lines if desired
+        panel.grid.minor = element_blank(),  # Remove minor grid lines if desired
+        panel.border = element_blank(),      # Remove the outline around the plot
+        panel.background = element_rect(fill = "white", color = NA),  # Set the background to white
+        plot.background = element_rect(fill = "white", color = NA)   # Ensure plot background is blank
+  )+
+  scale_y_discrete(labels = function(x) glue::glue(" <img src = 'C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/arrows/{x}.png' height = 50 /> "))
 g
-
 
 file_path <- file.path(plot_dir, paste(name, event_type, "events.png"))
 ggsave(file_path, g, width = 10, height = 8)
@@ -709,11 +767,11 @@ ggsave(paste0(plot_dir, group,"_", event_type, "_agesex_one_manymove.png"), widt
 fis <- events$event_type == "fission"
 
 #combine the A_subgroup_size and B_sub_group_size with A_during_disp and B_during_disp to make abline
-combined_1 <- data.frame(events$A_subgroup_size[fis])
+combined_1 <- data.frame(events$n_A[fis])
 colnames(combined_1) <- "sub_size"
 disp_1 <- data.frame(events$A_during_disp[fis])
 colnames(disp_1) <- "disp"
-combined_2 <- data.frame(events$B_subgroup_size[fis])
+combined_2 <- data.frame(events$n_B[fis])
 colnames(combined_2) <- "sub_size"
 disp_2 <- data.frame(events$B_during_disp[fis])
 colnames(disp_2) <- "disp"
@@ -746,7 +804,7 @@ dev.off()
 
 #filter dataframe to columns needed for the distance travelled and order the subgroup by size (so the larger subgroup is on the X axis and the smaller subgroup is on the Y axis)
 
-fission_df <- data.frame(cbind(events$A_during_disp[fis], events$B_during_disp[fis], events$A_subgroup_size[fis], events$B_subgroup_size[fis], events$AB_before_disp[fis]))
+fission_df <- data.frame(cbind(events$A_during_disp[fis], events$B_during_disp[fis], events$n_A[fis], events$n_B[fis], events$AB_before_disp[fis]))
 colnames(fission_df) <- c("A_during_disp", "B_during_disp", "A_subgroup_size", "B_subgroup_size", "AB_before_disp")
 
 #create column for the distnace travelled for the larger subgroup
@@ -756,7 +814,7 @@ fission_df$Distance_Smaller_Group <- ifelse(fission_df$A_subgroup_size >= fissio
 
 png(height = 800, width = 800, units = 'px', filename = paste0(plot_dir,'subgroup_dist_travelled_duringfission_groupsizeorder_lm.png'))
 par(mar = c(8,8,2,2))
-plot(fission_df$Distance_Larger_Group, fission_df$Distance_Smaller_Group, pch = 20, xlab = "Distance travelled by larger subgroup (m)", ylab = "Distance travelled by smaller subgroup (m)", main = '', cex = 4, cex.axis = 2.5, cex.lab = 2, col = "aquamarine3",mgp=c(5,2,0))
+plot(fission_df$Distance_Larger_Group, fission_df$Distance_Smaller_Group, pch = 20, xlab = "Distance travelled by larger subgroup (m)", ylab = "Distance travelled by smaller subgroup (m)", main = '', cex = 4, cex.axis = 2.5, cex.lab = 2, col = high_col,mgp=c(5,2,0))
 abline(lm(fission_df$Distance_Smaller_Group ~ fission_df$Distance_Larger_Group))
 dev.off()
 
@@ -843,11 +901,11 @@ fus <- events$event_type == "fusion"
 #need to think about what sort of plots to do...
 
 #combine the A_subgroup_size and B_sub_group_size with A_during_disp and B_during_disp to make abline
-combined_fus_1 <- data.frame(events$A_subgroup_size[fus])
+combined_fus_1 <- data.frame(events$n_A[fus])
 colnames(combined_fus_1) <- "sub_size"
 disp_fus_1 <- data.frame(events$A_during_disp[fus])
 colnames(disp_fus_1) <- "disp"
-combined_fus_2 <- data.frame(events$B_subgroup_size[fus])
+combined_fus_2 <- data.frame(events$n_B[fus])
 colnames(combined_fus_2) <- "sub_size"
 disp_fus_2 <- data.frame(events$B_during_disp[fus])
 colnames(disp_fus_2) <- "disp"
@@ -876,7 +934,7 @@ dev.off()
 
 #filter dataframe to columns needed for the distance travelled and order the subgroup by size (so the larger subgroup is on the X axis and the smaller subgroup is on the Y axis)
 
-fusion_df <- data.frame(cbind(events$A_during_disp[fus], events$B_during_disp[fus], events$A_subgroup_size[fus], events$B_subgroup_size[fus]))
+fusion_df <- data.frame(cbind(events$A_during_disp[fus], events$B_during_disp[fus], events$n_A[fus], events$n_B[fus]))
 colnames(fusion_df) <- c("A_during_disp", "B_during_disp", "A_subgroup_size", "B_subgroup_size")
 
 #create column for the distance travelled for the larger subgroup
@@ -887,9 +945,12 @@ fusion_df$Distance_Smaller_Group <- ifelse(fusion_df$A_subgroup_size >= fusion_d
 
 png(height = 800, width = 800, units = 'px', filename = paste0(plot_dir,'subgroup_dist_travelled_duringfusion_groupsizeorder.png'))
 par(mar = c(8,8,2,2))
-plot(fusion_df$Distance_Larger_Group, fusion_df$Distance_Smaller_Group, pch = 20, xlab = "Distance travelled by larger subgroup (m)", ylab = "Distance travelled by smaller subgroup (m)", main = '', cex = 4, cex.axis = 2.5, cex.lab = 2, col = "cadetblue3",mgp=c(5,2,0))
-#abline(lm(fusion_df$Distance_Smaller_Group ~ fusion_df$Distance_Larger_Group))
+plot(fusion_df$Distance_Larger_Group, fusion_df$Distance_Smaller_Group, pch = 20, xlab = "Distance travelled by larger subgroup (m)", ylab = "Distance travelled by smaller subgroup (m)", main = '', cex = 4, cex.axis = 2.5, cex.lab = 2, col = comp_col,mgp=c(5,2,0))
+abline(lm(fusion_df$Distance_Smaller_Group ~ fusion_df$Distance_Larger_Group))
 dev.off()
+
+
+
 
 #for changing the alpha values
 library("scales") 

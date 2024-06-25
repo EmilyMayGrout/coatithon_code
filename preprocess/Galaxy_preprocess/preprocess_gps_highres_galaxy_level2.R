@@ -15,6 +15,8 @@ load(file=paste0(group,'_coati_ids.RData'))
 
 #read in timestamp data - notice the level number, if 2, then its not got GPS speed errors
 load(file=paste0(group,'_xy_highres_level1.RData'))
+load(file=paste0(group,'_latlon_highres_level1.RData'))
+
 
 # 1 - "Quasar" 
 # 2 - "Estrella" 
@@ -88,5 +90,61 @@ save(list=c('xs','ys','ts'), file = paste0(groupdir,'galaxy_xy_highres_level2.RD
 
 
 
+#Luna
+lats[10,111:120] <- NA
+lons[10,111:120] <- NA
+
+lats[10, 53500:53600] <- NA
+lons[10, 53500:53600] <- NA
+
+#Orbita
+lats[6,180:200] <- NA
+lons[6,180:200] <- NA
+
+lats[6,250:350] <- NA
+lons[6,250:350] <- NA
+
+#Pluto
+lats[9,2120:2140] <- NA
+lons[9,2120:2140] <- NA
+
+#Estrella
+lats[2,10800:10850] <- NA
+lons[2,10800:10850] <- NA
+
+#Cometa
+lats[11, 26600:26800] <- NA
+lons[11, 26600:26800] <- NA
+
+lats[11,50450:50460] <- NA
+lons[11,50450:50460] <- NA
+
+lats[11, 86280:86370] <- NA
+lons[11, 86280:86370] <- NA
+
+#Quasar
+lats[1,50430:50480] <- NA
+lons[1,50430:50480] <- NA
+
+lats[1,59085:59150] <- NA
+lons[1,59085:59150] <- NA
+
+#Venus
+lats[3,65720:65850] <- NA
+lons[3,65720:65850] <- NA
+
+#Saturno
+lats[8,163650:163700] <- NA
+lons[8,163650:163700] <- NA
+
+#Pluto
+lats[9,175830:175900] <- NA
+lons[9,175830:175900] <- NA
+
+#Estrella
+lats[2,175800:176250] <- NA
+lons[2,175800:176250] <- NA
+
+save(list=c('lats','lons','ts'), file = paste0(groupdir,'galaxy_latlon_highres_level2.RData'))
 
 

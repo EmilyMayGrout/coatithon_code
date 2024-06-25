@@ -8,7 +8,7 @@ min_tracked <- 7 #minimum number of individuals tracked to include in analysis (
 
 #---DIRECTORIES----
 #which group - galaxy or presedente
-group <- 'galaxy'
+group <- 'presedente'
 
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
 
@@ -188,11 +188,11 @@ give.n <- function(x){
 
 
 if(group == "galaxy"){
-  colors <- c("coral1","coral3", "coral4")
+  colors <- c("darkolivegreen2","olivedrab3", "olivedrab4")
   label <- "Galaxy group"
   
 } else if (group == "presedente"){
-  colors <- c("darkolivegreen2","olivedrab3", "olivedrab4")
+  colors <- c("coral1","coral3", "coral4")
   label <- "Presidente group"
 }
 

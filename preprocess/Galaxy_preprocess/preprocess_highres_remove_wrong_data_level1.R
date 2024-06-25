@@ -9,6 +9,7 @@ data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/'
 gps_file <- "galaxy_xy_highres_level0.RData" 
+latlon_file <- "galaxy_latlon_highres_level0.RData" 
 id_file <- 'coati_ids.RData'
 
 outdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
@@ -16,6 +17,7 @@ outdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 #load data
 setwd(data_dir)
 load(gps_file)
+load(latlon_file)
 load(id_file)
 
 #ts[54001] is 2021-12-29 11:00:00
@@ -26,9 +28,11 @@ load(id_file)
 #so going to add NA's for Venus from ts[21601] to ts[54001] 
 xs[3,21601:54001] <- NA
 ys[3,21601:54001] <- NA
-
+lats[3,21601:54001] <- NA
+lons[3,21601:54001] <- NA
 
 save(list=c('xs','ys','ts'), file = paste0(outdir,'galaxy_xy_highres_level1.RData'))
+save(list=c('lats','lons','ts'), file = paste0(outdir,'galaxy_latlon_highres_level1.RData'))  
 
 
 
