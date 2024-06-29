@@ -189,13 +189,15 @@ together_times$time_pos<-as.POSIXct(together_times$time, format = "%Y-%m-%d %H:%
 
 calling_together <- calls[which(calls$datetime_synch_pos %in% together_times$time),]
 
+
 # calculate call rate for each together bout
 # get the duration of the bout
 
 crt_ <- as.data.frame(coati_ids[,1]); names(crt_) <- "name"
 crt_$ind_idx <- 1:nrow(crt_)
 call_rates_together <- data.frame()
-n = 1
+together_bout <- adjusted_bouts[120][[1]]
+
 for(together_bout in adjusted_bouts){
      ct_ <- calling_together[which(calling_together$datetime_synch_pos >= together_bout[1] & calling_together$datetime_synch_pos <= together_bout[2]), ]
     ct_ <- ct_[!is.na(ct_$calltype),]

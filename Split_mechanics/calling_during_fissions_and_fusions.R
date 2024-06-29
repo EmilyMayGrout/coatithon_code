@@ -4,7 +4,7 @@
 library(tidyverse)
 library(reshape2)
 
-use_machine_labels <- T
+use_machine_labels <- F
 
 #directory holding all the data
 #datadir <- '~/Dropbox/coatithon/calling_during_fissions_and_fusions/data'
@@ -77,9 +77,10 @@ for(i in 1:nrow(labeled_periods)){
   next_stop <- min(stops_for_file$datetime_synch, na.rm=T)
   labeled_periods$stoptime[i] <- next_stop
 }
-rm("startstop","i","stops_for_file","next_stop","starts","stops","starttime")
 
 }
+
+#rm("startstop","i","stops_for_file","next_stop","starts","stops","starttime")
 
 #remove the leading G from the tag ids for matching
 labeled_periods$id <- gsub('G', '', labeled_periods$id)
@@ -134,7 +135,7 @@ labeled_periods$tstop <- as.POSIXct(labeled_periods$stoptime, format = "%Y-%m-%d
 # get the call rate for each individual for each event before, during and after the event (also some additional info, like the subgroup id and the distance moved)
 ind_events_data <- data.frame()
 head(group_events_data)
-#i = 10
+#i = 25
 for(i in 1:nrow(group_events_data)){
   event.times <- group_events_data[i,c(10:14)]
   times <- ts[as.numeric(event.times[,c(2:5)])]  # start - end backwards
@@ -226,8 +227,8 @@ ind_events_data <- ind_events_data %>%
       event_type == "fission" & subgroup == "B" & split_type == "bothmove_onemove" & subgroup_moved == "A" ~ "slowed_down",
       event_type == "fission" & subgroup == "A" & split_type == "bothmove_bothmove" & subgroup_moved == "both" ~ "no_change",
       event_type == "fission" & subgroup == "B" & split_type == "bothmove_bothmove" & subgroup_moved == "both" ~ "no_change",
-      event_type == "fission" & subgroup == "B" & split_type == "bothstill_bothmove" & subgroup_moved == "both" ~ "both_change",
-      event_type == "fission" & subgroup == "A" & split_type == "bothstill_bothmove" & subgroup_moved == "both" ~ "both_change",
+      event_type == "fission" & subgroup == "B" & split_type == "bothstill_bothmove" & subgroup_moved == "both" ~ "both_move",
+      event_type == "fission" & subgroup == "A" & split_type == "bothstill_bothmove" & subgroup_moved == "both" ~ "both_move",
       event_type == "fission" & subgroup == "A" & split_type == "bothstill_onemove" & subgroup_moved == "A" ~ "sped_up",
       event_type == "fission" & subgroup == "B" & split_type == "bothstill_onemove" & subgroup_moved == "B" ~ "sped_up",
       event_type == "fission" & subgroup == "A" & split_type == "bothstill_onemove" & subgroup_moved == "B" ~ "no_change",
@@ -243,8 +244,8 @@ ind_events_data <- ind_events_data %>%
       event_type == "fusion" & subgroup == "A" & split_type == "onemove_bothstill" & subgroup_moved == "B" ~ "no_change", 
       event_type == "fusion" & subgroup == "A" & split_type == "bothmove_bothmove" & subgroup_moved == "both" ~ "no_change",
       event_type == "fusion" & subgroup == "B" & split_type == "bothmove_bothmove" & subgroup_moved == "both" ~ "no_change",
-      event_type == "fusion" & subgroup == "A" & split_type == "bothmove_bothstill" & subgroup_moved == "both" ~ "slowed_down",
-      event_type == "fusion" & subgroup == "B" & split_type == "bothmove_bothstill" & subgroup_moved == "both" ~ "slowed_down",
+      event_type == "fusion" & subgroup == "A" & split_type == "bothmove_bothstill" & subgroup_moved == "both" ~ "both_to_still",
+      event_type == "fusion" & subgroup == "B" & split_type == "bothmove_bothstill" & subgroup_moved == "both" ~ "both_to_still",
       TRUE ~ "other"
     ))
 
@@ -256,9 +257,6 @@ if(use_machine_labels){
  save(ind_events_data, file = paste0(datadir, "/calling_eventtype.RData"))
  
 }
-
-
-
 
 
 
