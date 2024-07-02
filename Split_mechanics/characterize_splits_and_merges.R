@@ -155,7 +155,7 @@ events$AB_before_disp <- events$AB_after_disp <- events$A_during_disp <- events$
 events$split_angle <- events$turn_angle_A <- events$turn_angle_B <- NA 
 events$A_before_disp <- events$B_before_disp <- NA
 
-i = 3
+i = 27
 for(i in c(1:nrow(events))){
   print(i)
   ff_data <- analyse_ff_event(i, events, xs, ys, ts, plot=F, max_time = 700) #with 700s, catches more start time of events which are still accurate to the event (not picking up a time from a different event)
@@ -166,6 +166,8 @@ for(i in c(1:nrow(events))){
     events$B_during_disp[i] <- ff_data$disps['B','during']
     events$A_before_disp[i] <- ff_data$disps['A','before']
     events$B_before_disp[i] <- ff_data$disps['B','before']
+    events$A_after_disp[i] <- ff_data$disps['A','after']
+    events$B_after_disp[i] <- ff_data$disps['B','after']
   }
   events$split_angle[i] <- ff_data$split_angle
   events$turn_angle_A[i] <- ff_data$turn_angle_A
@@ -393,10 +395,10 @@ hist(rbind(events$A_during_disp, events$B_during_disp), breaks = 40)
 #visualising the events with Eli's code
 
 #new function currently get's error after "Identifying changes in group membership"
-ff_output <- identify_splits_and_merges(R_inner = R_inner, R_outer = R_outer, xs, ys, ts, breaks = c(1, length(ts)+1), names = coati_ids)
+#ff_output <- identify_splits_and_merges(R_inner = R_inner, R_outer = R_outer, xs, ys, ts, breaks = c(1, length(ts)+1), names = coati_ids)
                                         
 
-events <- ff_data$events_detected
+#events <- ff_data$events_detected
 
 
 

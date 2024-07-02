@@ -24,11 +24,10 @@ calls <- read.csv("C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_pr
 #finding the travel speed of each individual for each bout duration
 
 call_rates_together_5mins$mean_speed <- NA
-call_rates_together_5mins$max_speed <- NA
 call_rates_together_5mins$distance <- NA
 call_rates_together_5mins$duration <- NA
 
-#i = 1
+i = 1
 
 for (i in 1:nrow(call_rates_together_5mins)){
   
@@ -54,8 +53,7 @@ for (i in 1:nrow(call_rates_together_5mins)){
   duration <- end_idx - start_idx
   
   # Calculate speed in meters per second (m/s)
-  call_rates_together_5mins$mean_speed[i] <- mean(distances/duration)
-  call_rates_together_5mins$max_speed[i]<- max(distances/duration)
+  call_rates_together_5mins$mean_speed[i] <- sum(distances)/duration
   call_rates_together_5mins$distance[i] <- sum(distances)
   call_rates_together_5mins$duration[i] <- duration
   
@@ -63,6 +61,8 @@ for (i in 1:nrow(call_rates_together_5mins)){
 
 
 save(call_rates_together_5mins, file = paste0(data_dir, "/calling_5mincut_baseline.RData"))
+
+call_rates_together_5mins$distance/call_rates_together_5mins$bout_dur
 
 #just interested in the contact calls
 contactcall_speed <- call_rates_together_5mins[call_rates_together_5mins$call_type == "contact call",]

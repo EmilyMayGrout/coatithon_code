@@ -212,11 +212,20 @@ ggplot(speed_days, aes(x = context, y = speed, fill = context)) +
   labs(x = label, y = "Speed (m/s)")+
   ylim(0, 2)+
   guides(fill="none")+
-  stat_summary(fun.data = give.n, geom = "text", cex = 6, position = position_nudge(x=0.2, y = 1.4))
+  stat_summary(fun.data = give.n, geom = "text", cex = 6, position = position_nudge(x=0.2, y = 1.4))+
+  facet_wrap(~name)
   
-ggsave(paste0(plot_dir, "speeds_highres.png"), width = 10, height = 5)
+ggsave(paste0(plot_dir, "speeds_highres_byind.png"), width = 25, height = 15)
 
 
+mean(speed_days$speed[speed_days$context == "together"])
+sd(speed_days$speed[speed_days$context == "together"])
+
+mean(speed_days$speed[speed_days$context == "split"])
+sd(speed_days$speed[speed_days$context == "split"])
+
+mean(speed_days$speed[speed_days$context == "alone"])
+sd(speed_days$speed[speed_days$context == "alone"])
 
 
 
