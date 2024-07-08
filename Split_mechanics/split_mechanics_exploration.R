@@ -17,7 +17,7 @@ Sys.setenv(TZ='UTC')
 user <- 'emily'
 
 #which group - galaxy or presedente
-group <- 'presedente' #subdirectory where the group data is stored
+group <- 'galaxy' #subdirectory where the group data is stored
 
 #whether to identify splits and merges automatically (if F) or use manually identified events (if T)
 use_manual_events <- F
@@ -486,7 +486,7 @@ if(group == 'galaxy'){
 #-------------------------------------------------------
 
 #define type of event to look at
-event_type <- "fusion"
+event_type <- "fission"
 
 #------------------------------------------------------
 #------------------------------------------------------
@@ -525,6 +525,10 @@ all <- ggplot(contingency_df, aes(Var2, Var1, fill = Freq)) +
   )+
   scale_y_discrete(labels = function(x) glue::glue(" <img src = 'C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/arrows/{x}.png' height = 50 /> "))
 all
+
+
+#save dataframe to make matrices of the two groups together
+save(contingency_df, file = paste0(groupdir, group, "_matrix.RData"))
 
 file_path <- file.path(plot_dir, paste(event_type, "matrix.png"))
 ggsave(file_path, all, width = 10, height = 8)

@@ -4,7 +4,7 @@
 #--------PARAMS-------
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/ch1_cleancode/'
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level2/'
 gps_file <- "galaxy_xy_highres_level1.RData" #level0 is when Venus is not removed
 id_file <- 'galaxy_coati_ids.RData'
 
@@ -13,6 +13,8 @@ load("C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/galax
 
 #list of Rs
 R <- 50
+
+use_machine_labels <- T
 
 #-------SETUP-------
 
@@ -50,7 +52,7 @@ n_tracked <- colSums(!is.na(xs))
 all_tracked_idxs <- which(n_tracked==n_inds)
 
 #----------------------------------------------------------------------
-#getting subgorup data
+#getting subgroup data
 subgroup_data <- get_subgroup_data(xs, ys, R)
 
 
@@ -162,7 +164,13 @@ adjusted_bouts_5min <- Filter(Negate(is.null), adjusted_bouts_5min)
 
 #get the call files 
 datadir <- "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed"
-callfile <- 'all_data_hms_synched.csv'
+
+if(use_machine_labels){
+  callfile <- "all_data_hms_all_ml_synched.csv"
+} else {
+  callfile <- 'all_data_hms_synched.csv'
+  }
+
 id_file <- 'galaxy_coati_ids.RData'
 
 #LOAD DATA
@@ -170,19 +178,64 @@ setwd(datadir)
 calls <- read.csv(callfile, header=T, sep = ',')
 load(id_file)
 
-#identify labeled periods for each individual
-startstop <- calls[which(calls$label %in% c('start','stop')),]
-startstop <- startstop[order(startstop$file, startstop$datetime_synch),]
-starts <- startstop[which(startstop$label == 'start'),]
-stops <- startstop[which(startstop$label == 'stop'),]
-labeled_periods <- data.frame(file = starts$file, id = starts$id, starttime = starts$datetime_synch, stoptime = NA)
-#for each start marker, search for the next stop marker
-for(i in 1:nrow(labeled_periods)){
-  starttime <- labeled_periods$starttime[i]
-  stops_for_file <- stops[which(stops$file == labeled_periods$file[i] & stops$datetime_synch > starttime),]
-  next_stop <- min(stops_for_file$datetime_synch, na.rm=T)
-  labeled_periods$stoptime[i] <- next_stop
+
+if(use_machine_labels){
+  
+  bound_info <- unique(paste(calls$file, calls$filestart_UTC_soroka))
+  
+  # Split bound_info into file and starttime
+  split_info <- strsplit(bound_info, " ")
+  file <- sapply(split_info, '[', 1)
+  date <- sapply(split_info, '[', 2)
+  time <- sapply(split_info, '[', 3)
+  
+  # Combine date and time into starttime
+  starttime <- paste(date, time)
+  # Extract id from file
+  id <- substring(file, 1, 5)
+  
+  # Create the new dataframe
+  labeled_periods <- data.frame(file = file, id = id, starttime = starttime, stringsAsFactors = FALSE)
+  
+  # Initialize an empty vector to store the latest times
+  # I would have got the duration of the file by loading in the wave files but I didn't have permissions to read in these files so this is the second best option - finding the latest label to infer the file duration
+  latest_times <- vector("character", length = nrow(labeled_periods))
+  labeled_periods$stoptime <- NA
+  # Iterate over each unique file in new_data
+  for (i in seq_along(labeled_periods$file)) {
+    file <- labeled_periods$file[i]
+    date <- as.Date(labeled_periods$starttime[i])
+    # Subset calls dataframe for the current file
+    calls_onefile <- calls[calls$file == file, ]
+    # Find the latest time in the Start column
+    latest_time <- max(calls_onefile$Start)  # Assuming Start is in POSIXct format
+    #put it in the correct time (add 11:00:000)
+    #latest_time <- as.character(hms(latest_time) + hms("11:00:00.000"))
+    datetime <- paste(date, latest_time)
+    # Store the latest time in the corresponding index of latest_times
+    labeled_periods$stoptime[i] <- format(as.POSIXct(datetime, format = "%Y-%m-%d %H:%M:%OS", tz = "UTC")+ as.difftime("11:00:00"))
+    
+  } 
+  
+} else {  
+  #identify labeled periods for each individual
+  startstop <- calls[which(calls$label %in% c('start','stop')),]
+  startstop <- startstop[order(startstop$file, startstop$datetime_synch),]
+  starts <- startstop[which(startstop$label == 'start'),]
+  stops <- startstop[which(startstop$label == 'stop'),]
+  labeled_periods <- data.frame(file = starts$file, id = starts$id, starttime = starts$datetime_synch, stoptime = NA)
+  #for each start marker, search for the next stop marker
+  for(i in 1:nrow(labeled_periods)){
+    starttime <- labeled_periods$starttime[i]
+    stops_for_file <- stops[which(stops$file == labeled_periods$file[i] & stops$datetime_synch > starttime),]
+    next_stop <- min(stops_for_file$datetime_synch, na.rm=T)
+    labeled_periods$stoptime[i] <- next_stop
+  }
+  
 }
+
+
+
 #remove the leading G from the tag ids for matching
 labeled_periods$id <- gsub('G', '', labeled_periods$id)
 #add the individual index
@@ -266,7 +319,7 @@ call_rates_together_5mins <- call_rates_together[which(call_rates_together$bout_
 
 sum(unique(call_rates_together_5mins$bout_dur))/60/60 #in hours
 
-save(call_rates_together_5mins, file = "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/call_rates_together_5mincut_gal.RData")
+save(call_rates_together_5mins, file = "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/call_rates_together_5mincut_gal_ml.RData")
 #load("C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/call_rates_together_gal.RData")
 
 #check number of events left - 65
@@ -325,7 +378,14 @@ hist(call_rates_together_5mins$mean_speed, breaks = 100)
 #save this data frame for Odd
 save(call_rates_together_5mins, file = paste0(datadir, "/calling_5mincut_baseline.RData"))
 
+call_rates_together_5mins$starttime <- as_hms(call_rates_together_5mins$start_bout) - as_hms("5:00:00")
+call_rates_together_5mins$starttime <- as_hms(call_rates_together_5mins$starttime)
 
-plot(call_rates_together_5mins$mean_speed, call_rates_together_5mins$call_rate)
+#plotting distance travelled over 3 hour period
+ggplot(call_rates_together_5mins[call_rates_together_5mins$call_type == "contact call",], aes(x = starttime, y = distance))+
+  geom_jitter(width = 150, height = 0.001)+ #jitter by 2.5 minutes
+  labs(x = "Time", y = "Distance travelled in 5 minutes (m)")+
+  theme_classic()
+ggsave(paste0(plot_dir, "disttravelled_time.png"), width = 10, height = 5)
 
 

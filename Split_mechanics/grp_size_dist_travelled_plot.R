@@ -51,6 +51,25 @@ g2 + g1
 
 ggsave(("C:/Users/egrout/Dropbox/coatithon/results/speeds_grpsize_fisfus.png"), width = 13, height = 5)
 
+#how many events are smaller groups travelling more than bigger groups?
+sum(both_fissions$Distance_Smaller_Group[both_fissions$Group == "Presidente"] > both_fissions$Distance_Larger_Group[both_fissions$Group == "Presidente"])
+#37 events in Galaxy where smaller groups travel further
+#11 for Presidente
+sum(both_fissions$Distance_Smaller_Group[both_fissions$Group == "Presidente"] < both_fissions$Distance_Larger_Group[both_fissions$Group == "Presidente"])
+#27 events in Galaxy where larger groups travel further
+#25 for Presidente
+
+sum(both_fusions$Distance_Smaller_Group[both_fusions$Group == "Galaxy"] > both_fusions$Distance_Larger_Group[both_fusions$Group == "Galaxy"])
+#46 events in Galaxy where smaller groups travel to large group
+#32 events in Presidente 
+sum(both_fusions$Distance_Smaller_Group[both_fusions$Group == "Galaxy"] < both_fusions$Distance_Larger_Group[both_fusions$Group == "Galaxy"])
+#13 in Galaxy where larger group travels further
+#6 in Presidente
+
+
+
+
+
 
 
 

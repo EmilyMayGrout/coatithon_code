@@ -17,12 +17,12 @@
 #----PARAMETERS---
 utc_offset <- -5 #local time offset from UTC, in hours - should be negative 5 for panama
 #path_to_synch_file <- '~/Downloads/Synch calls coati collar project - Sheet1.csv' #where the synch table is located
-path_to_synch_file <- 'C:/Users/egrout/Dropbox/coatithon/synch_table.csv'
+path_to_synch_file <- 'C:/Users/egrout/Dropbox/coatithon/synch_table_all.csv'
 
 use_machine_labels <- T
 
 if(use_machine_labels){
-path_to_call_labels_file <- 'C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/all_data_hms_ml.csv' #made in calls_around_fission_fusions_galaxy with labels which were cleaned in the cleaning_labels 
+path_to_call_labels_file <- 'C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/all_data_hms_all_ml.csv' #made in calls_around_fission_fusions_galaxy_old with labels which were cleaned in the cleaning_labels 
 } else {
   path_to_call_labels_file <- 'C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/all_data_hms.csv'
 }
@@ -173,7 +173,7 @@ for(i in 1:length(soroka_ids)){
 
 #make a table of soroka id and date vs offset and use to correct labels
 #pull the dates and soroka ids from the table of labelled calls in the future, but for now use the synch table
-dates <- unique(synch_dat$date)
+dates <- seq.Date(min(synch_dat$date), max(synch_dat$date), by = "1 day")
 soroka_ids <- unique(synch_dat$soroka_id)
 
 #create the table

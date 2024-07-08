@@ -3,11 +3,11 @@
 use_machine_labels <- T
 
 if(use_machine_labels){
- wd <- "C:/Users/egrout/Dropbox/calls/Galaxy_labels/machine_labels/" 
+ wd <- "C:/Users/egrout/Dropbox/calls/Galaxy_labels/machine_labels_all/" 
 }else{wd <- "C:/Users/egrout/Dropbox/calls/Galaxy_labels/completed_labels/"}
 setwd <- wd
 
-use_automated_events <- F
+use_automated_events <- T
 
 if(use_automated_events){
 load("C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/galaxy_auto_ff_events_characterized.RData")  #RData was made in split_mechanics_exploration 
@@ -54,9 +54,14 @@ for (i in 1:length(files)) {
   
   # add a column with the row names (i.e. the name of the CSV file)
   file_data$file_name <- files[i]
-  #only keeping necessary info of the file name
-  file_data$file <- str_sub(file_data$file_name,end=11)
-  file_data$date <- str_sub(file_data$file_name, start = 13, end = 20)
+  #only keeping necessary info of the file name 
+  file_data$file <- str_c(str_sub(file_data$file_name, 1, 8), str_sub(file_data$file_name, 18, 20), sep = "")
+  file_data$date <- str_sub(file_data$file_name, start = 9, end = 16)
+  
+ 
+  #if using the ML files for the labelled days ("C:/Users/egrout/Dropbox/calls/Galaxy_labels/machine_labels), run this code to get filename and date instead:
+  #file_data$file <- str_sub(file_data$file_name,end=11)
+  #file_data$date <- str_sub(file_data$file_name, start = 13, end = 20)
   colnames(file_data)[colnames(file_data) == "Name"] <- "label"
   
   # add the data to the all_data dataframe
@@ -88,7 +93,7 @@ if (use_machine_labels) {
   all_data_hms <- all_data
   #as.POSIXct goes to the second
   all_data_hms$datetime <- as.POSIXct(paste(all_data_hms$date, all_data_hms$Start), format = "%Y-%m-%d %H:%M:%OS")+ as.difftime("11:00:00")
-  write.csv(all_data_hms, "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/all_data_hms_ml.csv", row.names = F)
+  write.csv(all_data_hms, "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/all_data_hms_all_ml.csv", row.names = F)
  
 } else {
   

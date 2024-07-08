@@ -4,13 +4,13 @@
 library(tidyverse)
 library(reshape2)
 
-use_machine_labels <- F
+use_machine_labels <- T
 
 #directory holding all the data
 #datadir <- '~/Dropbox/coatithon/calling_during_fissions_and_fusions/data'
 datadir <- "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed"
 if(use_machine_labels){
-callfile <- 'all_data_hms_ml_synched.csv' #made in coati_synch using the cleaned labels from cleaning_labels
+callfile <- 'all_data_hms_all_ml_synched.csv' #made in coati_synch using the cleaned labels from cleaning_labels
 }else{
   callfile <- 'all_data_hms_synched.csv' #made in coati_synch using the cleaned labels from cleaning_labels
 }
@@ -158,7 +158,7 @@ for(i in 1:nrow(group_events_data)){
         after <- calls[which(calls$datetime_synch_pos >= times[2] & calls$datetime_synch_pos < times[1]),]
         
         for(j in l.inds){
-          event <- group_events_data[i,c("event_idx","event_type")] 
+          event <- group_events_data[i,c("n_A", "n_B", "event_idx","event_type")] 
           event <- rbind(event,event,event) # as there are three time periods I will rbind the events 3 times
           event$period <- c("before","during","after")
           event$duration <- c(as.numeric(difftime(times[3],times[4], units = "secs")),
@@ -187,11 +187,15 @@ for(i in 1:nrow(group_events_data)){
           # # Optional: get distance the subgroup the individual is in moved during the event
           a_move <- group_events_data[group_events_data$event_idx == unique(event$event_idx),"A_during_disp"]
           b_move <- group_events_data[group_events_data$event_idx == unique(event$event_idx),"B_during_disp"]
-    
           event$sub_move_dist_during <- ifelse(j %in% a_inds,a_move,b_move)
-           
+          
           event$n_ind_labeled <- length(l.inds) # total number of individuals that have labeled data for this event
-          ind_events_data<-rbind( ind_events_data,event)
+          #get size of the subgroup
+          event$subgroup_size <- ifelse(event$subgroup == "A", event$n_A, event$n_B)
+          #remove n_A and n_B column
+          event <- within(event, rm("n_A", "n_B"))
+         
+          ind_events_data <- rbind( ind_events_data,event)
         }
       }
     }
@@ -252,7 +256,7 @@ ind_events_data <- ind_events_data %>%
 
 #save this data frame for Odd
 if(use_machine_labels){
-  save(ind_events_data, file = paste0(datadir, "/calling_eventtype_ml.RData"))
+  save(ind_events_data, file = paste0(datadir, "/calling_eventtype_all_ml.RData"))
 } else {
  save(ind_events_data, file = paste0(datadir, "/calling_eventtype.RData"))
  
