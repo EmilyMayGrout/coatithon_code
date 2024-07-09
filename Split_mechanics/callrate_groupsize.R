@@ -123,7 +123,7 @@ j = 1
 #write.csv(calls, file = paste0(datadir, "/all_data_hms_all_ml_synched_subgrp_size_noNas.csv"))
 
 calls <- read.csv(paste0(datadir, "/all_data_hms_all_ml_synched_subgrp_size_noNas.csv"))
-write.csv(calls, file = paste0(datadir, "/all_data_hms_all_ml_synched_subgrp_size_noNas.csv"))
+#write.csv(calls, file = paste0(datadir, "/all_data_hms_all_ml_synched_subgrp_size_noNas.csv"))
 
 
 #combining the contact calls 
@@ -149,31 +149,65 @@ calls$calltype[calls$label == "squeal chittering"] <- "aggression call"
 calls$datetime_synch <- as.POSIXct(calls$datetime_synch, format="%Y-%m-%d %H:%M:%S")
 
 # Create 2-minute bins
-calls$time_bin <- cut(calls$datetime_synch, breaks="5 mins")
+calls$time_bin <- cut(calls$datetime_synch, breaks="2 mins")
+
 
 # Define a function to calculate the mode
 calculate_mode <- function(x) {
-  unique_x <- unique(x)
-  unique_x[which.max(tabulate(match(x, unique_x)))]
+  if (length(x) == 0) return(NA)
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
 }
 
-# Group by id, label, date, and time_bin, then calculate call_rate, mean_subgroup_size, and mode_subgroup_size
-results <- calls %>%
+# Generate the complete grid of all combinations of id, date, and time_bin
+complete_grid <- expand_grid(
+  id = unique(calls_cut$id),
+  date = unique(calls_cut$date),
+  time_bin = unique(calls_cut$time_bin)
+)
+
+
+# Summarize the data to get mean and mode subgroup sizes
+subgroup_size_summary <- calls_cut %>%
+  group_by(id, date, time_bin) %>%
+  summarise(
+    mean_subgroup_size = mean(count, na.rm = TRUE),
+    mode_subgroup_size = calculate_mode(count[!is.na(count)]),
+    .groups = 'drop'
+  )
+
+# Merge the complete grid with the subgroup size data
+results_complete <- complete_grid %>%
+  left_join(subgroup_size_summary, by = c("id", "date", "time_bin"))
+
+# Summarize call rates
+call_rate_summary <- calls_cut %>%
   group_by(id, calltype, date, time_bin) %>%
   summarise(
     call_rate = n(),
-    mean_subgroup_size = mean(count, na.rm = TRUE),
-    mode_subgroup_size = calculate_mode(count[!is.na(count)])
-    
-  ) %>%
-  ungroup()
+    .groups = 'drop'
+  )
 
-results <- na.omit(results)
+# Complete the call rate data to ensure all combinations of id, date, time_bin, and calltype
+complete_call_rate <- complete_grid %>%
+  expand_grid(calltype = unique(calls_cut$calltype)) %>%
+  left_join(call_rate_summary, by = c("id", "date", "time_bin", "calltype")) %>%
+  mutate(call_rate = replace_na(call_rate, 0))
 
-#write.csv(results, file = paste0(datadir, "/callrate_grpsize_noNas.csv"))
+
+# Merge the call rate data with the subgroup size data
+final_results <- results_complete %>%
+  left_join(complete_call_rate, by = c("id", "date", "time_bin"))
 
 
-ggplot(results, aes(x = mode_subgroup_size, y = call_rate, group = mode_subgroup_size)) +
+#remove rows in the dataframe where count is NA
+callrate_subsize <- final_results[!is.na(final_results$calltype),]
+
+write.csv(callrate_subsize, file = paste0(datadir, "/callrate_grpsize_noNas_2mins.csv"))
+
+
+
+ggplot(callrate_subsize, aes(x = mode_subgroup_size, y = call_rate, group = mode_subgroup_size)) +
   geom_boxplot(fill = "steelblue1", color = "black") +
   labs(
     title = "Call Rate vs. Mean Subgroup Size",

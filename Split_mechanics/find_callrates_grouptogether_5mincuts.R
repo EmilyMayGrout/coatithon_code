@@ -123,7 +123,7 @@ adjusted_bouts <- Filter(Negate(is.null), adjusted_bouts)
 #for looking at speed, want the bouts to be the same length, so making a different list with equal length bouts
 
 # Function to split bouts into 5-minute intervals
-split_into_intervals <- function(bout, interval_minutes = 5) {
+split_into_intervals <- function(bout, interval_minutes = 3) {
   start_time <- bout[1]
   end_time <- bout[2]
   
@@ -152,7 +152,7 @@ split_into_intervals <- function(bout, interval_minutes = 5) {
 
 # Create the 5-minute adjusted bouts list
 adjusted_bouts_5min <- lapply(adjusted_bouts, function(bout) {
-  split_into_intervals(bout, interval_minutes = 5)
+  split_into_intervals(bout, interval_minutes = 3)
 })
 
 # Flatten the list and remove NULL entries
@@ -312,15 +312,19 @@ for(together_bout in adjusted_bouts_5min){
 }
 
 #kick out bouts that are shorter than 2min
-call_rates_together_5mins <- call_rates_together[which(call_rates_together$bout_dur > 120), ]
+call_rates_together_3mins <- call_rates_together[which(call_rates_together$bout_dur > 120), ]
 
 
 #find total duration of times when group together to get call rates
 
-sum(unique(call_rates_together_5mins$bout_dur))/60/60 #in hours
+sum(unique(call_rates_together_3mins$bout_dur))/60/60 #in hours
 
-save(call_rates_together_5mins, file = "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/call_rates_together_5mincut_gal_ml.RData")
+save(call_rates_together_3mins, file = "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/call_rates_together_3mincut_gal_ml.RData")
 #load("C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/call_rates_together_gal.RData")
+
+#just making the naming the same so I don't have to rewrite all the code
+call_rates_together_5mins <- call_rates_together_3mins
+
 
 #check number of events left - 65
 length(unique(call_rates_together_5mins$bout))
@@ -346,7 +350,13 @@ for (i in 1:nrow(call_rates_together_5mins)){
   end_idx <- which(ts == call_rates_together_5mins$end_bout[i])
   
   xs_sub <- na.omit(xs[ind_idx, c(start_idx:end_idx)])
-  ys_sub <-na.omit(ys[ind_idx, c(start_idx:end_idx)])
+  ys_sub <- na.omit(ys[ind_idx, c(start_idx:end_idx)])
+  
+  # Skip the iteration if xs_sub or ys_sub are all NA's (resulting in empty vectors)
+  if (length(xs_sub) == 0 || length(ys_sub) == 0) {
+    next
+  }
+  
   
   time_interval <- 30  # Interval to filter every 10 seconds
   
@@ -384,8 +394,8 @@ call_rates_together_5mins$starttime <- as_hms(call_rates_together_5mins$starttim
 #plotting distance travelled over 3 hour period
 ggplot(call_rates_together_5mins[call_rates_together_5mins$call_type == "contact call",], aes(x = starttime, y = distance))+
   geom_jitter(width = 150, height = 0.001)+ #jitter by 2.5 minutes
-  labs(x = "Time", y = "Distance travelled in 5 minutes (m)")+
+  labs(x = "Time", y = "Distance in 3 minute bins (m)")+
   theme_classic()
-ggsave(paste0(plot_dir, "disttravelled_time.png"), width = 10, height = 5)
+ggsave(paste0(plot_dir, "distancetravelled_time_3minbins.png"), width = 10, height = 5)
 
 

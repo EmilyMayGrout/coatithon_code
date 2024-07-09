@@ -264,6 +264,20 @@ if(use_machine_labels){
 
 
 
+#look at distribution of durations of splits to compare run the speed over time plot with a realistic bin duration for comparison
+
+mean(ind_events_data$duration[ind_events_data$period == "during"], breaks = 40)
+
+#most durations are between 100 and 200s, mean is 165 seconds
+
+
+
+
+
+
+
+
+
 #-----------------------------------------------------------------------
 
 leadership_metric <- c("position","crosstime","crosstime_ownfinishline")
