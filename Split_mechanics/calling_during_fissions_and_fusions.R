@@ -4,7 +4,7 @@
 library(tidyverse)
 library(reshape2)
 
-use_machine_labels <- T
+use_machine_labels <- F
 
 #directory holding all the data
 #datadir <- '~/Dropbox/coatithon/calling_during_fissions_and_fusions/data'

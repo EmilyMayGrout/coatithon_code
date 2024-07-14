@@ -87,6 +87,8 @@ if(group == 'presedente'){
   break_4 <- 20
   break_5 <- 20
   break_6 <- 50
+  ylims = c(0, 0.06)
+  xlims = c(0, 80)
 } else if(group == "galaxy"){
   high_col <- "darkolivegreen4"
   comp_col <- "darkolivegreen1"
@@ -96,6 +98,9 @@ if(group == 'presedente'){
   break_4 <- 20
   break_5 <- 50
   break_6 <- 50
+  ylims = c(0, 0.11)
+  xlims = c(0, 60)
+  
 }
 
 #redo matrix with and without males to see how this affects the patterns observed
@@ -153,15 +158,32 @@ fission_df <- create_group_distance_df("fission")
 #Deciding cut-off points to categorise different types of fissions and fusions
 
 # Combine the two columns into a single vector, removing NA values
-during_dist <- as.vector(t(rbind(events$A_during_disp, events$B_during_disp)))
-during_dist <- na.omit(during_dist)
+#fissions
+during_dist_fiss <- as.vector(t(rbind(fission_df$A_during_disp, fission_df$B_during_disp)))
+during_dist_fiss <- na.omit(during_dist_fiss)
+# Compute density
+density_data_fiss <- density(during_dist_fiss)
+
+#fusions
+during_dist_fus <- as.vector(t(rbind(fusion_df$A_during_disp, fusion_df$B_during_disp)))
+during_dist_fus <- na.omit(during_dist_fus)
 
 # Compute density
-density_data <- density(during_dist)
+density_data_fus <- density(during_dist_fus)
 
 # Create a histogram with density on the y-axis
-hist(during_dist, breaks = 100, freq = FALSE, main = " ", xlab = "Distance during displacement", ylab = "Density", col = "darkslategray4")
-lines(density(during_dist), col = "darkorange", lwd = 2)
+png(height = 800, width = 1200, units = 'px', filename = paste0(plot_dir,group,'_dist_during_fisfus.png'))
+par(mar = c(6,6,2,2)) #bottom, left, top, right
+hist(during_dist_fiss, breaks = 50, freq = FALSE, main = " ", xlab = "Distance during displacement", ylab = "Density", col = high_col, ylim = ylims, xlim = xlims, cex.lab = 2, cex.axis = 2)
+#lines(density(during_dist), col = "darkorange", lwd = 2)
+hist(during_dist_fus, breaks = 50, freq = FALSE, main = " ", xlab = "Distance during displacement", ylab = "Density",col = alpha(comp_col,0.5), add = T)
+
+legend("topright", legend=c("Fission", "Fusion"),
+       fill=c(high_col, comp_col), lty=0, cex=2)
+abline(v = 10, lty = 3)
+dev.off()
+
+
 
 #Finding the point where to split the data to slow group and fast group (by finding the lowest peak between the high peaks)
 yvals <- density(during_dist)$y
@@ -176,7 +198,8 @@ xvals <- xvals[(15 < xvals) & (xvals < 30)]
 index_min <- which(diff(sign(d)) != 0)
 threshold <- xvals[index_min]
 print(threshold)
-abline(v=threshold, lty = 3)
+#abline(v=threshold, lty = 3)
+abline(v = 10, lty = 3)
 
 
 # Combine the two columns into a single vector, removing NA values
@@ -486,7 +509,7 @@ if(group == 'galaxy'){
 #-------------------------------------------------------
 
 #define type of event to look at
-event_type <- "fission"
+event_type <- "fusion"
 
 #------------------------------------------------------
 #------------------------------------------------------
@@ -528,7 +551,7 @@ all
 
 
 #save dataframe to make matrices of the two groups together
-save(contingency_df, file = paste0(groupdir, group, "_matrix.RData"))
+save(contingency_df, file = paste0(groupdir, group, event_type, "_matrix.RData"))
 
 file_path <- file.path(plot_dir, paste(event_type, "matrix.png"))
 ggsave(file_path, all, width = 10, height = 8)

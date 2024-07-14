@@ -146,11 +146,13 @@ calls$calltype[calls$label == "chitter x"] <- "aggression call"
 calls$calltype[calls$label == "squeal chittering"] <- "aggression call"
 
 # Ensure datetime_synch is in POSIXct format
-calls$datetime_synch <- as.POSIXct(calls$datetime_synch, format="%Y-%m-%d %H:%M:%S")
+calls$datetime_synch <- as.POSIXct(calls$datetime_synch, format="%Y-%m-%d %H:%M:%S", tz = "UTC")
 
 # Create 2-minute bins
 calls$time_bin <- cut(calls$datetime_synch, breaks="2 mins")
 
+# Convert time_bin to POSIXct for start and end time extraction
+calls$time_bin <- as.POSIXct(calls$time_bin, tz = "UTC")
 
 # Define a function to calculate the mode
 calculate_mode <- function(x) {
@@ -161,14 +163,14 @@ calculate_mode <- function(x) {
 
 # Generate the complete grid of all combinations of id, date, and time_bin
 complete_grid <- expand_grid(
-  id = unique(calls_cut$id),
-  date = unique(calls_cut$date),
-  time_bin = unique(calls_cut$time_bin)
+  id = unique(calls$id),
+  date = unique(calls$date),
+  time_bin = unique(calls$time_bin)
 )
 
 
 # Summarize the data to get mean and mode subgroup sizes
-subgroup_size_summary <- calls_cut %>%
+subgroup_size_summary <- calls %>%
   group_by(id, date, time_bin) %>%
   summarise(
     mean_subgroup_size = mean(count, na.rm = TRUE),
@@ -181,7 +183,7 @@ results_complete <- complete_grid %>%
   left_join(subgroup_size_summary, by = c("id", "date", "time_bin"))
 
 # Summarize call rates
-call_rate_summary <- calls_cut %>%
+call_rate_summary <- calls %>%
   group_by(id, calltype, date, time_bin) %>%
   summarise(
     call_rate = n(),
@@ -190,7 +192,7 @@ call_rate_summary <- calls_cut %>%
 
 # Complete the call rate data to ensure all combinations of id, date, time_bin, and calltype
 complete_call_rate <- complete_grid %>%
-  expand_grid(calltype = unique(calls_cut$calltype)) %>%
+  expand_grid(calltype = unique(calls$calltype)) %>%
   left_join(call_rate_summary, by = c("id", "date", "time_bin", "calltype")) %>%
   mutate(call_rate = replace_na(call_rate, 0))
 
@@ -202,6 +204,7 @@ final_results <- results_complete %>%
 
 #remove rows in the dataframe where count is NA
 callrate_subsize <- final_results[!is.na(final_results$calltype),]
+callrate_subsize <- callrate_subsize[!is.na(callrate_subsize$mean_subgroup_size),]
 
 write.csv(callrate_subsize, file = paste0(datadir, "/callrate_grpsize_noNas_2mins.csv"))
 
@@ -221,7 +224,7 @@ ggsave(paste0(plot_dir, "callrate_grpsize.png"), width = 15, height = 5)
 
 
 # Create a ggplot histogram
-ggplot(results, aes(x = mode_subgroup_size)) +
+ggplot(callrate_subsize, aes(x = mode_subgroup_size)) +
   geom_histogram(binwidth = 1, fill = "steelblue", color = "black", alpha = 0.7) +
   labs(title = "Distribution of subgroup sizes in 1Hz period",
        x = "Mean Subgroup Size",
@@ -236,7 +239,57 @@ ggplot(results, aes(x = mode_subgroup_size)) +
 ggsave(paste0(plot_dir, "hist_subgroupsizes_1Hz.png"), width = 8, height = 5)
 
 
+#adding speed of travel for each x minute bin
+callrate_subsize$time_bin_end <- as.POSIXct(callrate_subsize$time_bin) + lubridate::seconds(120)
+callrate_subsize$id <- gsub("G", "", callrate_subsize$id)
+#add the individual index
+callrate_subsize$ind_idx <- match(callrate_subsize$id, coati_ids$tag_id)
+
+callrate_subsize$mean_speed <- NA
+callrate_subsize$distance <- NA
+callrate_subsize$duration <- NA
 
 
+i = 1
 
+for (i in 1:nrow(callrate_subsize)){
+  
+  #get index of the individual in the row
+  ind_idx <- callrate_subsize$ind_idx[i]
+  #get the time index for the duration to extract the speed value
+  start_idx <- which(ts == callrate_subsize$time_bin[i])
+  end_idx <- which(ts == callrate_subsize$time_bin_end[i])
+  
+  # Skip the iteration if xs_sub or ys_sub are all NA's (resulting in empty vectors)
+  if (length(start_idx) == 0 || length(end_idx) == 0) {
+    next
+  }
+  
+  xs_sub <- na.omit(xs[ind_idx, c(start_idx:end_idx)])
+  ys_sub <- na.omit(ys[ind_idx, c(start_idx:end_idx)])
+  
+  #if (length(xs_sub) == 0 || length(ys_sub) == 0) {
+  #  next
+  #}
+  
+  time_interval <- 30  # Interval to filter every 10 seconds
+  
+  # Filter xs and ys vectors to every 10 seconds
+  filtered_xs <- na.omit(xs_sub[seq(1, length(xs_sub), by = time_interval)])
+  filtered_ys <- na.omit(ys_sub[seq(1, length(ys_sub), by = time_interval)])
+  
+  
+  # Calculate the distance between consecutive points
+  distances <- sqrt(diff(filtered_xs)^2 + diff(filtered_ys)^2)
+  
+  duration <- end_idx - start_idx
+  
+  # Calculate speed in meters per second (m/s)
+  callrate_subsize$mean_speed[i] <- sum(distances)/duration
+  callrate_subsize$distance[i] <- sum(distances)
+  callrate_subsize$duration[i] <- duration
+  
+}
+
+write.csv(callrate_subsize, file = paste0(datadir, "/callrate_grpsize_noNas_2mins_speed.csv"))
 
