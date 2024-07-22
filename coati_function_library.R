@@ -634,12 +634,15 @@ analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 600, thresh_h = 5
     #quartz() #open a new plot for mac
     par(mfrow=c(2,1))
     plot(ti:tf, dyad_dist[ti:tf],type='l', main = paste(event_type, datetime),xlab='Time (min)',ylab = 'Distance apart (m)')
-    abline(v=t_event,col='black', lty = 2)
-    abline(h = thresh_h, col = 'darkorange1')
-    abline(h = thresh_l, col = 'magenta')
+    #abline(v=t_event,col='black', lty = 2)
+    abline(h = thresh_h, col = 'darkorange3')
+    abline(h = thresh_l, col = 'orange')
     for(r in 1:nrow(event_loc)){
-      abline(v=event_loc$start_time[r], col = 'green')
-      abline(v=event_loc$end_time[r], col = 'green')
+      abline(v=event_loc$start_time[r], col = 'lightblue')
+      abline(v=event_loc$end_time[r], col = 'lightblue')
+      abline(v=(event_loc$start_time[r] - 120), col = "lightblue")
+      abline(v=(event_loc$end_time[r] + 120), col = "lightblue")
+      
     }
 
     xmin <- min(min(xA[,ti:tf],na.rm=T),min(xB[,ti:tf],na.rm=T))
@@ -648,13 +651,13 @@ analyse_ff_event <- function(i, events, xs, ys, ts, max_time = 600, thresh_h = 5
     ymax <- max(max(yA[,ti:tf],na.rm=T),max(yB[,ti:tf],na.rm=T))
     plot(NULL, xlim=c(xmin,xmax),ylim=c(ymin,ymax),asp=1, xlab='Easting', ylab = 'Northing', main = paste('(Red =', group_A_names, '), (Blue =', group_B_names,')'))
     for(j in 1:nrow(xA)){
-      lines(xA[j,ti:tf],yA[j,ti:tf],type='l',col='#FF000033')
+      lines(xA[j,ti:tf],yA[j,ti:tf],type='l',col='#CAFF7080')
     }
     for(j in 1:nrow(xB)){
-      lines(xB[j,ti:tf],yB[j,ti:tf],type='l',col='#0000FF33')
+      lines(xB[j,ti:tf],yB[j,ti:tf],type='l',col='lightblue1')
     }
-    lines(xcA[ti:tf],ycA[ti:tf], col = '#FF0000', lwd = 2)
-    lines(xcB[ti:tf],ycB[ti:tf], col = '#0000FF', lwd = 2)
+    lines(xcA[ti:tf],ycA[ti:tf], col = 'olivedrab3', lwd = 2)
+    lines(xcB[ti:tf],ycB[ti:tf], col = 'dodgerblue3', lwd = 2)
 
     points(xcA[t_event], ycA[t_event], pch = 8, col = 'black')
     points(xcB[t_event], ycB[t_event], pch = 8, col = 'black')

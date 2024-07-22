@@ -57,7 +57,7 @@ subgroup_data <- get_subgroup_data(xs, ys, R)
 
 #----------------------------------------------------------------------
 #get the call files 
-datadir <- "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed"
+datadir <- "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/"
 callfile <- 'all_data_hms_all_ml_synched.csv' #made in coati_synch
 id_file <- 'galaxy_coati_ids.RData'
 

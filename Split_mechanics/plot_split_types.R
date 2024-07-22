@@ -262,8 +262,10 @@ xdistline_end <- xdistline_start + 50
 yline <- (floor(ymin / 10) * 10)+10
 
 
-#xA colors are: '#CAFF7080' 'olivedrab3'
-#xB colors are: 'lightblue1' 'dodgerblue3'
+#xA colors are: 
+#'#CAFF7080' 'olivedrab3'
+#xB colors are:
+#'lightblue1' 'dodgerblue3'
 
 
 #png(height = 800, width = 1000, units = 'px', res = 90, filename = paste0(plot_dir, group, "_event_",t_event, ".png"))
@@ -275,7 +277,7 @@ for(j in 1:nrow(xB)){
   lines(xB[j,ti:tf],yB[j,ti:tf],type='l',col='thistle1')
 }
 lines(xcA[ti:tf],ycA[ti:tf], col = 'yellow3', lwd = 3)
-lines(xcB[ti:tf],ycB[ti:tf], col = 'slateblue3', lwd = 3)
+lines(xcB[ti:tf],ycB[ti:tf], col = 'mediumpurple2', lwd = 3)
 
 cex = 3
 

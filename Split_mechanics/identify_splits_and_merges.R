@@ -9,18 +9,21 @@ R_outer <- 50
 
 codedir <- '~/Dropbox/code_ari/coatithon_code/'
 dir <- '~/Dropbox/coati/processed/' #directory where all data is stored
-group <- 'presedente' #subdirectory where the group data is stored
+group <- 'galaxy' #subdirectory where the group data is stored
 
 #get directory to group data
 groupdir <- paste0(dir,group)
 
 #for Emily:
 codedir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
-#groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
-#plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level2/'
+
+if(group == "galaxy"){
+groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level2/'
+} else if (group == "presedente"){
 groupdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level2/'
-
+}
 
 #SOURCE FUNCTIONS
 setwd(codedir)
@@ -56,7 +59,16 @@ write.csv(pres_events_detected[, c(1,2,3,8,9,10)], file = "C:/Users/egrout/Dropb
 
 
 #looking at one event
-analyse_ff_event(387, events = ff_data_50$events_detected, xs, ys, ts, max_time = 600, plot = T)
+
+for (i in 1:nrow(ff_data_50$events_detected)){
+  png(height = 600, width = 600, units = 'px', filename = paste0(plot_dir,"events/", i  ,'_event.png'))
+analyse_ff_event(i, events = ff_data_50$events_detected, xs, ys, ts, max_time = 600, plot = T)
+dev.off()
+
+}
+
+
+
 
 plot(xs[c(2,3,9), i], ys[c(2,3,9), i])
 #points(xs[9,i], ys[9,i], col = "blue", type = 'l')
