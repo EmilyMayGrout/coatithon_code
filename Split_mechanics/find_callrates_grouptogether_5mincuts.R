@@ -150,14 +150,14 @@ split_into_intervals <- function(bout, interval_minutes = 3) {
   return(bout_intervals)
 }
 
-# Create the 5-minute adjusted bouts list
-adjusted_bouts_5min <- lapply(adjusted_bouts, function(bout) {
-  split_into_intervals(bout, interval_minutes = 3)
+# Create the x-minute adjusted bouts list
+adjusted_bouts_min <- lapply(adjusted_bouts, function(bout) {
+  split_into_intervals(bout, interval_minutes = 2)
 })
 
 # Flatten the list and remove NULL entries
-adjusted_bouts_5min <- unlist(adjusted_bouts_5min, recursive = FALSE)
-adjusted_bouts_5min <- Filter(Negate(is.null), adjusted_bouts_5min)
+adjusted_bouts_min <- unlist(adjusted_bouts_min, recursive = FALSE)
+adjusted_bouts_min <- Filter(Negate(is.null), adjusted_bouts_min)
 
 
 
@@ -254,13 +254,13 @@ calls$calltype[calls$label == "chirp"] <- "contact call"
 
 #combine aggressive calls
 calls$calltype[calls$label == "chitter"] <- "aggression call"
-calls$calltype[calls$label == "squeal"] <- "aggression call"
-calls$calltype[calls$label == "squeal chitter"] <- "aggression call"
-calls$calltype[calls$label == "squeal chitter x"] <- "aggression call"
-calls$calltype[calls$label == "squeal chitters"] <- "aggression call"
-calls$calltype[calls$label == "low squeal"] <- "aggression call"
+# calls$calltype[calls$label == "squeal"] <- "aggression call"
+# calls$calltype[calls$label == "squeal chitter"] <- "aggression call"
+# calls$calltype[calls$label == "squeal chitter x"] <- "aggression call"
+# calls$calltype[calls$label == "squeal chitters"] <- "aggression call"
+# calls$calltype[calls$label == "low squeal"] <- "aggression call"
 calls$calltype[calls$label == "chitter x"] <- "aggression call"
-calls$calltype[calls$label == "squeal chittering"] <- "aggression call"
+# calls$calltype[calls$label == "squeal chittering"] <- "aggression call"
 
 #add coati names to column based on IDs
 calls$name[calls$id == "G9463"] <- "Estrella"
@@ -290,9 +290,9 @@ calling_together <- calls[which(calls$datetime_synch_pos %in% together_times$tim
 crt_ <- as.data.frame(coati_ids[,1]); names(crt_) <- "name"
 crt_$ind_idx <- 1:nrow(crt_)
 call_rates_together <- data.frame()
-together_bout <- adjusted_bouts_5min[120][[1]]
+together_bout <- adjusted_bouts_min[120][[1]]
 
-for(together_bout in adjusted_bouts_5min){
+for(together_bout in adjusted_bouts_min){
   ct_ <- calling_together[which(calling_together$datetime_synch_pos >= together_bout[1] & calling_together$datetime_synch_pos <= together_bout[2]), ]
   ct_ <- ct_[!is.na(ct_$calltype),]
   
@@ -312,42 +312,42 @@ for(together_bout in adjusted_bouts_5min){
 }
 
 #kick out bouts that are shorter than 2min
-call_rates_together_3mins <- call_rates_together[which(call_rates_together$bout_dur > 120), ]
+call_rates_together_mins <- call_rates_together[which(call_rates_together$bout_dur > 110), ]
 
 
 #find total duration of times when group together to get call rates
 
-sum(unique(call_rates_together_3mins$bout_dur))/60/60 #in hours
+sum(unique(call_rates_together_mins$bout_dur))/60/60 #in hours
 
-save(call_rates_together_3mins, file = "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/call_rates_together_3mincut_gal_ml.RData")
+#save(call_rates_together_mins, file = "C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/call_rates_together_mincut_gal_ml.RData")
 #load("C:/Users/egrout/Dropbox/coatithon/processed/split_analysis_processed/call_rates_together_gal.RData")
 
 #just making the naming the same so I don't have to rewrite all the code
-call_rates_together_5mins <- call_rates_together_3mins
+#call_rates_together_mins <- call_rates_together_mins
 
 
-#check number of events left - 65
-length(unique(call_rates_together_5mins$bout))
+#check number of events left - 65 in 5 min bins, 341 in 2 min bins
+length(unique(call_rates_together_mins$bout))
 
 par(mar = c(14,4,1,1))
-boxplot(call_rate ~ name*call_type, data = call_rates_together_5mins[call_rates_together_5mins$n_ind_in_bout > 5,], las = 2, xlab = "", ylim = c(0, 0.6))
+boxplot(call_rate ~ name*call_type, data = call_rates_together_mins[call_rates_together_mins$n_ind_in_bout > 5,], las = 2, xlab = "", ylim = c(0, 0.6))
 
 #finding the travel speed of each individual for each bout duration
 
-call_rates_together_5mins$mean_speed <- NA
-call_rates_together_5mins$max_speed <- NA
-call_rates_together_5mins$distance <- NA
-call_rates_together_5mins$duration <- NA
+call_rates_together_mins$mean_speed <- NA
+call_rates_together_mins$max_speed <- NA
+call_rates_together_mins$distance <- NA
+call_rates_together_mins$duration <- NA
 
 #i = 1
 
-for (i in 1:nrow(call_rates_together_5mins)){
+for (i in 1:nrow(call_rates_together_mins)){
   
   #get index of the individual in the row
-  ind_idx <- call_rates_together_5mins$ind_idx[i]
+  ind_idx <- call_rates_together_mins$ind_idx[i]
   #get the time index for the duration to extract the speed value
-  start_idx <- which(ts == call_rates_together_5mins$start_bout[i])
-  end_idx <- which(ts == call_rates_together_5mins$end_bout[i])
+  start_idx <- which(ts == call_rates_together_mins$start_bout[i])
+  end_idx <- which(ts == call_rates_together_mins$end_bout[i])
   
   xs_sub <- na.omit(xs[ind_idx, c(start_idx:end_idx)])
   ys_sub <- na.omit(ys[ind_idx, c(start_idx:end_idx)])
@@ -371,28 +371,30 @@ for (i in 1:nrow(call_rates_together_5mins)){
   duration <- end_idx - start_idx
   
   # Calculate speed in meters per second (m/s)
-  call_rates_together_5mins$mean_speed[i] <- mean(distances/duration)
-  call_rates_together_5mins$max_speed[i]<- max(distances/duration)
-  call_rates_together_5mins$distance[i] <- sum(distances)
-  call_rates_together_5mins$duration[i] <- duration
+  call_rates_together_mins$mean_speed[i] <- mean(distances/duration)
+  call_rates_together_mins$max_speed[i]<- max(distances/duration)
+  call_rates_together_mins$distance[i] <- sum(distances)
+  call_rates_together_mins$duration[i] <- duration
   
 }
 
-hist(call_rates_together_5mins$mean_speed, breaks = 100)
+hist(log(call_rates_together_mins$mean_speed), breaks = 100)
 
 
 #no bimodal relationship in the speeds, so to decide if the group was moving or not, we could filter by distance and duration
 
 #0.001 as cut off for not moving
 
-#save this data frame for Odd
-save(call_rates_together_5mins, file = paste0(datadir, "/calling_5mincut_baseline.RData"))
+#call_rates_together_mins_notml <- call_rates_together_mins
 
-call_rates_together_5mins$starttime <- as_hms(call_rates_together_5mins$start_bout) - as_hms("5:00:00")
-call_rates_together_5mins$starttime <- as_hms(call_rates_together_5mins$starttime)
+#save this data frame for Odd
+save(call_rates_together_mins, file = paste0(datadir, "/callrate_2mincut_baseline_chitters.RData"))
+
+call_rates_together_mins$starttime <- as_hms(call_rates_together_mins$start_bout) - as_hms("5:00:00")
+call_rates_together_mins$starttime <- as_hms(call_rates_together_mins$starttime)
 
 #plotting distance travelled over 3 hour period
-ggplot(call_rates_together_5mins[call_rates_together_5mins$call_type == "contact call",], aes(x = starttime, y = distance))+
+ggplot(call_rates_together_mins[call_rates_together_mins$call_type == "contact call",], aes(x = starttime, y = distance))+
   geom_jitter(width = 150, height = 0.001)+ #jitter by 2.5 minutes
   labs(x = "Time", y = "Distance in 3 minute bins (m)")+
   theme_classic()

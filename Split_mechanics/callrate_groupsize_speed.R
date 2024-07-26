@@ -63,7 +63,8 @@ id_file <- 'galaxy_coati_ids.RData'
 
 #LOAD DATA
 setwd(datadir)
-#calls <- read.csv(callfile, header=T, sep = ',')
+#calls <- read.csv(callfile, header=T, sep = ',') 
+#calls <- calls[,-1]
 load(id_file)
 
 
@@ -78,44 +79,44 @@ j = 1
 # #this for loop takes 5 hours to run
 # # Loop through each unique individual ID
 # for (i in unique(calls$id)) {
-#   
+# 
 #   # Subset the data for the current individual
 #   ind_i <- calls[calls$id == i, ]
-#   
+# 
 #   # Remove the 'G' to get the collar ID - to find the coati_ids index
 #   ind_i$id <- gsub('G', '', ind_i$id)
 #   id_indx <- which(coati_ids$tag_id == unique(ind_i$id))
-#   
+# 
 #   # Loop through each of the times in ind_i$datetime_synch to find the number of individuals in the subgroup of that individual
 #   for (j in 1:nrow(ind_i)) {
-#     
+# 
 #     print(j)
-#     
+# 
 #     time <- as.POSIXct(ind_i$datetime_synch[j], format = "%Y-%m-%d %H:%M:%S", tz = "UTC")
 #     time <- round_date(time, "second")
-#     
+# 
 #     # Find the ts index for this time
 #     t <- which(ts == time)
-#     
+# 
 #     # Skip to the next iteration if t is empty
 #     if (length(t) == 0) {
 #       next
 #     }
-#     
+# 
 #     # Get the information of the subgroup membership for each individual for each time
 #     subgroup_info_j <- subgroup_data$ind_subgroup_membership[, t]
 #     subgroup_id_for_j <- subgroup_data$ind_subgroup_membership[id_indx, t]
-#     
+# 
 #     # If there is any NA in subgroup_info_j, skip to the next row
 #     if (any(is.na(subgroup_info_j))) {
 #       next
 #     }
 #     # Count the number of values equal to the subgroup_id_for_j, excluding NAs
 #     count <- sum(subgroup_info_j == subgroup_id_for_j, na.rm = TRUE)
-#     
+# 
 #     # Assign the count to the appropriate row in the calls dataframe
 #     calls$count[calls$id == i & calls$datetime_synch == ind_i$datetime_synch[j]] <- count
-#     
+# 
 #   }
 # }
 
@@ -124,6 +125,7 @@ j = 1
 
 calls <- read.csv(paste0(datadir, "/all_data_hms_all_ml_synched_subgrp_size_noNas.csv"))
 #write.csv(calls, file = paste0(datadir, "/all_data_hms_all_ml_synched_subgrp_size_noNas.csv"))
+calls <- calls[,-c(1:3)]
 
 
 #combining the contact calls 
@@ -137,13 +139,13 @@ calls$calltype[calls$label == "chirp"] <- "contact call"
 
 #combine aggressive calls
 calls$calltype[calls$label == "chitter"] <- "aggression call"
-calls$calltype[calls$label == "squeal"] <- "aggression call"
-calls$calltype[calls$label == "squeal chitter"] <- "aggression call"
-calls$calltype[calls$label == "squeal chitter x"] <- "aggression call"
-calls$calltype[calls$label == "squeal chitters"] <- "aggression call"
-calls$calltype[calls$label == "low squeal"] <- "aggression call"
+#calls$calltype[calls$label == "squeal"] <- "aggression call"
+#calls$calltype[calls$label == "squeal chitter"] <- "aggression call"
+#calls$calltype[calls$label == "squeal chitter x"] <- "aggression call"
+#calls$calltype[calls$label == "squeal chitters"] <- "aggression call"
+#calls$calltype[calls$label == "low squeal"] <- "aggression call"
 calls$calltype[calls$label == "chitter x"] <- "aggression call"
-calls$calltype[calls$label == "squeal chittering"] <- "aggression call"
+#calls$calltype[calls$label == "squeal chittering"] <- "aggression call"
 
 # Ensure datetime_synch is in POSIXct format
 calls$datetime_synch <- as.POSIXct(calls$datetime_synch, format="%Y-%m-%d %H:%M:%S", tz = "UTC")
@@ -182,39 +184,45 @@ subgroup_size_summary <- calls %>%
 results_complete <- complete_grid %>%
   left_join(subgroup_size_summary, by = c("id", "date", "time_bin"))
 
-# Summarize call rates
-call_rate_summary <- calls %>%
+# Summarize call counts
+call_count_summary <- calls %>%
   group_by(id, calltype, date, time_bin) %>%
   summarise(
-    call_rate = n(),
+    call_count = n(),
     .groups = 'drop'
   )
 
-# Complete the call rate data to ensure all combinations of id, date, time_bin, and calltype
-complete_call_rate <- complete_grid %>%
+# Complete the call count data to ensure all combinations of id, date, time_bin, and calltype
+complete_call_count <- complete_grid %>%
   expand_grid(calltype = unique(calls$calltype)) %>%
-  left_join(call_rate_summary, by = c("id", "date", "time_bin", "calltype")) %>%
-  mutate(call_rate = replace_na(call_rate, 0))
+  left_join(call_count_summary, by = c("id", "date", "time_bin", "calltype")) %>%
+  mutate(call_count = replace_na(call_count, 0))
 
 
 # Merge the call rate data with the subgroup size data
 final_results <- results_complete %>%
-  left_join(complete_call_rate, by = c("id", "date", "time_bin"))
+  left_join(complete_call_count, by = c("id", "date", "time_bin"))
 
 
 #remove rows in the dataframe where count is NA
-callrate_subsize <- final_results[!is.na(final_results$calltype),]
-callrate_subsize <- callrate_subsize[!is.na(callrate_subsize$mean_subgroup_size),]
+callcount_subsize <- final_results[!is.na(final_results$calltype),]
+callcount_subsize <- callcount_subsize[!is.na(callcount_subsize$mean_subgroup_size),]
 
-write.csv(callrate_subsize, file = paste0(datadir, "/callrate_grpsize_noNas_2mins.csv"))
+callcount_subsize$call_rate <- callcount_subsize$call_count / 120 #2 minute time bins
+
+#renaming dataframe for Odd
+calling_subsize <- callcount_subsize
+
+
+write.csv(calling_subsize, file = paste0(datadir, "/calling_grpsize_2mins.csv"))
 
 
 
-ggplot(callrate_subsize, aes(x = mode_subgroup_size, y = call_rate, group = mode_subgroup_size)) +
+ggplot(calling_subsize, aes(x = mode_subgroup_size, y = call_rate, group = mode_subgroup_size)) +
   geom_boxplot(fill = "steelblue1", color = "black") +
   labs(
-    title = "Call Rate vs. Mean Subgroup Size",
-    y = "Call Rate"
+    title = "Call Count vs. Mean Subgroup Size",
+    y = "Call Count"
   ) +
   scale_x_discrete(name ="Mean Subgroup Size", limits = factor(1:11))+
   facet_wrap(~ calltype) +
@@ -224,10 +232,10 @@ ggsave(paste0(plot_dir, "callrate_grpsize.png"), width = 15, height = 5)
 
 
 # Create a ggplot histogram
-ggplot(callrate_subsize, aes(x = mode_subgroup_size)) +
+ggplot(calling_subsize, aes(x = mode_subgroup_size)) +
   geom_histogram(binwidth = 1, fill = "steelblue", color = "black", alpha = 0.7) +
   labs(title = "Distribution of subgroup sizes in 1Hz period",
-       x = "Mean Subgroup Size",
+       x = "Mode Subgroup Size",
        y = "Frequency") +
   theme_classic() +
   theme(
@@ -240,25 +248,25 @@ ggsave(paste0(plot_dir, "hist_subgroupsizes_1Hz.png"), width = 8, height = 5)
 
 
 #adding speed of travel for each x minute bin
-callrate_subsize$time_bin_end <- as.POSIXct(callrate_subsize$time_bin) + lubridate::seconds(120)
-callrate_subsize$id <- gsub("G", "", callrate_subsize$id)
+calling_subsize$time_bin_end <- as.POSIXct(calling_subsize$time_bin) + lubridate::seconds(120)
+calling_subsize$id <- gsub("G", "", calling_subsize$id)
 #add the individual index
-callrate_subsize$ind_idx <- match(callrate_subsize$id, coati_ids$tag_id)
+calling_subsize$ind_idx <- match(calling_subsize$id, coati_ids$tag_id)
 
-callrate_subsize$mean_speed <- NA
-callrate_subsize$distance <- NA
-callrate_subsize$duration <- NA
+calling_subsize$mean_speed <- NA
+calling_subsize$distance <- NA
+calling_subsize$duration <- NA
 
 
 i = 1
 
-for (i in 1:nrow(callrate_subsize)){
+for (i in 1:nrow(calling_subsize)){
   
   #get index of the individual in the row
-  ind_idx <- callrate_subsize$ind_idx[i]
+  ind_idx <- calling_subsize$ind_idx[i]
   #get the time index for the duration to extract the speed value
-  start_idx <- which(ts == callrate_subsize$time_bin[i])
-  end_idx <- which(ts == callrate_subsize$time_bin_end[i])
+  start_idx <- which(ts == calling_subsize$time_bin[i])
+  end_idx <- which(ts == calling_subsize$time_bin_end[i])
   
   # Skip the iteration if xs_sub or ys_sub are all NA's (resulting in empty vectors)
   if (length(start_idx) == 0 || length(end_idx) == 0) {
@@ -285,11 +293,165 @@ for (i in 1:nrow(callrate_subsize)){
   duration <- end_idx - start_idx
   
   # Calculate speed in meters per second (m/s)
-  callrate_subsize$mean_speed[i] <- sum(distances)/duration
-  callrate_subsize$distance[i] <- sum(distances)
-  callrate_subsize$duration[i] <- duration
+  calling_subsize$mean_speed[i] <- sum(distances)/duration
+  calling_subsize$distance[i] <- sum(distances)
+  calling_subsize$duration[i] <- duration
   
 }
 
-write.csv(callrate_subsize, file = paste0(datadir, "/callrate_grpsize_noNas_2mins_speed.csv"))
+calling_subsize_speed <- calling_subsize
+
+
+
+#why is the old and new dataframe different??
+
+save(calling_subsize_speed, file = paste0(datadir, "/calling_grpsize_speed_2mins_chitters.RData"))
+
+
+#----------------------------------------------------------------------
+#now looking at the group spread for each individual 
+
+#get the time between the start and end of each two minute bin
+calling_subsize_speed <- calling_subsize
+calling_subsize_speed$time_bin_middle <- as.POSIXct(calling_subsize_speed$time_bin) + lubridate::seconds(60)
+calling_subsize_speed$mean_diadic_dist_to_others <- NA
+calling_subsize_speed$max_diadic_dist <- NA
+calling_subsize_speed$group_ids <- NA
+calling_subsize_speed$grp_size_mid <- NA
+calling_subsize_speed$row_num <- 1:nrow(calling_subsize_speed)
+
+i = 17381
+for (i in 1:nrow(calling_subsize_speed)){
+  
+  #get index of the individual in the row
+  ind_idx <- calling_subsize_speed$ind_idx[i]
+  
+  #get the index of the middle time 
+  mid_time <- which(ts == calling_subsize_speed$time_bin_middle[i])
+  
+  #get all group memberships for the middle time for this row
+  subgroup_comp_for_i <- subgroup_data$ind_subgroup_membership[,mid_time]
+  
+  #get the id of the individual on row i
+  group_id_for_i <- subgroup_comp_for_i[ind_idx]
+  
+  #get the indexes of the individuals also in the same group as i
+  group_members_for_i <- which(subgroup_comp_for_i == group_id_for_i)
+  
+  calling_subsize_speed$grp_size_mid[i] <- length(unique(group_members_for_i))
+  calling_subsize_speed$group_ids[i] <- paste(group_members_for_i, collapse = " ")
+  
+  #get the xs and ys for their locations at mid_idx
+  xs_all <- xs[group_members_for_i, mid_time]
+  ys_all <- ys[group_members_for_i, mid_time]
+  
+  # Coordinates of the individual of interest
+  xs_i <- xs_all[ind_idx]
+  ys_i <- ys_all[ind_idx]
+  
+ 
+  # Calculate dyadic distances
+  distances <- sqrt((xs_all - xs_i)^2 + (ys_all - ys_i)^2)
+  
+  #remove own diadic distance to get the mean diadic distance
+  distances <- distances[-ind_idx]
+  calling_subsize_speed$mean_diadic_dist_to_others[i] <- mean(distances)
+  
+  # Compute pairwise distances
+  all_dists <- dist(cbind(xs_all, ys_all))
+  
+  # Find the maximum distance
+  calling_subsize_speed$max_diadic_dist[i] <- max(all_dists)
+  
+
+}
+
+
+table(is.na(calling_subsize_speed$mean_diadic_dist_to_others))
+
+#what's the relationship between max diadic distance and mean diadic distance
+ggplot(calling_subsize_speed, aes(x= max_diadic_dist, y = mean_diadic_dist_to_others))+
+  geom_point()+facet_wrap(~grp_size_mid)
+
+calling_subsize_speed_diaddist_allgrps <- calling_subsize_speed
+
+save(calling_subsize_speed_diaddist_allgrps, file = paste0(datadir, "/calling_grpsize_speed_2mins_chitters_allgrps.RData"))
+
+
+#------------------------------------------------------------------------------------------
+#so now want to filter the dataframe to times when the subgroup size doesn't change in each two minute bin
+
+calling_subsize_speed_cut <- calling_subsize_speed_diaddist_allgrps
+
+#if there is no value for the mean diadic distance, then cut
+calling_subsize_speed_cut <- calling_subsize_speed_cut[is.finite(calling_subsize_speed_cut[["mean_diadic_dist_to_others"]]), ]
+
+calling_subsize_speed_cut$row_num <- 1:nrow(calling_subsize_speed_cut)
+
+#this for loop is going through each two minute bin to determine whether the membership of the group has changed, and how many individuals have changed
+calling_subsize_speed_cut$grp_change <- NA
+i = 9401
+for (i in 1:nrow(calling_subsize_speed_cut)){
+  
+  #get index of the individual in the row
+  ind_idx <- calling_subsize_speed_cut$ind_idx[i]
+  
+  #get the index of the first time and last time
+  start_time <- which(ts == calling_subsize_speed_cut$time_bin[i])
+  end_time <- which(ts == calling_subsize_speed_cut$time_bin_end[i])
+  
+  if(length(end_time) == 0){
+    next
+  }
+  
+  mat <- subgroup_data$ind_subgroup_membership[,start_time:end_time]
+  
+  #determine whether the subgrouping changed in the two minute bin for individual in row i
+   
+  # Initialize a vector to store the number of changes for each timepoint
+  changes <- numeric(ncol(mat) - 1)
+  baseline <- mat[, 1]
+    
+  # Loop through each column (timepoint) starting from the second column
+  for (j in 2:ncol(mat)) {
+    # Compare the current column to the baseline column
+    changes[j - 1] <- sum(baseline != mat[, j])
+    
+    # Update the baseline to the current column
+    baseline <- mat[, j]
+  }
+  
+  #if there were more than two individuals changing subgroup, then it is classed as a change
+  if (max(changes, na.rm = TRUE) > 2) {
+    calling_subsize_speed_cut$grp_change[i] <- "change"
+  } else if (max(changes, na.rm = TRUE) > 0 & max(changes, na.rm = TRUE) <= 2) {
+    calling_subsize_speed_cut$grp_change[i] <- "little change"
+  } else {
+    calling_subsize_speed_cut$grp_change[i] <- "no change"
+  }
+
+}
+
+table(calling_subsize_speed_cut$grp_change)
+
+#cut the times when there is a change in group membership
+calling_subsize_speed_cut <- calling_subsize_speed_cut[!calling_subsize_speed_cut$grp_change == "change",]
+
+
+
+save(calling_subsize_speed_cut, file = paste0(datadir, "/calling_grpsize_speed_2mins_chitters_cut_nochanges.RData"))
+
+
+ggplot(calling_subsize_speed_cut, aes(x= max_diadic_dist, y = mean_diadic_dist_to_others))+
+  geom_point()+facet_wrap(~grp_size_mid)
+
+
+
+
+
+
+
+
+
+
 

@@ -4,7 +4,7 @@
 library(tidyverse)
 library(reshape2)
 
-use_machine_labels <- F
+use_machine_labels <- T
 
 #directory holding all the data
 #datadir <- '~/Dropbox/coatithon/calling_during_fissions_and_fusions/data'
@@ -100,13 +100,13 @@ calls$calltype[calls$label == "chirp"] <- "contact call"
 
 #combine aggressive calls
 calls$calltype[calls$label == "chitter"] <- "aggression call"
-calls$calltype[calls$label == "squeal"] <- "aggression call"
-calls$calltype[calls$label == "squeal chitter"] <- "aggression call"
-calls$calltype[calls$label == "squeal chitter x"] <- "aggression call"
-calls$calltype[calls$label == "squeal chitters"] <- "aggression call"
-calls$calltype[calls$label == "low squeal"] <- "aggression call"
+# calls$calltype[calls$label == "squeal"] <- "aggression call"
+# calls$calltype[calls$label == "squeal chitter"] <- "aggression call"
+# calls$calltype[calls$label == "squeal chitter x"] <- "aggression call"
+# calls$calltype[calls$label == "squeal chitters"] <- "aggression call"
+# calls$calltype[calls$label == "low squeal"] <- "aggression call"
 calls$calltype[calls$label == "chitter x"] <- "aggression call"
-calls$calltype[calls$label == "squeal chittering"] <- "aggression call"
+# calls$calltype[calls$label == "squeal chittering"] <- "aggression call"
 
 #add coati names to column based on IDs
 calls$name[calls$id == "G9463"] <- "Estrella"
@@ -263,12 +263,48 @@ if(use_machine_labels){
 }
 
 
-
 #look at distribution of durations of splits to compare run the speed over time plot with a realistic bin duration for comparison
 
 mean(ind_events_data$duration[ind_events_data$period == "during"], breaks = 40)
 
 #most durations are between 100 and 200s, mean is 165 seconds
+
+
+ind_events_data_singletons <- ind_events_data[0, ]
+
+# Loop through each unique event_idx
+for (i in unique(ind_events_data$event_idx)) {
+  
+  # Subset data for the current event
+  event_i <- ind_events_data[ind_events_data$event_idx == i, ]
+  
+  # Add the any_size_one column based on the condition
+  event_i$any_size_one <- ifelse(any(event_i$subgroup_size == 1), FALSE, TRUE)
+  
+  # Bind the current event data back to the ind_events_data_singletons data frame
+  ind_events_data_singletons <- rbind(ind_events_data_singletons, event_i)
+}
+
+#removing events where just singletons join or leave
+
+ind_events_data_groups <- ind_events_data_singletons[ind_events_data_singletons$any_size_one == T,]
+
+ind_events_data_groups <- ind_events_data_groups[,-17]
+
+
+#save group events data frame for Odd
+if(use_machine_labels){
+  save(ind_events_data_groups, file = paste0(datadir, "/calling_eventtype_all_ml_onlygroups_chitters.RData"))
+} else {
+  save(ind_events_data_groups, file = paste0(datadir, "/calling_eventtype_onlygroups.RData"))
+  
+}
+
+
+
+
+
+
 
 
 
