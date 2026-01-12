@@ -2,7 +2,7 @@
 #here is also the code for the full group trajectories for 1 day
 
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
-code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/'
+code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/ch1_cleancode/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/'
 gps_file <- "galaxy_xy_10min_level1.RData"
 id_file <- 'galaxy_coati_ids.RData' 
@@ -401,16 +401,16 @@ gg <- ggmap(map) +
             hjust = 0.5,
             vjust = 0.7,
             size = 8, color = "white") +
-  geom_text(data = sbar,
-            aes(x = -79.7052,
-                y = 9.1235,
-                label = '(a)'), color = "white", size = 8)+
+  #geom_text(data = sbar,
+  #          aes(x = -79.7052,
+  #              y = 9.1235,
+  #              label = '(a)'), color = "white", size = 8)+
   
   NULL
 
 gg
 
-ggsave(filename = paste0(plot_dir, 'ggmap_traj_28_col_cut', '.png'), plot = gg, width = 13, height = 6, dpi = 300)
+ggsave(filename = paste0(plot_dir, 'ggmap_traj_28_col_cut2', '.png'), plot = gg, width = 13, height = 6, dpi = 300)
 
 
 

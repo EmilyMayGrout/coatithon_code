@@ -3,7 +3,7 @@
 
 #--------PARAMS-------
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2022/galaxy/"
-code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/'
+code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/ch1_cleancode/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/galaxy_results/level1/'
 gps_file <- "galaxy_xy_10min_level1.RData" #level0 is when Venus is not removed
 id_file <- 'galaxy_coati_ids.RData'
@@ -522,7 +522,7 @@ gg <- ggplot(aes(x = prop_alone, y = age_sex), data = coati_ids)+
   theme( strip.text.y = element_blank())
 
 gg <- ggplot(aes(x = prop_alone, y = age_sex, color = name), data = coati_ids) +
-  xlab("Proportion of time alone (%)") +
+  xlab("Percentage of time alone") +
   ylab("Age class") + 
   scale_x_continuous(limits = c(0,40))+
   geom_point(aes(color = name), position = position_jitter(width = 0, height = 0.3), size = 3, alpha = 0.7) +

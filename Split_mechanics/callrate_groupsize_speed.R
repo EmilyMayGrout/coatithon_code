@@ -233,10 +233,10 @@ ggsave(paste0(plot_dir, "callrate_grpsize.png"), width = 15, height = 5)
 
 # Create a ggplot histogram
 ggplot(calling_subsize, aes(x = mode_subgroup_size)) +
-  geom_histogram(binwidth = 1, fill = "steelblue", color = "black", alpha = 0.7) +
-  labs(title = "Distribution of subgroup sizes in 1Hz period",
-       x = "Mode Subgroup Size",
+  geom_histogram(binwidth = 1, fill = "steelblue2", color = "steelblue3", alpha = 0.7) +
+  labs(x = "Mode Subgroup Size",
        y = "Frequency") +
+  scale_x_continuous(breaks = c(1,3,5,7,9,11)) +
   theme_classic() +
   theme(
     plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
@@ -316,6 +316,8 @@ calling_subsize_speed <- calling_subsize
 calling_subsize_speed$time_bin_middle <- as.POSIXct(calling_subsize_speed$time_bin) + lubridate::seconds(60)
 calling_subsize_speed$mean_diadic_dist_to_others <- NA
 calling_subsize_speed$max_diadic_dist <- NA
+calling_subsize_speed$min_diadic_dist <- NA
+calling_subsize_speed$median_diadic_dist <- NA
 calling_subsize_speed$group_ids <- NA
 calling_subsize_speed$grp_size_mid <- NA
 calling_subsize_speed$row_num <- 1:nrow(calling_subsize_speed)
@@ -363,7 +365,12 @@ for (i in 1:nrow(calling_subsize_speed)){
   # Find the maximum distance
   calling_subsize_speed$max_diadic_dist[i] <- max(all_dists)
   
-
+  #minimum distance
+  calling_subsize_speed$min_diadic_dist[i] <- min(all_dists)
+  
+  #median
+  calling_subsize_speed$median_diadic_dist[i] <- median(all_dists)
+  
 }
 
 
@@ -442,8 +449,13 @@ calling_subsize_speed_cut <- calling_subsize_speed_cut[!calling_subsize_speed_cu
 save(calling_subsize_speed_cut, file = paste0(datadir, "/calling_grpsize_speed_2mins_chitters_cut_nochanges.RData"))
 
 
-ggplot(calling_subsize_speed_cut, aes(x= max_diadic_dist, y = mean_diadic_dist_to_others))+
+ggplot(calling_subsize_speed_cut, aes(x= median_diadic_dist, y = mean_diadic_dist_to_others))+
   geom_point()+facet_wrap(~grp_size_mid)
+
+
+ggplot(calling_subsize_speed_cut, aes(x= grp_size_mid, y = max_diadic_dist, group = grp_size_mid))+
+  geom_boxplot()
+
 
 
 

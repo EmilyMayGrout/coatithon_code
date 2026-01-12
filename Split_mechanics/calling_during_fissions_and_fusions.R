@@ -262,6 +262,12 @@ if(use_machine_labels){
  
 }
 
+table(calls$label)
+
+cont_calls <- calls[calls$label %in% c("chirp grunt", "chirp", "chirp click", "click","click grunt"), ]
+nrow(cont_calls)
+
+agg_calls <- calls[calls$label %in% c("chitter"),]
 
 #look at distribution of durations of splits to compare run the speed over time plot with a realistic bin duration for comparison
 
@@ -301,6 +307,7 @@ if(use_machine_labels){
 }
 
 
+#plot duration of during events
 
 
 

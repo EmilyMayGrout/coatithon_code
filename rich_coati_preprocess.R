@@ -1,60 +1,67 @@
-#this script will read in the movebank csv file, make it into raw txt files and
-#output a preprocess r data file for the low res data (1 gps point/10 mins)
+#This script is looking at the coatis Rich collared on BCI to see whether they did fission and fusion
 library(lubridate)
 library(sf)
 library(tidyverse)
 
-#load useful functions
-source('C:/Users/egrout/Dropbox/coatithon/coatithon_code/ch1_cleancode/coati_function_library_V1.R')
 
-firsttime <- as.POSIXct('2023-01-19 11:00', tz = 'UTC')
-lasttime <-  as.POSIXct('2023-02-02 23:00', tz = 'UTC')
+indir <-  "C:/Users/egrout/Dropbox/coatithon/rawdata/2024/gps/"
+outdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2024/rich_project/"
+metadatadir <- "C:/Users/egrout/Dropbox/coatithon/rawdata/2024/metadata/"
 
-#firsttime <- as.POSIXct('2023-01-19 00:00', tz = 'UTC') #to get sleep times for josephine
-#lasttime <-  as.POSIXct('2023-02-02 10:00', tz = 'UTC')
-
-indir <-  "C:/Users/egrout/Dropbox/coatithon/rawdata/2023/presedente/gps/"
-outdir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
-metadatadir <-  "C:/Users/egrout/Dropbox/coatithon/rawdata/2023/presedente/metadata/"
-
-#setting the working directory to the raw data file in dropbox
 setwd(indir)
 
-#------------------------------------------------------------------------------------------
-#BELOW CODE NOW COMPLETE SO DOES NOT NEED RERUNNING TO GET TXT FILES
-# 
-# #NEED TO DO THIS IF DOWNLOADING DATA FROM MOVEBANK RATHER THAN USING DECODER
-# #first read in csv and split into files for each individual and save as txt file into the indir
-#presedente_all <- read.csv("D:/PhD/BCI coatis 2023/logger files/Coati Presedente CCAS BCI 2023.csv")
-# # 
-# #filter presedente_all to "name", "lon", "lat", "date", "time")
-# 
-# presedente_all_filter <- presedente_all[,c(36,4,5,3)]
-# 
-# colnames(presedente_all_filter) <- c("name", "lon", "lat", "datetime")
-# 
-# #split by id
-# split_presedente <- split(presedente_all_filter, presedente_all_filter$name, drop = F)
-# 
-# #can make each individual as own dataframe in global enviro
-# #list2env(lapply(split_presedente, as.data.frame.list), .GlobalEnv)
-# 
-# #save each individual as own txt file in dropbox rawdata file
-# 
-# allNames <- names(split_presedente)
-# for(i in allNames){
-#   #get name of individual from i of list
-#   saveName <- paste0(i ,".txt")
-#   write.table(split_presedente[[i]], file = saveName)
-# 
-# }
+#downloaded file from movebank
+#first read in csv and split into files for each individual and save as txt file into the indir
+bci_all <- read.csv("C:/Users/egrout/Dropbox/coatithon/rawdata/2024/rich_project_bci.csv")
+colnames(bci_all)
+
+unique(bci_all$individual.taxon.canonical.name)
+
+coati_all <- bci_all[bci_all$individual.taxon.canonical.name == "Nasua narica",]
+
+#filter bci_all to "name", "lon", "lat", "date", "time")
+
+coati_all_filt <- coati_all[,c(36,4,5,3)]
+
+colnames(coati_all_filt) <- c("name", "lon", "lat", "datetime")
+
+#split by id
+split_bci <- split(coati_all_filt, coati_all_filt$name, drop = F)
+
+#can make each individual as own dataframe in global enviro
+#list2env(lapply(split_bci, as.data.frame.list), .GlobalEnv)
+
+#save each individual as own txt file in dropbox rawdata file
+allNames <- names(split_bci)
+for(i in allNames){
+  #get name of individual from i of list
+  saveName <- paste0(i ,".txt")
+  write.table(split_bci[[i]], file = saveName)
+
+}
+
+test <- split_bci$Ginny
+
+for (i in 1:nrow(test)){
+  
+  test$time_diff[i] <- difftime(test$datetime[i+1], test$datetime[i])
+
+}
+
+hist(as.numeric(test$time_diff), breaks = 100)
+
+#so the sampling rate is a GPS burst every 4 mins and if they aren't moving, then its 30 min sampling 
+#Time of First Deployed Location	2024-03-09 16:46:27.000
+#Time of Last Deployed Location	2024-07-11 20:35:28.000
 
 
-#--------------------------------------------------------------------------------------------
+firsttime <- as.POSIXct('2024-05-04 11:00', tz = 'UTC')
+lasttime <-  as.POSIXct('2024-05-30 23:00', tz = 'UTC')
+
 
 #create times vector - only for the times that are in the DAY 11:00 (6am) - 23:00 (6pm)
 #first make list of 10 min intervals then remove the times overnight
-ts <- seq.POSIXt(from = firsttime, to = lasttime,  by = '10 min')
+ts <- seq.POSIXt(from = firsttime, to = lasttime,  by = '30 min')
 minhr <- 11
 maxhr <- 23
 #minhr <- 00 #to get sleep times for josephine
@@ -62,7 +69,7 @@ maxhr <- 23
 
 ts <- ts[which((hour(ts) <= maxhr) & (hour(ts) >= minhr))]
 
-#making a list of all individuals in presedente
+#making a list of all individuals from Rich's project on BCI
 all_files <- sort(list.files())
 
 lats <- lons <- xs <- ys <- matrix(NA, nrow = length(all_files), ncol = length(ts))
@@ -92,14 +99,14 @@ for(i in 1:length(all_files)){
   tagdata$diffs <- diffs
   highresdata$diffs <- NA #need to add these columns for the rbind later
   
- #filter the gps points to the last fix
+  #filter the gps points to the last fix
   tagdata <- tagdata[which(tagdata$diffs > 160) ,]
   
   #take the modulus 10 (divide by 10 and get remainder) to find values which are within 2 min of a 10 min interval
   tagdata <- tagdata[which(minute(tagdata$datetime) %% 10 <= 2),]
-  
-  #round down the times to the nearest 10 mins
-  tagdata$roundtime <- floor_date(tagdata$datetime,unit="10 minutes")
+
+  #round down the times to the nearest 4 mins
+  tagdata$roundtime <- floor_date(tagdata$datetime,unit="30 minutes")
   highresdata$roundtime <- highresdata$datetime #need this for the matching later
   
   #add in the high res data
@@ -124,7 +131,7 @@ for(i in 1:length(all_files)){
   latlon_i <- st_as_sf(x=combined_df, coords=c("lon", "lat"), crs="+proj=longlat +datum=WGS84")
   #convert to UTM
   utm_i <- st_transform(latlon_i, crs="+proj=utm +zone=17 +north +datum=WGS84 +units=m") #convert UTM to lat/long - coordinates are stored in a geometry column of class 'sfc_POINT'
- 
+  
   #store eastings and northings in xs and ys matrices
   xs[i,] <- unlist(map(utm_i$geometry,1))
   ys[i,] <- unlist(map(utm_i$geometry,2))
@@ -133,37 +140,21 @@ for(i in 1:length(all_files)){
 
 
 setwd(metadatadir)
-coati_ids <- read.csv("coati_id.csv", header = F)
+coati_ids <- read.csv("coati_ids.csv", header = F)
+colnames(coati_ids) <- c("name", "tag_id", "age", "sex")
+
+coati_ids <- read.csv("coati_ids.csv", header = F)
 colnames(coati_ids) <- c("name", "tag_id", "age", "sex")
 coati_ids$color <- '#0000FF'
 coati_ids$color[which(coati_ids$age == 'Adult' & coati_ids$sex == 'Female')] <- '#FF0000'
 coati_ids$color[which(coati_ids$age == 'Sub-adult' & coati_ids$sex == 'Female')] <- '#FFAA66'
 coati_ids$color[which(coati_ids$age == 'Sub-adult' & coati_ids$sex == 'Male')] <- '#66AAFF'
 coati_ids$color[which(coati_ids$age == 'Juvenile')] <- '#666666'
-save(coati_ids, file = paste0(outdir, 'presedente_coati_ids.RData'))
+save(coati_ids, file = paste0(outdir, 'richcoati_ids.RData'))
 
 
-save(list=c('xs','ys','ts'), file = paste0(outdir,'presedente_xy_10min_level0.RData'))
-save(list=c('lats','lons','ts'), file = paste0(outdir,'presedente_latlon_10min_level0.RData'))  
-
-
-#save(list=c('xs','ys','ts'), file = paste0(outdir,'presedente_xy_10min_level0_sleep.RData'))
-#save(list=c('lats','lons','ts'), file = paste0(outdir,'presedente_latlon_10min_level0_sleep.RData'))
-
-#calculate the proportion of missing fixes for group members
-#remove males and Wildflower
-
-each_sum <- data.frame(sum = rowSums(!is.na(xs)))
-each_sum <- as.data.frame(each_sum[c(1:4,6,7,11:17,19,20,22),])
-colnames(each_sum) <- "sum"
-max(each_sum$sum)
-min(each_sum$sum)
-each_sum$missing <- max(each_sum$sum)- each_sum$sum
-each_sum$prop <- (each_sum$missing/max(each_sum$sum))*100
-100 - mean(each_sum$prop)#96.9 #value included in ms 
-sd(each_sum$prop) #5.17
-
-
+save(list=c('xs','ys','ts'), file = paste0(outdir,'richproject_xy_30min_level0.RData'))
+save(list=c('lats','lons','ts'), file = paste0(outdir,'richproject_latlon_30min_level0.RData'))  
 
 
 

@@ -239,9 +239,10 @@ for (i in seq(1, length(utm_long$Time), by = 120)) {
   
   # Plot
   g2 <- ggplot(utm_long_filt, aes(x = X_UTM, y = Y_UTM)) +
-    geom_point(size = 1, color = "purple4") +
-    geom_circle(data = utm_long_filt, aes(x0 = X_UTM, y0 = Y_UTM, r = 25), fill = NA, color = "skyblue2") + # Add circles with radius of 25 meters (diameter of 50 meters)
+    geom_point(size = 5, color = "purple4") +
+    #geom_circle(data = utm_long_filt, aes(x0 = X_UTM, y0 = Y_UTM, r = 25), fill = NA, color = "skyblue2") + # Add circles with radius of 25 meters (diameter of 50 meters)
     geom_segment(data = close_pairs, aes(x = X_UTM1, y = Y_UTM1, xend = X_UTM2, yend = Y_UTM2), color = "red") +
+    geom_point(size = 5, color = "purple4") +
     geom_segment(x = scale_bar_x, xend = scale_bar_x + scale_bar_length, y = scale_bar_y, yend = scale_bar_y, color = "black", size = 1) +
     geom_text(x = scale_bar_x + scale_bar_length / 2, y = scale_bar_y - 0.05, label = scale_bar_label, vjust = 1.5, hjust = 0.5, size = 7) +
     coord_fixed() +
@@ -255,7 +256,7 @@ for (i in seq(1, length(utm_long$Time), by = 120)) {
           plot.background = element_rect(fill="white"))
   
   # Save the plot
-  ggsave(g2, file = paste0(plotdir, "chainrule_plots/", i, ".png"), width = 6, height = 6)
+  ggsave(g2, file = paste0(plotdir, "chainrule_plots/nocircles/", i, ".png"), width = 6, height = 6)
   
 }
 

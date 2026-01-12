@@ -9,8 +9,8 @@ library(ecodist)
 library(vegan)
 
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/" 
-code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/' 
-plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/' 
+code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/ch1_cleancode/' 
+plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level2/' 
 id_file <- 'presedente_coati_ids.RData'  #level one is where May and Cleopatra have been changed to subadults
 pres_gps_matrix <- 'presedente_matrix_10min_proptimeinsamesubgroup_50m.txt' #saved from plot3c in fission_fusion_presedente
 
@@ -170,6 +170,54 @@ mtext("Presidente group", side = 3, line = 2, cex = 3)
 
 dev.off()
 
+
+
+
+#---------------------------------------------------------------------------
+#seeing whether influence scores correlate with the genetics matrix - i.e. are individuals who are more influential on one another closer relatives?
+
+
+
+load('add directory /pres_relatedness.Rdata')
+
+pres_inds_neworder <- c("B12.L001", "B17.L001", "B16.L001", "B09.L001", "B03.L001", "B01.L001", "B02.L001", "B04.L001", "B14.L001", "B10.L001", "B07.L001", "B05.L001", "B06.L001", "B13.L001", "B11.L001", "B15.L001") 
+
+pres_neworder_indx <- c(1,9,10,3,4,12,2,11,7,5,13,16,8,15,6,14) #order for coati_ids when adult males are not in the group 
+
+
+#load csv from Jack's influence metrics
+influence <- read.csv('C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/presidente_speed_influence_matrix_2024_09_04.csv', header = T)
+#remove first column
+influence <- influence[,-1]
+inf_matrix <- as.matrix(influence) 
+rownames(inf_matrix) <- coati_ids_cut$name
+colnames(inf_matrix) <- coati_ids_cut$name
+visualize_network_matrix_presedente(inf_matrix, coati_ids_cut[1:16,])
+
+
+#reorder to same as genetics/subgrouping matrices
+inf_matrix_raw <- inf_matrix[pres_neworder_indx, pres_neworder_indx]
+rownames(inf_matrix_raw) <- coati_ids_cut$name[pres_neworder_indx]
+colnames(inf_matrix_raw) <- coati_ids_cut$name[pres_neworder_indx]
+
+png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'pres_influence_raw.png')) 
+visualize_network_matrix_presedente(inf_matrix_raw, coati_ids_cut[pres_neworder_indx,])
+dev.off()
+
+#as the matrix is not symetrical, getting the mean of each dyad (for now - but could do something different later)
+inf_matrix_mean <- (inf_matrix_raw + t(inf_matrix_raw)) / 2
+
+#mean scores for each dyad matrix:
+visualize_network_matrix_presedente(inf_matrix_mean, coati_ids_cut[pres_neworder_indx,])
+
+set.seed(2)
+
+#table 2
+mod <- mrqap.dsp(inf_matrix2~gen_matrix, directed="undirected", diagonal = F) 
+
+png(height = 600, width = 650, units = 'px', filename = paste0(plot_dir,'pres_influence_meanscores.png')) 
+visualize_network_matrix_presedente(inf_matrix_mean, coati_ids_cut[pres_neworder_indx,]) 
+dev.off() 
 
 
 

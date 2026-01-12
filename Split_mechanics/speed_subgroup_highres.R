@@ -8,7 +8,7 @@ min_tracked <- 7 #minimum number of individuals tracked to include in analysis (
 
 #---DIRECTORIES----
 #which group - galaxy or presedente
-group <- 'presedente'
+group <- 'galaxy'
 
 code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/'
 
@@ -174,7 +174,7 @@ speed_days <- speed_days %>%  filter(n_tracked > min_tracked)
 speed_days <- speed_days %>% filter(!is.na(speed))
 
 #remove times when alone
-#speed_days <- speed_days[!(speed_days$context == "alone"),]
+speed_days <- speed_days[!(speed_days$context == "alone"),]
 
 hist(speed_days$speed, breaks = 1000)
 
@@ -188,11 +188,11 @@ give.n <- function(x){
 
 
 if(group == "galaxy"){
-  colors <- c("darkolivegreen2","olivedrab3", "olivedrab4")
+  colors <- c("darkolivegreen2","olivedrab4")
   label <- "Galaxy group"
   
 } else if (group == "presedente"){
-  colors <- c("coral1","coral3", "coral4")
+  colors <- c("cadetblue2","cadetblue4")
   label <- "Presidente group"
 }
 

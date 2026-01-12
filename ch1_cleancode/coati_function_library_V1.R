@@ -6,6 +6,7 @@ library(dbscan)
 library(sp)
 library(lubridate)
 library(stringr)
+library(tidyr)
 
 #GRAPHICS FOR WINDOWS AND MAC
 if(.Platform$OS.type=="windows") {
@@ -131,9 +132,9 @@ visualize_network_matrix_presedente <- function(net, coati_ids){
   
   zmin <- min(net, na.rm=T)
   zmax <- max(net, na.rm=T)
-  par(mgp=c(3, 1, 0), mar=c(11,11,3,3)) #bottom, left, top, and right ##CHANGE THESE VALUES IF DOING FORLOOP OF THE MATRIX PLOTS AND THEY DON'T FIT mar=c(11,8,3,5)) and change legend mar from 6 to 9
+  par(mgp=c(3, 1, 0), mar=c(11,8,3,3)) #bottom, left, top, and right ##CHANGE THESE VALUES IF DOING FORLOOP OF THE MATRIX PLOTS AND THEY DON'T FIT mar=c(11,8,3,5)) and change legend mar from 6 to 9 orig: c(11,11,3,3)
   #par(mgp=c(3, 1, 0), mar=c(11,8,3,8))
-  image.plot(net, col = viridis(256), zlim=c(zmin,zmax), xaxt= 'n', yaxt = 'n', legend.cex = 7, legend.width = 1.3,legend.mar = 6, axis.args=list(cex.axis=2))
+  image.plot(net, col = viridis(256), zlim=c(zmin,zmax), xaxt= 'n', yaxt = 'n', legend.cex = 7, legend.width = 1.3,legend.mar = 9, axis.args=list(cex.axis=2))
   axis(1, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2, cex.axis=1.8)
   axis(2, at = seq(0,1,length.out= nrow(net)), labels = coati_ids$name, las = 2,  cex.axis=1.8)
   
@@ -339,5 +340,30 @@ get_p_dyad_together <- function(splits_df_local, n_inds_local){
 }
 
 
+#function to convert xs and ys matrices to a dataframe for visualising with ggmap
+matrix_to_df <- function(xs = NULL, ys = NULL,  ts = NULL, UTM_zone = CRS("+proj=utm +zone=17 +datum=WGS84")){
+  
+  xs_df <- as.data.frame(xs)
+  colnames(xs_df) <- ts
+  xs_df$ID <- c(1:16)
+  xs_long <- xs_df %>% pivot_longer(!ID, names_to = "datetime", values_to = "UTM_X")
+  ys_df <- as.data.frame(ys)
+  colnames(ys_df) <- ts
+  ys_df$ID <- c(1:16)
+  ys_long <- ys_df %>% pivot_longer(!ID, names_to = "datetime", values_to = "UTM_Y")
+  UTM_df <- merge(xs_long, ys_long, by = c("datetime", "ID"))
+  UTM_df$datetime <- as.POSIXct(UTM_df$datetime, format = "%Y-%m-%d %H:%M:%OS", tz = "UTC")
+  
+  #add lat and lon to dataframe
+  #to do this, need to remove NAs
+  UTM_df <- UTM_df[!is.na(UTM_df$UTM_X),]
+  
+  sp <- SpatialPoints(coords = UTM_df[, c("UTM_X", "UTM_Y")], proj4string = UTM_zone)
+  latlon <- spTransform(sp, CRS("+proj=longlat +datum=WGS84"))
+  UTM_df <- cbind(UTM_df, unlist(latlon@coords))
+  colnames(UTM_df)[c(5,6)] <- c("lon", "lat")
+  
+  return(UTM_df)
+}
 
 

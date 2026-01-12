@@ -3,14 +3,14 @@
 
 #--------PARAMS-------
 data_dir <- "C:/Users/egrout/Dropbox/coatithon/processed/2023/presedente/"
-code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/code_review/'
+code_dir <- 'C:/Users/egrout/Dropbox/coatithon/coatithon_code/ch1_cleancode/'
 plot_dir <- 'C:/Users/egrout/Dropbox/coatithon/results/presedente_results/level1/'
 gps_file <- "presedente_xy_10min_level1.RData"
 id_file <- 'presedente_coati_ids.RData'
 
 #list of Rs
 Rs <- c(10,20,30,40,50,100)
-R <- 70
+R <- 50
 #-------SETUP-------
 
 library(fields)
@@ -123,7 +123,7 @@ dev.off()
 
 #-------------------------------------------------------------------------------------
 
-R <- 70
+R <- 50
 
 # Figure 2d,e,f: Characterizing the subgroup patterns when group was split into 2 or 3 subgroups
 png(height = 400, width = 1450, units = 'px', filename = paste0(plot_dir,'50m_charecterisations.png'))
@@ -173,7 +173,7 @@ prop_2.3 <- (sum_2.3/ sum_all)*100
 #-------------------------------------------------------------------------------------
 
 #Figure 3c: which individuals tend to be in the same subgroup for only the group
-R = 15
+R = 50
 
 subgroup_data <- get_subgroup_data(xs, ys, R=R)
 
@@ -521,12 +521,13 @@ gg <- ggplot(aes(x = prop_alone, y = age_sex), data = coati_ids)+
   guides(color = "none")+  # Remove the legend
   theme( strip.text.y = element_blank())
 
+gg
 #change Ardera to Ardern (spelling error)
 
 coati_ids$name[coati_ids$name == "Ardera"] <- "Ardern"
 
 gg <- ggplot(aes(x = prop_alone, y = age_sex, color = name), data = coati_ids) +
-  xlab("Proportion of time alone (%)") +
+  xlab("Percentage of time alone") +
   ylab("Age class") + 
   scale_x_continuous(limits = c(0, 40))+
   geom_point(aes(color = name), position = position_jitter(width = 0, height = 0.3), size = 3, alpha = 0.7) +

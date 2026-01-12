@@ -17,7 +17,7 @@ Sys.setenv(TZ='UTC')
 user <- 'emily'
 
 #which group - galaxy or presedente
-group <- 'galaxy' #subdirectory where the group data is stored
+group <- 'presedente' #subdirectory where the group data is stored
 
 #whether to identify splits and merges automatically (if F) or use manually identified events (if T)
 use_manual_events <- F
@@ -186,8 +186,8 @@ dev.off()
 
 
 #Finding the point where to split the data to slow group and fast group (by finding the lowest peak between the high peaks)
-yvals <- density(during_dist)$y
-xvals <- density(during_dist)$x
+yvals <- density(during_dist_fiss)$y
+xvals <- density(during_dist_fiss)$x
 d_yvals <- yvals[2:length(yvals)] - yvals[1:length(yvals)-1]
 d_xvals <- xvals[2:length(xvals)] - xvals[1:length(xvals)-1]
 d <- d_yvals/d_xvals
@@ -509,7 +509,7 @@ if(group == 'galaxy'){
 #-------------------------------------------------------
 
 #define type of event to look at
-event_type <- "fusion"
+event_type <- "fission"
 
 #------------------------------------------------------
 #------------------------------------------------------
@@ -533,7 +533,7 @@ all <- ggplot(contingency_df, aes(Var2, Var1, fill = Freq)) +
   geom_tile() +
   geom_text(aes(label = Freq), color = "black", size = 4) +
   scale_fill_gradient(low = "white", high = high_col) +
-  labs(title = paste(group, event_type, "heatmap"),
+  labs(#title = paste(group, event_type, "heatmap"),
        x = "Subgroup Composition",
        y = "Event Type",
        fill = "Count") +
@@ -553,8 +553,8 @@ all
 #save dataframe to make matrices of the two groups together
 save(contingency_df, file = paste0(groupdir, group, event_type, "_matrix.RData"))
 
-file_path <- file.path(plot_dir, paste(event_type, "matrix.png"))
-ggsave(file_path, all, width = 10, height = 8)
+file_path <- file.path(plot_dir, paste(event_type, "matrix2.png"))
+ggsave(file_path, all, width = 12, height = 10)
 
 #now want to look at the individual who moves to see if this is the singleton or the group 
 #for events where both are still and one moved, was it the single individual who moved?

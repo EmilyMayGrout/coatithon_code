@@ -378,7 +378,7 @@ for (i in 1:nrow(call_rates_together_mins)){
   
 }
 
-hist(log(call_rates_together_mins$mean_speed), breaks = 100)
+hist((call_rates_together_mins$mean_speed), breaks = 100)
 
 
 #no bimodal relationship in the speeds, so to decide if the group was moving or not, we could filter by distance and duration
